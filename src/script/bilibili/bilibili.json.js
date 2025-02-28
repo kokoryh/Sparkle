@@ -1,24 +1,26 @@
-try {
-    const url = $request.url;
-    const body = JSON.parse($response.body);
-    const routeHandlerMap = {
-        '/resource/show/tab/v2?': handleLayout,
-        '/v2/splash': handleSplash,
-        '/feed/index?': handleFeedIndex,
-        '/feed/index/story?': handleFeedIndexStory,
-        '/account/mine': handleAccountMine,
-        '/account/myinfo?': handleAccountMyInfo,
-    };
-    for (const route in routeHandlerMap) {
-        if (url.includes(route)) {
-            routeHandlerMap[route](body);
-            break;
+$done(handleResponse($response, $request) || {});
+
+function handleResponse({ body }, { url }) {
+    try {
+        const routeHandlers = {
+            '/resource/show/tab/v2?': handleLayout,
+            '/v2/splash': handleSplash,
+            '/feed/index?': handleFeedIndex,
+            '/feed/index/story?': handleFeedIndexStory,
+            '/account/mine': handleAccountMine,
+            '/account/myinfo?': handleAccountMyInfo,
+        };
+        for (const route in routeHandlers) {
+            if (url.includes(route)) {
+                const respBody = routeHandlers[route](JSON.parse(body));
+                return respBody ? { body: JSON.stringify(respBody) } : null;
+            }
         }
+        return null;
+    } catch (e) {
+        console.log(e.toString());
+        return null;
     }
-} catch (e) {
-    console.log(e.toString());
-} finally {
-    $done({});
 }
 
 function handleLayout(body) {
@@ -99,34 +101,37 @@ function handleLayout(body) {
             icon_selected: 'http://i0.hdslb.com/bfs/archive/a54a8009116cb896e64ef14dcf50e5cade401e00.png',
         },
     ];
-    $done({ body: JSON.stringify(body) });
+    return body;
 }
 
 function handleSplash(body) {
-    if (!body.data) return;
-    ['show', 'event_list'].forEach(key => {
+    if (!body.data) return null;
+    const keys = ['show', 'event_list'];
+    keys.forEach(key => {
         if (body.data[key]) {
             body.data[key] = [];
         }
     });
-    $done({ body: JSON.stringify(body) });
+    return body;
 }
 
 function handleFeedIndex(body) {
     if (Array.isArray(body.data.items)) {
+        const types = new Set([
+            'small_cover_v2', // ios double column mode
+            'large_cover_single_v9', // ios single column mode
+            'large_cover_v1', // ipad
+        ]);
         body.data.items = body.data.items.filter(item => {
             return (
-                !item.banner_item && // 移除头部banner
+                !item.banner_item && // remove header banner
                 !item.ad_info &&
                 item.card_goto === 'av' &&
-                ['small_cover_v2', 'large_cover_single_v9', 'large_cover_v1'].includes(
-                    // 前两种为ios类型，后一种为平板类型
-                    item.card_type
-                )
+                types.has(item.card_type)
             );
         });
     }
-    $done({ body: JSON.stringify(body) });
+    return body;
 }
 
 function handleFeedIndexStory(body) {
@@ -139,7 +144,7 @@ function handleFeedIndexStory(body) {
             return res;
         }, []);
     }
-    $done({ body: JSON.stringify(body) });
+    return body;
 }
 
 function handleAccountMine(body) {
@@ -350,7 +355,7 @@ function handleAccountMine(body) {
             due_date: 4669824160000,
         });
     }
-    $done({ body: JSON.stringify(body) });
+    return body;
 }
 
 function handleAccountMyInfo(body) {
@@ -362,5 +367,5 @@ function handleAccountMyInfo(body) {
             due_date: 4669824160000,
         });
     }
-    $done({ body: JSON.stringify(body) });
+    return body;
 }
