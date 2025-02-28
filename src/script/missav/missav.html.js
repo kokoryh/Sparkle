@@ -1,13 +1,15 @@
 import * as cheerio from 'cheerio';
+
 // import * as fs from 'fs';
+// import path from 'path';
+// import { fileURLToPath } from 'url';
+// const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // const $response = {
-//     headers: {
-//         'content-type': 'text/html',
-//     },
-//     body: fs.readFileSync('./input.html', 'utf-8'),
+//     headers: { 'content-type': 'text/html' },
+//     body: fs.readFileSync(path.join(__dirname, './input.html'), 'utf-8'),
 // };
 // const $done = ({ body }) => {
-//     fs.writeFileSync('./output.html', body);
+//     fs.writeFileSync(path.join(__dirname, './output.html'), body);
 // };
 
 const headers = $response.headers;
