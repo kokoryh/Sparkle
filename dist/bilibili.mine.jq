@@ -64,6 +64,13 @@
                         "uri": "bilibili://bilipay/mine_wallet",
                         "icon": "http://i0.hdslb.com/bfs/archive/f416634e361824e74a855332b6ff14e2e7c2e082.png",
                         "common_op_item": {}
+                    },
+                    {
+                        id: 406,
+                        title: '我的直播',
+                        uri: 'bilibili://user_center/live_center',
+                        icon: 'http://i0.hdslb.com/bfs/archive/1db5791746a0112890b77a0236baf263d71ecb27.png',
+                        common_op_item: {},
                     }
                 ],
                 "style": 1,

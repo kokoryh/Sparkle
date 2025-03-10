@@ -1,7 +1,8 @@
-$done(handleResponse($response, $request) || {});
+$done(handleResponse($response, $request, $argument) || {});
 
-function handleResponse({ body }, { url }) {
+function handleResponse({ body }, { url }, args) {
     try {
+        const options = typeof args === 'string' ? JSON.parse(args) : typeof args === 'object' ? args : {};
         const routeHandlers = {
             '/resource/show/tab/v2?': handleLayout,
             '/v2/splash': handleSplash,
@@ -14,7 +15,7 @@ function handleResponse({ body }, { url }) {
             if (url.includes(route)) {
                 const rawBody = JSON.parse(body);
                 if (!rawBody?.data) return null;
-                return { body: JSON.stringify(routeHandlers[route](rawBody)) };
+                return { body: JSON.stringify(routeHandlers[route](rawBody, options)) };
             }
         }
         return null;
@@ -147,7 +148,7 @@ function handleFeedIndexStory(body) {
     return body;
 }
 
-function handleAccountMine(body) {
+function handleAccountMine(body, options) {
     const sectionMap = {
         sections_v2: [
             {
@@ -207,6 +208,13 @@ function handleAccountMine(body) {
                         title: '我的钱包',
                         uri: 'bilibili://bilipay/mine_wallet',
                         icon: 'http://i0.hdslb.com/bfs/archive/f416634e361824e74a855332b6ff14e2e7c2e082.png',
+                        common_op_item: {},
+                    },
+                    {
+                        id: 406,
+                        title: '我的直播',
+                        uri: 'bilibili://user_center/live_center',
+                        icon: 'http://i0.hdslb.com/bfs/archive/1db5791746a0112890b77a0236baf263d71ecb27.png',
                         common_op_item: {},
                     },
                 ],
@@ -340,6 +348,57 @@ function handleAccountMine(body) {
             body.data[key] = sectionMap[key];
         }
     });
+
+    if (body.data.sections_v2 && options.showUperCenter === '1') {
+        body.data.sections_v2.splice(1, 0, {
+            title: '创作中心',
+            items: [
+                {
+                    id: 171,
+                    title: '创作中心',
+                    uri: 'bilibili://uper/homevc',
+                    icon: 'http://i0.hdslb.com/bfs/archive/d3aad2d07538d2d43805f1fa14a412d7a45cc861.png',
+                    need_login: 1,
+                    global_red_dot: 0,
+                    display: 1,
+                    is_up_anchor: true,
+                },
+                {
+                    id: 533,
+                    title: '数据中心',
+                    uri: 'https://member.bilibili.com/york/data-center?navhide=1&from=profile',
+                    icon: 'http://i0.hdslb.com/bfs/feed-admin/367204ba56004b1a78211ba27eefbf5b4cc53a35.png',
+                    need_login: 1,
+                    global_red_dot: 0,
+                    display: 1,
+                },
+                {
+                    id: 707,
+                    title: '主播中心',
+                    uri: 'https://live.bilibili.com/p/html/live-app-anchor-center/index.html?is_live_webview=1#/',
+                    icon: 'http://i0.hdslb.com/bfs/feed-admin/48e17ccd0ce0cfc9c7826422d5e47ce98f064c2a.png',
+                    need_login: 1,
+                    display: 1,
+                },
+                {
+                    id: 2647,
+                    title: '直播数据',
+                    uri: 'https://live.bilibili.com/p/html/live-app-data/index.html?source_tag=0&foreground=pink&is_live_webview=1&hybrid_set_header=2#/',
+                    icon: 'https://i0.hdslb.com/bfs/legacy/0566b128c51d85b7ec545f318e1fd437d172dfea.png',
+                    display: 1,
+                },
+            ],
+            style: 1,
+            button: {
+                text: '发布',
+                url: 'bilibili://uper/user_center/archive_selection',
+                icon: 'http://i0.hdslb.com/bfs/archive/205f47675eaaca7912111e0e9b1ac94cb985901f.png',
+                style: 1,
+            },
+            type: 1,
+            up_title: '创作中心',
+        });
+    }
 
     delete body.data.answer;
     delete body.data.live_tip;
