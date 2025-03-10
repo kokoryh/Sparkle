@@ -3,7 +3,8 @@
     "author": "kokoryh",
     "type": "module",
     "scripts": {
-        "build": "node build.js"
+        "build": "node build.js",
+        "jq": "type .\\src\\jq\\input.json | jq -f ./src/jq/main.jq --indent 4 > ./src/jq/output.json"
     },
     "dependencies": {
         "@protobuf-ts/plugin": "2.9.4",

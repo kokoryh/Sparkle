@@ -1,5 +1,6 @@
 node_modules
 package-lock.json
 
+jq
 src/script/missav/input.html
 src/script/missav/output.html
