@@ -349,7 +349,7 @@ function handleAccountMine(body, options) {
         }
     });
 
-    if (body.data.sections_v2 && options.showUperCenter) {
+    if (options.showUperCenter && body.data.sections_v2) {
         body.data.sections_v2.splice(1, 0, {
             title: '创作中心',
             items: [

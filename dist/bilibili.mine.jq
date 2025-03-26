@@ -1,7 +1,8 @@
 .data |= (
     del(.answer, .live_tip, .vip_section, .vip_section_v2, .modular_vip_section) | 
+    .vip_type = 2 | 
     .vip |= if . != null and .status == 0 
-        then . + {status:1,type:2,vip_pay_type:1,due_date:4669824160000}
+        then . + { status: 1, type: 2, due_date: 9005270400000, role: 15 }
         else . 
     end | 
     if .sections_v2 then .sections_v2 = 
