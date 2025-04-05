@@ -7,6 +7,7 @@ import { PlayViewReply } from '../../proto/bilibili/app/playurl/v1/playurl.js';
 import { PopularReply } from '../../proto/bilibili/app/show/popular/v1/popular.js';
 import { TFInfoReply, ViewReply, ViewProgressReply } from '../../proto/bilibili/app/view/v1/view.js';
 import {
+    Module,
     ModuleType,
     RelateCardType,
     RelatesFeedReply,
@@ -23,14 +24,17 @@ const emptyBytes = new Uint8Array(0);
 export function handleDynAllReply(grpcBody, options) {
     const message = DynAllReply.fromBinary(grpcBody);
     message.topicList = emptyBytes;
-    message.dynamicList.list = message.dynamicList.list.filter(item => ![DynamicType.AD, DynamicType.LIVE_RCMD].includes(item.cardType));
+    if (message.dynamicList) {
+        message.dynamicList.list = message.dynamicList.list.filter(item => ![DynamicType.AD, DynamicType.LIVE_RCMD].includes(item.cardType));
+    }
     if (options.showUpList === 'false') {
         delete message.upList;
     } else if (!options.isIPad && options.showUpList !== 'true') {
         if (message.upList?.showLiveNum) {
             const { list, listSecond } = message.upList;
-            if (listSecond.length) {
-                listSecond.at(-1).separator = true;
+            const lastItem = listSecond.at(-1);
+            if (lastItem) {
+                lastItem.separator = true;
                 list.unshift(...listSecond);
                 listSecond.length = 0;
             }
@@ -44,10 +48,10 @@ export function handleDynAllReply(grpcBody, options) {
 export function handleDefaultWordsReply(grpcBody) {
     const message = DefaultWordsReply.fromBinary(grpcBody);
     message.show = '搜索视频、番剧或up主';
-    delete message.word;
-    delete message.goto;
-    delete message.value;
-    delete message.uri;
+    message.word = '';
+    message.goto = '';
+    message.value = '';
+    message.uri = '';
     modifyBody(DefaultWordsReply, message);
 }
 
@@ -67,7 +71,7 @@ export function handlePlayViewUniteReply(grpcBody) {
         Object.values(message.playArcConf.arcConfs).forEach(item => {
             if (item.isSupport && item.disabled) {
                 item.disabled = false;
-                item.extraContent = null;
+                item.extraContent = undefined;
                 item.unsupportScene.length = 0;
             }
         });
@@ -82,7 +86,7 @@ export function handlePlayViewReply(grpcBody) {
         if (arcConf && (!arcConf.isSupport || arcConf.disabled)) {
             arcConf.isSupport = true;
             arcConf.disabled = false;
-            arcConf.extraContent = null;
+            arcConf.extraContent = undefined;
             arcConf.unsupportScene.length = 0;
         }
     });
@@ -92,7 +96,7 @@ export function handlePlayViewReply(grpcBody) {
 export function handlePopularReply(grpcBody) {
     const message = PopularReply.fromBinary(grpcBody);
     message.items = message.items.filter(item => {
-        return !['rcmdOneItem', 'smallCoverV5Ad', 'topicList'].includes(item.item.oneofKind);
+        return !['rcmdOneItem', 'smallCoverV5Ad', 'topicList'].includes(item.item.oneofKind as string);
     });
     modifyBody(PopularReply, message);
 }
@@ -144,7 +148,7 @@ export function handleViewReplyV2(grpcBody) {
     message.tab?.tabModule.forEach(tabModule => {
         if (tabModule.tab.oneofKind !== 'introduction') return;
 
-        tabModule.tab.introduction.modules = tabModule.tab.introduction.modules.reduce((modules, module) => {
+        tabModule.tab.introduction.modules = tabModule.tab.introduction.modules.reduce((modules: Module[], module) => {
             if ([ModuleType.PAY_BAR, ModuleType.SPECIALTAG, ModuleType.MERCHANDISE].includes(module.type)) {
                 return modules;
             }
