@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "lib": ["ESNext", "DOM"],
+        "baseUrl": "./",
+        "rootDir": "./",
+        "outDir": "./dist",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        // "types": ["node"] /* Specify type package names to be included without being referenced in a source file. */,
+        // "typeRoots": [
+        //     "./src/types/*.d.ts",
+        //     "./node_modules/@types"
+        // ] /* Specify multiple folders that act like './node_modules/@types'. */,
+        "paths": {
+            "@proto/*": ["src/proto/*"]
+        } /* Specify a set of entries that re-map imports to additional lookup locations. */,
+        "allowJs": true,
+        "checkJs": true,
+        "strict": true,
+        "noImplicitAny": false,
+        "alwaysStrict": false
+    }
+}
