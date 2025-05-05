@@ -23,6 +23,7 @@ message CastTips {
 
 message PlayViewBusinessInfo {
     repeated ClipInfo clip_info = 6;
+    int32 vip_status = 16;
     EpisodeInfo episode_info = 18;
     UserStatus user_status = 20;
 }

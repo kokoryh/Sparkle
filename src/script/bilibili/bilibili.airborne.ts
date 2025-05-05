@@ -138,6 +138,12 @@ function handlePlayViewUniteReply(body, segments: number[][], videoId: string) {
             };
         });
 
+        if (message.vodInfo) {
+            message.vodInfo.streamList.forEach(item => {
+                delete item.streamInfo?.needVip;
+            });
+        }
+
         if (message.playArc) {
             message.playArc.videoType = BizType.PGC;
         }
@@ -154,6 +160,7 @@ function getPGCAnyModel(segments: number[][]): PGCAnyModel {
     return {
         business: {
             clipInfo: getClipInfo(segments),
+            vipStatus: 1,
             episodeInfo: {
                 epId: 1231523,
                 cid: '27730904912',

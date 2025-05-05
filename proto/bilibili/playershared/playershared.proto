@@ -7,6 +7,18 @@ message VideoVod {
     int64 cid = 2;
 }
 
+message VodInfo {
+    repeated Stream stream_list = 5;
+}
+
+message Stream {
+    StreamInfo stream_info = 1;
+}
+
+message StreamInfo {
+    optional bool need_vip = 6;
+}
+
 message PlayArcConf {
     map<int32, ArcConf> arc_confs = 1;
 }
