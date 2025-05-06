@@ -171,7 +171,11 @@ export function handleViewReply(grpcBody) {
         if (tabModule.tab.oneofKind !== 'introduction') return;
 
         tabModule.tab.introduction.modules = tabModule.tab.introduction.modules.reduce((modules: Module[], module) => {
-            if ([ModuleType.PAY_BAR, ModuleType.SPECIALTAG, ModuleType.MERCHANDISE].includes(module.type)) {
+            if (
+                [ModuleType.ACTIVITY, ModuleType.PAY_BAR, ModuleType.SPECIALTAG, ModuleType.MERCHANDISE].includes(
+                    module.type
+                )
+            ) {
                 return modules;
             }
             if (module.type === ModuleType.UGC_HEADLINE && module.data.oneofKind === 'headLine') {

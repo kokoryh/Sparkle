@@ -43,6 +43,7 @@ message Module {
 enum ModuleType {
     UNKNOWN = 0;
     UGC_HEADLINE = 3;
+    ACTIVITY = 18;
     RELATED_RECOMMEND = 28;
     PAY_BAR = 29;
     SPECIALTAG = 37;
