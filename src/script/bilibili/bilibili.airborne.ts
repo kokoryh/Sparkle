@@ -68,11 +68,12 @@ function fetchOriginalRequest(url, headers, body): Promise<{ headers; body }> {
         $httpClient.post(params, (error, response, data) => {
             if (response?.status !== 200) {
                 reject('Fetch Original Request Failed');
+            } else {
+                resolve({
+                    headers: response.headers,
+                    body: data,
+                });
             }
-            resolve({
-                headers: response.headers,
-                body: data,
-            });
         });
     });
 }
