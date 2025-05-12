@@ -12,7 +12,12 @@ function handleResponse({ body }, { url }, argument) {
     try {
         body = JSON.parse(body);
         if (!body?.data) return null;
-        const options = typeof argument === 'string' ? JSON.parse(argument) : typeof argument === 'object' && argument !== null ? argument : {};
+        const options =
+            typeof argument === 'string'
+                ? JSON.parse(argument)
+                : typeof argument === 'object' && argument !== null
+                ? argument
+                : {};
         for (const route in routeHandlers) {
             if (url.includes(route)) {
                 return { body: JSON.stringify(routeHandlers[route](body, options)) };
@@ -140,6 +145,7 @@ function handleFeedIndexStory(body) {
         body.data.items = body.data.items.reduce((res, item) => {
             if (!item.ad_info && !item.card_goto?.startsWith('ad')) {
                 delete item.story_cart_icon;
+                delete item.free_flow_toast;
                 res.push(item);
             }
             return res;
@@ -447,7 +453,8 @@ function getHundredAnnualVipData() {
             img_label_uri_hans: '',
             img_label_uri_hant: '',
             img_label_uri_hans_static: 'https://i0.hdslb.com/bfs/vip/52f60c8bdae8d4440edbb96dad72916022adf126.png',
-            img_label_uri_hant_static: 'https://i0.hdslb.com/bfs/activity-plat/static/20220614/e369244d0b14644f5e1a06431e22a4d5/VEW8fCC0hg.png',
+            img_label_uri_hant_static:
+                'https://i0.hdslb.com/bfs/activity-plat/static/20220614/e369244d0b14644f5e1a06431e22a4d5/VEW8fCC0hg.png',
         },
     };
 }
