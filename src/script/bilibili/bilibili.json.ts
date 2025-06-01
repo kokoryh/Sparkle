@@ -424,6 +424,7 @@ function handleAccountMyInfo(body) {
 }
 
 function getHundredAnnualVipData() {
+    const image = getVipLabelImage();
     return {
         status: 1,
         type: 2,
@@ -449,12 +450,23 @@ function getHundredAnnualVipData() {
             bg_color: '#FB7299',
             border_color: '',
             use_img_label: true,
-            image: 'https://i0.hdslb.com/bfs/vip/52f60c8bdae8d4440edbb96dad72916022adf126.png',
+            image,
             img_label_uri_hans: '',
             img_label_uri_hant: '',
-            img_label_uri_hans_static: 'https://i0.hdslb.com/bfs/vip/52f60c8bdae8d4440edbb96dad72916022adf126.png',
-            img_label_uri_hant_static:
-                'https://i0.hdslb.com/bfs/activity-plat/static/20220614/e369244d0b14644f5e1a06431e22a4d5/VEW8fCC0hg.png',
+            img_label_uri_hans_static: image,
+            img_label_uri_hant_static: image,
         },
     };
+}
+
+function getVipLabelImage(): string {
+    const date = new Date();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    switch (`${month}/${day}`) {
+        case '6/1':
+            return 'https://i0.hdslb.com/bfs/bangumi/kt/629e28d4426f1b44af1131ade99d27741cc61d4b.png';
+        default:
+            return 'https://i0.hdslb.com/bfs/vip/52f60c8bdae8d4440edbb96dad72916022adf126.png';
+    }
 }
