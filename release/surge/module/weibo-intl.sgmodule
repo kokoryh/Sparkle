@@ -1,6 +1,6 @@
 #!name=微博轻享版去广告
-#!desc=极简体验
-#!category=Block
+#!desc=Version 6.6.8 is the last supported release
+#!category=AdBlock
 
 [Rule]
 DOMAIN-SUFFIX,biz.weibo.com,REJECT,pre-matching

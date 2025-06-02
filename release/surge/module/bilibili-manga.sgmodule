@@ -1,6 +1,6 @@
-#!name=哔哩哔哩漫画去广告
-#!desc=适用于哔哩哔哩漫画HD
-#!category=Block
+#!name=哔哩哔哩漫画HD去广告
+#!desc=去广告 & 精简页面
+#!category=AdBlock
 
 [Map Local]
 ^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v1\.Comic\/(?:Flash|ListFlash|GetActivityTab|GetBubbles)\? header="content-type: application/json" data-type=text data="{}"

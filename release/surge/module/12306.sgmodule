@@ -1,6 +1,6 @@
 #!name=12306去广告
-#!desc=移除开屏广告和首页广告
-#!category=Block
+#!desc=去广告 & 精简首页
+#!category=AdBlock
 
 [Script]
 12306.request = type=http-request,pattern=^https:\/\/ad\.12306\.cn\/ad\/ser\/getAdList$,requires-body=1,engine=webview,script-path=https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/dist/12306.request.js
