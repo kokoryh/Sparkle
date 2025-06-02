@@ -22,6 +22,13 @@ message Relate {
 
 message ViewProgressReply {
     bytes video_guide = 1;
+    Chronos chronos = 2;
+}
+
+message Chronos {
+    string md5 = 1;
+    string file = 2;
+    optional string sign = 3;
 }
 
 message TFInfoReply {

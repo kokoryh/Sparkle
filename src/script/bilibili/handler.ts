@@ -1,12 +1,12 @@
 import { modifyBody } from '../../util/utils.js';
 import { DynAllReply, DynamicType } from '@proto/bilibili/app/dynamic/v2/dynamic.js';
-import { DefaultWordsReply } from '@proto/bilibili/app/interface/v1/search.js';
-import { ModeStatusReply } from '@proto/bilibili/app/interface/v1/teenagers.js';
+// import { DefaultWordsReply } from '@proto/bilibili/app/interface/v1/search.js';
+// import { ModeStatusReply } from '@proto/bilibili/app/interface/v1/teenagers.js';
 import { PlayViewUniteReply } from '@proto/bilibili/app/playerunite/v1/player.js';
 import { PlayViewReply } from '@proto/bilibili/app/playurl/v1/playurl.js';
 import { PopularReply } from '@proto/bilibili/app/show/popular/v1/popular.js';
 import {
-    TFInfoReply,
+    // TFInfoReply,
     ViewReply as IpadViewReply,
     ViewProgressReply as IpadViewProgressReply,
 } from '@proto/bilibili/app/view/v1/view.js';
@@ -51,24 +51,24 @@ export function handleDynAllReply(grpcBody, options) {
     modifyBody(DynAllReply, message);
 }
 
-export function handleDefaultWordsReply(grpcBody) {
-    const message = DefaultWordsReply.fromBinary(grpcBody);
-    message.show = '搜索视频、番剧或up主';
-    message.word = '';
-    message.goto = '';
-    message.value = '';
-    message.uri = '';
-    modifyBody(DefaultWordsReply, message);
-}
+// export function handleDefaultWordsReply(grpcBody) {
+//     const message = DefaultWordsReply.fromBinary(grpcBody);
+//     message.show = '搜索视频、番剧或up主';
+//     message.word = '';
+//     message.goto = '';
+//     message.value = '';
+//     message.uri = '';
+//     modifyBody(DefaultWordsReply, message);
+// }
 
-export function handleModeStatusReply(grpcBody) {
-    const message = ModeStatusReply.fromBinary(grpcBody);
-    const teenagersModel = message.userModels.find(item => item.mode === 'teenagers');
-    if (teenagersModel?.policy?.interval && teenagersModel.policy.interval !== '0') {
-        teenagersModel.policy.interval = '0';
-        modifyBody(ModeStatusReply, message);
-    }
-}
+// export function handleModeStatusReply(grpcBody) {
+//     const message = ModeStatusReply.fromBinary(grpcBody);
+//     const teenagersModel = message.userModels.find(item => item.mode === 'teenagers');
+//     if (teenagersModel?.policy?.interval && teenagersModel.policy.interval !== '0') {
+//         teenagersModel.policy.interval = '0';
+//         modifyBody(ModeStatusReply, message);
+//     }
+// }
 
 export function handlePlayViewUniteReply(grpcBody) {
     const message = PlayViewUniteReply.fromBinary(grpcBody);
@@ -113,14 +113,14 @@ export function handlePopularReply(grpcBody) {
     modifyBody(PopularReply, message);
 }
 
-export function handleTFInfoReply(grpcBody) {
-    const message = TFInfoReply.fromBinary(grpcBody);
-    if (message.tipsId !== '0') {
-        message.tfToast = emptyBytes;
-        message.tfPanelCustomized = emptyBytes;
-        modifyBody(TFInfoReply, message);
-    }
-}
+// export function handleTFInfoReply(grpcBody) {
+//     const message = TFInfoReply.fromBinary(grpcBody);
+//     if (message.tipsId !== '0') {
+//         message.tfToast = emptyBytes;
+//         message.tfPanelCustomized = emptyBytes;
+//         modifyBody(TFInfoReply, message);
+//     }
+// }
 
 export function handleIpadViewReply(grpcBody) {
     const message = IpadViewReply.fromBinary(grpcBody);
@@ -136,9 +136,15 @@ export function handleIpadViewReply(grpcBody) {
     modifyBody(IpadViewReply, message);
 }
 
-export function handleIpadViewProgressReply(grpcBody) {
+export function handleIpadViewProgressReply(grpcBody, { airborneDm }) {
     const message = IpadViewProgressReply.fromBinary(grpcBody);
     message.videoGuide = emptyBytes;
+    if (airborneDm && airborneDm !== '#' && message.chronos) {
+        message.chronos.md5 = '629dac59b7d4382519c3dc4ebec44e19';
+        message.chronos.file =
+            'https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/data/5d9da0661dccf3df1b1e78299e3bc669eee5a241.zip';
+        delete message.chronos.sign;
+    }
     modifyBody(IpadViewProgressReply, message);
 }
 

@@ -44,12 +44,7 @@ function handleDmSegMobileReq({ url, headers, body }) {
     const videoId = av2bv(pid);
     Promise.all([fetchOriginalRequest(url, headers, body), fetchSponsorBlock(videoId, oid !== '0' ? oid : '')])
         .then(([{ headers, body }, segments]) => {
-            if (segments.length) {
-                console.log(`${videoId}: ${JSON.stringify(segments)}`);
-                $done({ response: { headers, body: newRawBody(handleDmSegMobileReply(body, segments)) } });
-            } else {
-                $done({ response: { headers, body } });
-            }
+            $done({ response: { headers, body: newRawBody(handleDmSegMobileReply(body, segments, videoId)) } });
         })
         .catch(err => {
             console.log(err?.toString());
@@ -198,17 +193,21 @@ function getClipInfo(segments: number[][]): ClipInfo[] {
     }));
 }
 
-function handleDmSegMobileReply(body, segments: number[][]) {
+function handleDmSegMobileReply(body, segments: number[][], videoId: string) {
     const binaryBody = getBinaryBody(body);
     const message = DmSegMobileReply.fromBinary(binaryBody);
-    message.elems.unshift(...getAirBorneDms(segments));
+    message.elems = message.elems.filter(item => !item.action?.startsWith('airborne'));
+    if (segments.length) {
+        console.log(`${videoId}: ${JSON.stringify(segments)}`);
+        message.elems.unshift(...getAirBorneDms(segments));
+    }
     return DmSegMobileReply.toBinary(message);
 }
 
 function getAirBorneDms(segments: number[][]): DanmakuElem[] {
     return segments.map((segment, index) => {
         const id = (index + 1).toString();
-        const start = Math.max(Math.floor(segment[0] * 1000 - 2000), 1);
+        const start = Math.max(Math.floor(segment[0] * 1000), 1);
         const end = Math.floor(segment[1] * 1000);
         return {
             id,
@@ -217,7 +216,7 @@ function getAirBorneDms(segments: number[][]): DanmakuElem[] {
             fontsize: 50,
             color: 16777215,
             midHash: '1948dd5d',
-            content: '点击空降广告结束',
+            content: '空指部已就位',
             ctime: '1735660800',
             weight: 11,
             action: `airborne:${end}`,
