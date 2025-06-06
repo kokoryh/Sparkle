@@ -207,7 +207,7 @@ function handleDmSegMobileReply(body, segments: number[][], videoId: string) {
 function getAirBorneDms(segments: number[][]): DanmakuElem[] {
     return segments.map((segment, index) => {
         const id = (index + 1).toString();
-        const start = Math.max(Math.floor(segment[0] * 1000), 1);
+        const start = Math.floor(segment[0] * 1000) + 1000;
         const end = Math.floor(segment[1] * 1000);
         return {
             id,
