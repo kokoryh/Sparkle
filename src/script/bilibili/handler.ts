@@ -140,7 +140,7 @@ export function handleIpadViewProgressReply(grpcBody, { airborneDm }) {
     const message = IpadViewProgressReply.fromBinary(grpcBody);
     message.videoGuide = emptyBytes;
     if (airborneDm && airborneDm !== '#' && message.chronos) {
-        message.chronos.md5 = '8d6314267ecd67364380649545d5b2c2';
+        message.chronos.md5 = 'f0baed5939c353e14d77eee17b9f266c';
         message.chronos.file = 'https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/data/chronos.zip';
         delete message.chronos.sign;
     }
