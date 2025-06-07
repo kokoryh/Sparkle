@@ -1,8 +1,8 @@
 #!name=Bilibili增强
 #!desc=拜托，没有广告的哔哩哔哩真的超酷的
 #!category=Enhancement
-#!arguments=动态最常访问:auto,创作中心:0,过滤置顶评论广告:1,空降助手:bilibili.airborne,空降助手弹幕版:#,替换鉴权字段:#,Authorization:identify_v1 xxx
-#!arguments-desc=动态最常访问: [true, false, auto]\n- true: 始终显示\n- false: 始终隐藏\n- auto: 仅当列表中存在直播状态时显示\n\n创作中心: [1, 0]\n- 1: 显示\n- 0: 隐藏\n\n过滤置顶评论广告: [1, 0]\n- 1: 开启\n- 0: 关闭\n\n空降助手: 默认开启，配置为"#"时关闭\n\n空降助手弹幕版: 默认关闭，仅限Ipad开启\n\n替换鉴权字段: 默认关闭，配置为"h"时开启，需填写Authorization
+#!arguments=动态最常访问:auto,创作中心:0,过滤置顶评论广告:1,空降助手:bilibili.airborne,空降助手弹幕版:#
+#!arguments-desc=动态最常访问: [true, false, auto]\n- true: 始终显示\n- false: 始终隐藏\n- auto: 仅当列表中存在直播状态时显示\n\n创作中心: [1, 0]\n- 1: 显示\n- 0: 隐藏\n\n过滤置顶评论广告: [1, 0]\n- 1: 开启\n- 0: 关闭\n\n空降助手: 默认开启，配置为"#"时关闭\n\n空降助手弹幕版: 默认关闭，仅限Ipad开启
 
 [Rule]
 DOMAIN,api.biliapi.com,REJECT,pre-matching
@@ -17,9 +17,6 @@ DOMAIN,app.biliapi.net,REJECT,pre-matching
 ^https:\/\/(?:grpc\.biliapi\.net|app\.bilibili\.com)\/bilibili\.app\.interface\.v1\.Teenagers\/ModeStatus$ header="content-type: application/grpc" data-type=base64 data="AAAAABMKEQgCEgl0ZWVuYWdlcnMgAioA"
 ^https:\/\/(?:grpc\.biliapi\.net|app\.bilibili\.com)\/bilibili\.app\.interface\.v1\.Search\/DefaultWords$ header="content-type: application/grpc" data-type=base64 data="AAAAACkaHeaQnOe0ouinhumikeOAgeeVquWJp+aIlnVw5Li7IgAoAToAQgBKAA=="
 ^https:\/\/(?:grpc\.biliapi\.net|app\.bilibili\.com)\/bilibili\.app\.view\.v1\.View\/TFInfo$ header="content-type: application/grpc" data-type=base64 data="AAAAAAIIAQ=="
-
-[Header Rewrite]
-{{{替换鉴权字段}}}ttp-request ^https:\/\/(?:grpc\.biliapi\.net|app\.bilibili\.com)\/bilibili\.app\.(?:playerunite\.v1\.Player\/PlayViewUnite|pgc\.gateway\.player\.v2\.PlayURL\/PlayView)$ header-replace authorization "{{{Authorization}}}"
 
 [Body Rewrite]
 http-response-jq ^https:\/\/api\.bilibili\.com\/pgc\/view\/v2\/app\/season\? 'del(.data.payment)'

@@ -140,9 +140,8 @@ export function handleIpadViewProgressReply(grpcBody, { airborneDm }) {
     const message = IpadViewProgressReply.fromBinary(grpcBody);
     message.videoGuide = emptyBytes;
     if (airborneDm && airborneDm !== '#' && message.chronos) {
-        message.chronos.md5 = '629dac59b7d4382519c3dc4ebec44e19';
-        message.chronos.file =
-            'https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/data/5d9da0661dccf3df1b1e78299e3bc669eee5a241.zip';
+        message.chronos.md5 = '8d6314267ecd67364380649545d5b2c2';
+        message.chronos.file = 'https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/data/chronos.zip';
         delete message.chronos.sign;
     }
     modifyBody(IpadViewProgressReply, message);
