@@ -1,3 +1,5 @@
+import { zh, en } from './i18n';
+
 $done(handleResponse($response, $request, globalThis.$argument) || {});
 
 function handleResponse({ body }, { url }, argument) {
@@ -18,6 +20,7 @@ function handleResponse({ body }, { url }, argument) {
                 : typeof argument === 'object' && argument !== null
                 ? argument
                 : {};
+        options.isEn = new URL(url).searchParams.get('s_locale')?.startsWith('en');
         for (const route in routeHandlers) {
             if (url.includes(route)) {
                 return { body: JSON.stringify(routeHandlers[route](body, options)) };
@@ -30,19 +33,20 @@ function handleResponse({ body }, { url }, argument) {
     }
 }
 
-function handleLayout(body) {
+function handleLayout(body, options) {
+    const i18n = options.isEn ? en : zh;
     body.data.tab = [
         {
             pos: 1,
             id: 731,
-            name: '直播',
+            name: i18n.live,
             tab_id: '直播tab',
             uri: 'bilibili://live/home',
         },
         {
             pos: 2,
             id: 477,
-            name: '推荐',
+            name: i18n.for_you,
             tab_id: '推荐tab',
             uri: 'bilibili://pegasus/promo',
             default_selected: 1,
@@ -50,21 +54,21 @@ function handleLayout(body) {
         {
             pos: 3,
             id: 478,
-            name: '热门',
+            name: i18n.trending,
             tab_id: '热门tab',
             uri: 'bilibili://pegasus/hottopic',
         },
         {
             pos: 4,
             id: 545,
-            name: '动画',
+            name: i18n.anime,
             tab_id: 'bangumi',
             uri: 'bilibili://pgc/home',
         },
         {
             pos: 5,
             id: 151,
-            name: '影视',
+            name: i18n.film,
             tab_id: 'film',
             uri: 'bilibili://pgc/cinema-tab',
         },
@@ -73,7 +77,7 @@ function handleLayout(body) {
         {
             pos: 1,
             id: 176,
-            name: '消息',
+            name: i18n.messages,
             tab_id: '消息Top',
             uri: 'bilibili://link/im_home',
             icon: 'http://i0.hdslb.com/bfs/archive/d43047538e72c9ed8fd8e4e34415fbe3a4f632cb.png',
@@ -83,7 +87,7 @@ function handleLayout(body) {
         {
             pos: 1,
             id: 177,
-            name: '首页',
+            name: i18n.home,
             tab_id: 'home',
             uri: 'bilibili://main/home/',
             icon: 'http://i0.hdslb.com/bfs/archive/63d7ee88d471786c1af45af86e8cb7f607edf91b.png',
@@ -92,7 +96,7 @@ function handleLayout(body) {
         {
             pos: 2,
             id: 179,
-            name: '动态',
+            name: i18n.following,
             tab_id: 'dynamic',
             uri: 'bilibili://following/home/',
             icon: 'http://i0.hdslb.com/bfs/archive/86dfbe5fa32f11a8588b9ae0fccb77d3c27cedf6.png',
@@ -101,7 +105,7 @@ function handleLayout(body) {
         {
             pos: 5,
             id: 181,
-            name: '我的',
+            name: i18n.me,
             tab_id: '我的Bottom',
             uri: 'bilibili://user_center/',
             icon: 'http://i0.hdslb.com/bfs/archive/4b0b2c49ffeb4f0c2e6a4cceebeef0aab1c53fe1.png',
@@ -155,34 +159,35 @@ function handleFeedIndexStory(body) {
 }
 
 function handleAccountMine(body, options) {
+    const i18n = options.isEn ? en : zh;
     const sectionMap = {
         sections_v2: [
             {
                 items: [
                     {
                         id: 396,
-                        title: '离线缓存',
+                        title: i18n.downloads,
                         uri: 'bilibili://user_center/download',
                         icon: 'http://i0.hdslb.com/bfs/archive/5fc84565ab73e716d20cd2f65e0e1de9495d56f8.png',
                         common_op_item: {},
                     },
                     {
                         id: 397,
-                        title: '历史记录',
+                        title: i18n.history,
                         uri: 'bilibili://user_center/history',
                         icon: 'http://i0.hdslb.com/bfs/archive/8385323c6acde52e9cd52514ae13c8b9481c1a16.png',
                         common_op_item: {},
                     },
                     {
                         id: 3072,
-                        title: '我的收藏',
+                        title: i18n.my_favorites,
                         uri: 'bilibili://user_center/favourite',
                         icon: 'http://i0.hdslb.com/bfs/archive/d79b19d983067a1b91614e830a7100c05204a821.png',
                         common_op_item: {},
                     },
                     {
                         id: 2830,
-                        title: '稍后再看',
+                        title: i18n.watch_later,
                         uri: 'bilibili://user_center/watch_later_v2',
                         icon: 'http://i0.hdslb.com/bfs/archive/63bb768caa02a68cb566a838f6f2415f0d1d02d6.png',
                         need_login: 1,
@@ -193,32 +198,32 @@ function handleAccountMine(body, options) {
                 button: {},
             },
             {
-                title: '推荐服务',
+                title: i18n.recommended_services,
                 items: [
                     {
                         id: 402,
-                        title: '个性装扮',
+                        title: i18n.customization,
                         uri: 'https://www.bilibili.com/h5/mall/home?navhide=1&f_source=shop&from=myservice',
                         icon: 'http://i0.hdslb.com/bfs/archive/0bcad10661b50f583969b5a188c12e5f0731628c.png',
                         common_op_item: {},
                     },
                     {
                         id: 622,
-                        title: '会员购',
+                        title: i18n.mall,
                         uri: 'bilibili://mall/home',
                         icon: 'http://i0.hdslb.com/bfs/archive/19c794f01def1a267b894be84427d6a8f67081a9.png',
                         common_op_item: {},
                     },
                     {
                         id: 404,
-                        title: '我的钱包',
+                        title: i18n.my_wallet,
                         uri: 'bilibili://bilipay/mine_wallet',
                         icon: 'http://i0.hdslb.com/bfs/archive/f416634e361824e74a855332b6ff14e2e7c2e082.png',
                         common_op_item: {},
                     },
                     {
                         id: 406,
-                        title: '我的直播',
+                        title: i18n.live_studio,
                         uri: 'bilibili://user_center/live_center',
                         icon: 'http://i0.hdslb.com/bfs/archive/1db5791746a0112890b77a0236baf263d71ecb27.png',
                         common_op_item: {},
@@ -228,18 +233,18 @@ function handleAccountMine(body, options) {
                 button: {},
             },
             {
-                title: '更多服务',
+                title: i18n.more_services,
                 items: [
                     {
                         id: 407,
-                        title: '联系客服',
+                        title: i18n.help_center,
                         uri: 'bilibili://user_center/feedback',
                         icon: 'http://i0.hdslb.com/bfs/archive/7ca840cf1d887a45ee1ef441ab57845bf26ef5fa.png',
                         common_op_item: {},
                     },
                     {
                         id: 410,
-                        title: '设置',
+                        title: i18n.settings,
                         uri: 'bilibili://user_center/setting',
                         icon: 'http://i0.hdslb.com/bfs/archive/e932404f2ee62e075a772920019e9fbdb4b5656a.png',
                         common_op_item: {},
@@ -357,11 +362,11 @@ function handleAccountMine(body, options) {
 
     if (options.showUperCenter && body.data.sections_v2) {
         body.data.sections_v2.splice(1, 0, {
-            title: '创作中心',
+            title: i18n.creator_hub,
             items: [
                 {
                     id: 171,
-                    title: '创作中心',
+                    title: i18n.creator_hub,
                     uri: 'bilibili://uper/homevc',
                     icon: 'http://i0.hdslb.com/bfs/archive/d3aad2d07538d2d43805f1fa14a412d7a45cc861.png',
                     need_login: 1,
@@ -371,7 +376,7 @@ function handleAccountMine(body, options) {
                 },
                 {
                     id: 533,
-                    title: '数据中心',
+                    title: i18n.data_center,
                     uri: 'https://member.bilibili.com/york/data-center?navhide=1&from=profile',
                     icon: 'http://i0.hdslb.com/bfs/feed-admin/367204ba56004b1a78211ba27eefbf5b4cc53a35.png',
                     need_login: 1,
@@ -380,7 +385,7 @@ function handleAccountMine(body, options) {
                 },
                 {
                     id: 707,
-                    title: '主播中心',
+                    title: i18n.host_center,
                     uri: 'https://live.bilibili.com/p/html/live-app-anchor-center/index.html?is_live_webview=1#/',
                     icon: 'http://i0.hdslb.com/bfs/feed-admin/48e17ccd0ce0cfc9c7826422d5e47ce98f064c2a.png',
                     need_login: 1,
@@ -388,7 +393,7 @@ function handleAccountMine(body, options) {
                 },
                 {
                     id: 2647,
-                    title: '直播数据',
+                    title: i18n.live_data,
                     uri: 'https://live.bilibili.com/p/html/live-app-data/index.html?source_tag=0&foreground=pink&is_live_webview=1&hybrid_set_header=2#/',
                     icon: 'https://i0.hdslb.com/bfs/legacy/0566b128c51d85b7ec545f318e1fd437d172dfea.png',
                     display: 1,
@@ -396,13 +401,13 @@ function handleAccountMine(body, options) {
             ],
             style: 1,
             button: {
-                text: '发布',
+                text: i18n.upload,
                 url: 'bilibili://uper/user_center/archive_selection',
                 icon: 'http://i0.hdslb.com/bfs/archive/205f47675eaaca7912111e0e9b1ac94cb985901f.png',
                 style: 1,
             },
             type: 1,
-            up_title: '创作中心',
+            up_title: i18n.creator_hub,
         });
     }
 
@@ -465,7 +470,7 @@ function getVipLabelImage(): string {
     const day = date.getDate();
     switch (`${month}/${day}`) {
         case '6/1':
-            return 'https://i0.hdslb.com/bfs/bangumi/kt/629e28d4426f1b44af1131ade99d27741cc61d4b.png';
+            return 'https://i0.hdslb.com/bfs/bangumi/kt/d2d09af98bd5aaead93493df9a20a73b474672f7.png';
         default:
             return 'https://i0.hdslb.com/bfs/vip/52f60c8bdae8d4440edbb96dad72916022adf126.png';
     }
