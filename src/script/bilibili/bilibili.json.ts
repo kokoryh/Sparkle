@@ -181,7 +181,7 @@ function handleAccountMine(body, options) {
                     {
                         id: 3072,
                         title: i18n.my_favorites,
-                        uri: 'bilibili://user_center/favourite',
+                        uri: 'bilibili://user_center/favourite?version=2',
                         icon: 'http://i0.hdslb.com/bfs/archive/d79b19d983067a1b91614e830a7100c05204a821.png',
                         common_op_item: {},
                     },
