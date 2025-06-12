@@ -136,12 +136,28 @@ export function handleIpadViewReply(grpcBody) {
     modifyBody(IpadViewReply, message);
 }
 
-export function handleIpadViewProgressReply(grpcBody, { airborneDm }) {
+export function handleIpadViewProgressReply(grpcBody, { airborneDm, isHD }) {
     const message = IpadViewProgressReply.fromBinary(grpcBody);
     message.videoGuide = emptyBytes;
     if (airborneDm && airborneDm !== '#' && message.chronos) {
-        message.chronos.md5 = 'f0baed5939c353e14d77eee17b9f266c';
-        message.chronos.file = 'https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/data/chronos.zip';
+        const configMap = {
+            universal: {
+                sourceMd5: 'e6410b22c44fbe040d2ef486f06f0c19',
+                processedMd5: '548571446f794e44a6a288d168748edf',
+                file: 'https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/data/chronos.zip',
+            },
+            hd: {
+                sourceMd5: '325e7073ffc6fb5263682fecdcd1058f',
+                processedMd5: 'f0baed5939c353e14d77eee17b9f266c',
+                file: 'https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/data/chronos-hd.zip',
+            },
+        };
+        const config = isHD ? configMap['hd'] : configMap['universal'];
+        if (message.chronos.md5 !== config.sourceMd5) {
+            console.log(`md5: ${message.chronos.md5}\nfile: ${message.chronos.file}`);
+        }
+        message.chronos.md5 = config.processedMd5;
+        message.chronos.file = config.file;
         delete message.chronos.sign;
     }
     modifyBody(IpadViewProgressReply, message);
