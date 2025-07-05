@@ -26,11 +26,15 @@ export abstract class ProtobufHandler<T extends object> extends AbstractHandler 
 
     message: T;
 
-    constructor(type: MessageType<T>, data: Uint8Array) {
+    constructor(type: MessageType<T>, body: Uint8Array) {
         super();
         this.type = type;
-        this.message = this.fromBinary(data);
+        this.message = this.fromBinary(this.fromRawBody(body));
     }
+
+    protected abstract fromRawBody(body: Uint8Array): Uint8Array;
+
+    protected abstract toRawBody(body: Uint8Array): Uint8Array;
 
     fromBinary(data: Uint8Array): T {
         return this.type.fromBinary(data);

@@ -13,11 +13,9 @@ import {
 } from '@entity/bilibili';
 import locale from './locale';
 
-export const $ = Client.getInstance('Bilibili');
+export const $ = Client.getInstance('Bilibili Json');
 
 export abstract class BilibiliJsonHandler<T extends object> extends JsonHandler<T> {
-    protected i18n = this.isEn() ? locale.enUS : locale.zhCN;
-
     protected options: JsonOptions = $.argument as JsonOptions;
 
     constructor() {
@@ -31,13 +29,15 @@ export abstract class BilibiliJsonHandler<T extends object> extends JsonHandler<
         $.done({ body: this.toJsonString() });
     }
 
-    private isEn(): boolean {
+    protected isEn(): boolean {
         const url = new URL($.request.url);
         return Boolean(url.searchParams.get('s_locale')?.startsWith('en'));
     }
 }
 
 export class LayoutHandler extends BilibiliJsonHandler<Layout> {
+    protected i18n = this.isEn() ? locale.enUS : locale.zhCN;
+
     private layoutData = {
         tab: [
             {
@@ -163,13 +163,13 @@ export class FeedIndexStoryHandler extends BilibiliJsonHandler<FeedIndexStory> {
     protected process(): void {
         const { data } = this.message;
         if (Array.isArray(data.items)) {
-            data.items = data.items.reduce((res: StoryItem[], item) => {
+            data.items = data.items.reduce((result: StoryItem[], item) => {
                 if (!item.ad_info && !item.card_goto?.startsWith('ad')) {
                     delete item.story_cart_icon;
                     delete item.free_flow_toast;
-                    res.push(item);
+                    result.push(item);
                 }
-                return res;
+                return result;
             }, []);
         }
     }
@@ -223,6 +223,8 @@ export class AccountMineHandler extends BilibiliJsonHandler<AccountMine> {
                 return 'https://i0.hdslb.com/bfs/vip/52f60c8bdae8d4440edbb96dad72916022adf126.png';
         }
     }
+
+    protected i18n = this.isEn() ? locale.enUS : locale.zhCN;
 
     private sectionMap = {
         sections_v2: [
