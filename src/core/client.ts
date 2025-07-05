@@ -235,7 +235,7 @@ export class QuantumultXClient extends Client {
         status: 'statusCode',
     };
 
-    static toUint8Attay(bodyBytes: ArrayBuffer | undefined): Uint8Array | undefined {
+    static toUint8Array(bodyBytes: ArrayBuffer | undefined): Uint8Array | undefined {
         return bodyBytes ? new Uint8Array(bodyBytes) : bodyBytes;
     }
 
@@ -246,7 +246,7 @@ export class QuantumultXClient extends Client {
     protected override getFn<T extends object>(target: T, property: string, receiver: any): any {
         const mappedProperty = QuantumultXClient.propertyMap[property] || property;
         const value = super.getFn(target, mappedProperty, receiver);
-        return property === 'bodyBytes' ? QuantumultXClient.toUint8Attay(value) : value;
+        return property === 'bodyBytes' ? QuantumultXClient.toUint8Array(value) : value;
     }
 
     protected init(): void {
@@ -285,18 +285,7 @@ export class QuantumultXClient extends Client {
         return new Promise((resolve, reject) => {
             $task.fetch(fetchRequest).then(
                 response => {
-                    const fetchResponse: FetchResponse = {
-                        status: 200,
-                        headers: {},
-                    };
-                    for (const [key, value] of Object.entries(response)) {
-                        if (key === 'statusCode') {
-                            fetchResponse.status = value;
-                        } else {
-                            fetchResponse[key] = value;
-                        }
-                    }
-                    resolve(fetchResponse);
+                    resolve(this.createProxy(response));
                 },
                 error => {
                     reject(error);

@@ -32,12 +32,12 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
     }
 
     fetchRequest(): Promise<FetchResponse> {
-        const { url, headers, body } = $.request;
+        const { url, headers, bodyBytes } = $.request;
         return $.fetch({
             method: 'post',
             url,
             headers,
-            body,
+            body: bodyBytes,
         });
     }
 
@@ -78,17 +78,20 @@ export class PlayViewUniteReqHandler extends BilibiliRequestHandler<PlayViewUnit
         const { vod, bvid } = this.message;
         const { aid, cid } = vod || {};
         const videoId = bvid || avToBv(aid);
-        await Promise.all([this.fetchRequest(), this.fetchSponsorBlock(videoId, cid)]).then(
-            ([{ headers, bodyBytes }, segments]) => {
-                this.headers = headers;
-                this.body = new PlayViewUniteReplyHandler(bodyBytes!, segments).done();
-
-                if (segments.length) {
-                    $.info(videoId);
-                    $.info(segments);
-                }
+        try {
+            const [{ headers, bodyBytes }, segments] = await Promise.all([
+                this.fetchRequest(),
+                this.fetchSponsorBlock(videoId, cid),
+            ]);
+            this.headers = headers;
+            this.body = new PlayViewUniteReplyHandler(bodyBytes!, segments).done();
+            if (segments.length) {
+                $.info(videoId);
+                $.info(segments);
             }
-        );
+        } catch {
+            $.exit();
+        }
     }
 }
 
@@ -198,17 +201,20 @@ export class DmSegMobileReqHandler extends BilibiliRequestHandler<DmSegMobileReq
     async process(): Promise<void> {
         const { pid, oid } = this.message;
         const videoId = avToBv(pid);
-        await Promise.all([this.fetchRequest(), this.fetchSponsorBlock(videoId, oid)]).then(
-            ([{ headers, bodyBytes }, segments]) => {
-                this.headers = headers;
-                this.body = new DmSegMobileReplyHandler(bodyBytes!, segments).done();
-
-                if (segments.length) {
-                    $.info(videoId);
-                    $.info(segments);
-                }
+        try {
+            const [{ headers, bodyBytes }, segments] = await Promise.all([
+                this.fetchRequest(),
+                this.fetchSponsorBlock(videoId, oid),
+            ]);
+            this.headers = headers;
+            this.body = new DmSegMobileReplyHandler(bodyBytes!, segments).done();
+            if (segments.length) {
+                $.info(videoId);
+                $.info(segments);
             }
-        );
+        } catch {
+            $.exit();
+        }
     }
 }
 

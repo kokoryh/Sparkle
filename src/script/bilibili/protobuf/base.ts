@@ -1,4 +1,5 @@
 import { MessageType } from '@protobuf-ts/runtime';
+import { gunzipSync } from 'fflate';
 import Client from '@core/client';
 import { ProtobufHandler } from '@core/handler';
 import { ProtobufOptions } from '@entity/bilibili';
@@ -34,7 +35,8 @@ export abstract class BilibiliProtobufHandler<T extends object> extends Protobuf
         const header = rawBody.slice(0, 5);
         let body = rawBody.slice(5);
         if (header[0]) {
-            body = $utils.ungzip(body) as Uint8Array<ArrayBuffer>;
+            const ungzip = typeof $utils === 'object' ? $utils.ungzip : gunzipSync;
+            body = ungzip(body) as Uint8Array<ArrayBuffer>;
         }
         return body;
     }
