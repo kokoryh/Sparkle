@@ -15,7 +15,7 @@ import locale from './locale';
 
 export const $ = Client.getInstance('Bilibili Json');
 
-export abstract class BilibiliJsonHandler<T extends object> extends JsonMessage<T> {
+export abstract class BilibiliJsonHandler<T extends { data: object | null }> extends JsonMessage<T> {
     protected options: JsonOptions = {
         showCreatorHub: false,
     };
@@ -28,6 +28,9 @@ export abstract class BilibiliJsonHandler<T extends object> extends JsonMessage<
     protected abstract process(): void;
 
     done(): void {
+        if (!this.message.data) {
+            $.exit();
+        }
         this.process();
         $.done({ body: this.toJsonString() });
     }

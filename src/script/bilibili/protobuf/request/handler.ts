@@ -77,7 +77,7 @@ export class PlayViewUniteReqHandler extends BilibiliRequestHandler<PlayViewUnit
     async process(): Promise<void> {
         const { vod, bvid } = this.message;
         const { aid, cid } = vod || {};
-        const videoId = bvid || avToBv(aid);
+        const videoId = bvid || avToBv(aid!);
         try {
             const [{ headers, bodyBytes }, segments] = await Promise.all([
                 this.fetchRequest(),
