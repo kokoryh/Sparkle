@@ -3,10 +3,10 @@
 #!category=AdBlock
 
 [Map Local]
-^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v1\.Comic\/(?:Flash|ListFlash|GetActivityTab|GetBubbles)\? header="content-type: application/json" data-type=text data="{}"
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v1\.Comic\/(Flash|ListFlash|GetActivityTab|GetBubbles)\? header="content-type: application/json" data-type=text data="{}"
 
 [Body Rewrite]
-http-response-jq ^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v1\.(?:Comic\/AppInit|Home\/HomeFeed)\? '.data as $data | .data[("activity_tab", "flash", "operate") | select($data[.])] = null | if .data.feeds then .data.feeds |= map(select(.type | IN(15, 30) | not)) end'
+http-response-jq ^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v1\.(Comic\/AppInit|Home\/HomeFeed)\? '.data as $data | .data[("activity_tab", "flash", "operate") | select($data[.])] = null | if .data.feeds then .data.feeds |= map(select(.type | IN(15, 30) | not)) end'
 
 [MITM]
 hostname = %APPEND% manga.bilibili.com
