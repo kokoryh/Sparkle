@@ -22,15 +22,15 @@ export abstract class BilibiliJsonHandler<T extends { data: object | null }> ext
 
     constructor() {
         super($.response.body as string);
+        if (!this.message.data) {
+            $.exit();
+        }
         Object.assign(this.options, $.argument);
     }
 
     protected abstract process(): void;
 
     done(): void {
-        if (!this.message.data) {
-            $.exit();
-        }
         this.process();
         $.done({ body: this.toJsonString() });
     }
@@ -476,8 +476,8 @@ export class AccountMineHandler extends BilibiliJsonHandler<AccountMine> {
     };
 
     protected process(): void {
-        const { data } = this.message;
         const { showCreatorHub } = this.options;
+        const { data } = this.message;
         Object.entries(this.sectionMap).forEach(([key, value]) => {
             if (data[key]) {
                 data[key] = value;

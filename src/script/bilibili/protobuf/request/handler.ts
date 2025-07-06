@@ -31,7 +31,7 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
         });
     }
 
-    fetchRequest(): Promise<FetchResponse> {
+    protected fetchRequest(): Promise<FetchResponse> {
         const { url, headers, bodyBytes } = $.request;
         return $.fetch({
             method: 'post',
@@ -41,7 +41,7 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
         });
     }
 
-    async fetchSponsorBlock(videoId: string, cid = ''): Promise<number[][]> {
+    protected async fetchSponsorBlock(videoId: string, cid = ''): Promise<number[][]> {
         cid = cid !== '0' ? cid : '';
         try {
             const response = await $.fetch({

@@ -5,7 +5,7 @@ export abstract class AbstractMessage {
 }
 
 export abstract class JsonMessage<T extends object> extends AbstractMessage {
-    message: T;
+    protected message: T;
 
     constructor(data: string) {
         super();
@@ -22,9 +22,9 @@ export abstract class JsonMessage<T extends object> extends AbstractMessage {
 }
 
 export abstract class ProtobufMessage<T extends object> extends AbstractMessage {
-    type: MessageType<T>;
+    protected type: MessageType<T>;
 
-    message: T;
+    protected message: T;
 
     constructor(type: MessageType<T>, body: Uint8Array) {
         super();

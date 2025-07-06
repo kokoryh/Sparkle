@@ -42,7 +42,6 @@ export class DynAllReplyMessage extends BilibiliResponseHandler<DynAllReply> {
     }
 
     protected process(): void {
-        const { showUpList } = this.options;
         const message = this.message;
         delete message.topicList;
         if (message.dynamicList) {
@@ -50,20 +49,25 @@ export class DynAllReplyMessage extends BilibiliResponseHandler<DynAllReply> {
                 item => ![DynamicType.AD, DynamicType.LIVE_RCMD].includes(item.cardType)
             );
         }
-        if (showUpList === 'hide') {
+        this.handleUpList();
+    }
+
+    private handleUpList(): void {
+        const { showUpList } = this.options;
+        if (showUpList === 'show' || this.isIPad()) {
+            return;
+        }
+        const message = this.message;
+        if (showUpList === 'hide' || !message.upList?.showLiveNum) {
             delete message.upList;
-        } else if (!this.isIPad() && showUpList !== 'show') {
-            if (message.upList?.showLiveNum) {
-                const { list, listSecond } = message.upList;
-                const lastItem = listSecond.at(-1);
-                if (lastItem) {
-                    lastItem.separator = true;
-                    list.unshift(...listSecond);
-                    listSecond.length = 0;
-                }
-            } else {
-                delete message.upList;
-            }
+            return;
+        }
+        const { list, listSecond } = message.upList;
+        const lastItem = listSecond.at(-1);
+        if (lastItem) {
+            lastItem.separator = true;
+            list.unshift(...listSecond);
+            listSecond.length = 0;
         }
     }
 }
@@ -210,7 +214,7 @@ export class IpadViewProgressReplyHandler extends BilibiliResponseHandler<IpadVi
             const { chronos } = message;
             const config = this.isHD() ? this.configMap.hd : this.configMap.universal;
             if (chronos.md5 !== config.sourceMd5) {
-                $.info(`MD5 mismatch detected:\nReceived: ${chronos.md5}\nFile: ${chronos.file}`);
+                $.log(`MD5 mismatch detected:\nReceived: ${chronos.md5}\nFile: ${chronos.file}`);
             }
             chronos.md5 = config.processedMd5;
             chronos.file = config.file;

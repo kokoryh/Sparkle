@@ -1,5 +1,5 @@
-import { MessageType } from '@protobuf-ts/runtime';
 import { gunzipSync } from 'fflate';
+import { MessageType } from '@protobuf-ts/runtime';
 import Client from '@core/client';
 import { ProtobufMessage } from '@core/message';
 import { ProtobufOptions } from '@entity/bilibili';
@@ -7,7 +7,7 @@ import { ProtobufOptions } from '@entity/bilibili';
 export const $ = Client.getInstance('Bilibili Protobuf');
 
 export abstract class BilibiliProtobufHandler<T extends object> extends ProtobufMessage<T> {
-    options: ProtobufOptions = {
+    protected options: ProtobufOptions = {
         showUpList: 'auto',
         filterTopReplies: true,
         airborneDm: false,
