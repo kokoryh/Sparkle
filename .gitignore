@@ -8,7 +8,6 @@ src/proto
 src/script/ehentai
 src/script/missav/input.html
 src/script/missav/output.html
-src/types
-src/util
+src/util/proto
 
 *.dev.ts

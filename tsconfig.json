@@ -7,13 +7,13 @@
         "outDir": "./dist",
         "module": "ESNext",
         "moduleResolution": "bundler",
-        "typeRoots": ["./node_modules/@types"],
+        "typeRoots": ["./node_modules/@types", "src/types"],
         "paths": {
+            "@entity/*": ["src/core/entity/*"],
+            "@core/*": ["src/core/*"],
             "@proto/*": ["src/proto/*"],
             "@util/*": ["src/util/*"]
         },
-        "allowJs": true,
-        "checkJs": true,
         "strict": true,
         "noImplicitAny": false,
         "alwaysStrict": false

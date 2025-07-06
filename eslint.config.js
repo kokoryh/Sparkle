@@ -5,5 +5,15 @@ import { globalIgnores } from 'eslint/config';
 export default tseslint.config(
     eslint.configs.recommended,
     tseslint.configs.recommended,
-    globalIgnores(['dist', 'src/proto'])
+    globalIgnores(['dist', 'src/proto']),
+    {
+        rules: {
+            '@typesccript-eslint/no-empty-object-type': [
+                'error',
+                {
+                    allowInterfaces: 'with-single-extends',
+                },
+            ],
+        },
+    }
 );
