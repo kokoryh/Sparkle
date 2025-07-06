@@ -56,5 +56,5 @@ enum BizType {
 }
 
 message ViewInfo {
-    bytes prompt_bar = 2;
+    optional bytes prompt_bar = 2;
 }

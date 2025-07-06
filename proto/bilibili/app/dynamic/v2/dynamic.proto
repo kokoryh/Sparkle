@@ -5,7 +5,7 @@ package bilibili.app.dynamic.v2;
 message DynAllReply {
     DynamicList dynamic_list = 1;
     CardVideoUpList up_list = 2;
-    bytes topic_list = 3;
+    optional bytes topic_list = 3;
 }
 
 message DynamicList {

@@ -5,7 +5,7 @@ const BASE = 58n;
 
 const data = 'FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf';
 
-export function av2bv(avid) {
+export function avToBv(avid: string | number): string {
     const bytes = ['B', 'V', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0'];
     let bvIndex = bytes.length - 1;
     let tmp = (MAX_AID | BigInt(avid)) ^ XOR_CODE;
@@ -19,7 +19,7 @@ export function av2bv(avid) {
     return bytes.join('');
 }
 
-export function bv2av(bvid) {
+export function bvToAv(bvid: string): number {
     const bvidArr = Array.from(bvid);
     [bvidArr[3], bvidArr[9]] = [bvidArr[9], bvidArr[3]];
     [bvidArr[4], bvidArr[7]] = [bvidArr[7], bvidArr[4]];

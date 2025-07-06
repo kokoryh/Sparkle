@@ -3,7 +3,7 @@ syntax = "proto3";
 package bilibili.main.community.reply.v1;
 
 message MainListReply {
-    bytes cm = 11;
+    optional bytes cm = 11;
     repeated ReplyInfo top_replies = 14;
 }
 

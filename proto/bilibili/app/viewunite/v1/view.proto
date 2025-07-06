@@ -5,11 +5,11 @@ package bilibili.app.viewunite.v1;
 message ViewReply {
     ReqUser req_user = 3;
     Tab tab = 5;
-    bytes cm = 7;
+    optional bytes cm = 7;
 }
 
 message ReqUser {
-    bytes elec_plus_btn = 7;
+    optional bytes elec_plus_btn = 7;
 }
 
 message Tab {
@@ -51,7 +51,7 @@ enum ModuleType {
 }
 
 message Headline {
-    bytes label = 1;
+    optional bytes label = 1;
 }
 
 message Relates {
@@ -79,7 +79,7 @@ message CardBasicInfo {
 }
 
 message ViewProgressReply {
-    bytes dm = 4;
+    optional bytes dm = 4;
 }
 
 message RelatesFeedReply {

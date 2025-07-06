@@ -8,7 +8,7 @@ message PlayViewReply {
 }
 
 message ViewInfo {
-    bytes try_watch_prompt_bar = 8;
+    optional bytes try_watch_prompt_bar = 8;
 }
 
 message PlayAbilityExtConf {

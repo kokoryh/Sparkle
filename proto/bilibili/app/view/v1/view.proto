@@ -5,15 +5,15 @@ package bilibili.app.view.v1;
 message ViewReply {
     ReqUser req_user = 4;
     repeated Relate relates = 10;
-    bytes label = 23;
+    optional bytes label = 23;
     repeated bytes cms = 30;
-    bytes cm_config = 31;
-    bytes cm_ipad = 41;
+    optional bytes cm_config = 31;
+    optional bytes cm_ipad = 41;
     repeated bytes special_cell_new = 50;
 }
 
 message ReqUser {
-    bytes elec_plus_btn = 9;
+    optional bytes elec_plus_btn = 9;
 }
 
 message Relate {
@@ -21,7 +21,7 @@ message Relate {
 }
 
 message ViewProgressReply {
-    bytes video_guide = 1;
+    optional bytes video_guide = 1;
     Chronos chronos = 2;
 }
 
@@ -33,6 +33,6 @@ message Chronos {
 
 message TFInfoReply {
     int64 tips_id = 1;
-    bytes tf_toast = 2;
-    bytes tf_panel_customized = 3;
+    optional bytes tf_toast = 2;
+    optional bytes tf_panel_customized = 3;
 }

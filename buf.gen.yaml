@@ -7,8 +7,3 @@ plugins:
       - long_type_string
       - output_javascript
     out: src/proto
-  - local: protoc-gen-es
-    opt:
-      - target=js+dts
-      - import_extension=js
-    out: src/proto
