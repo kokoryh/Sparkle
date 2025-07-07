@@ -79,7 +79,14 @@ message CardBasicInfo {
 }
 
 message ViewProgressReply {
+    Chronos chronos = 2;
     optional bytes dm = 4;
+}
+
+message Chronos {
+    string md5 = 1;
+    string file = 2;
+    optional string sign = 3;
 }
 
 message RelatesFeedReply {

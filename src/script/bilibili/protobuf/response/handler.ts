@@ -6,6 +6,7 @@ import { PlayViewUniteReply } from '@proto/bilibili/app/playerunite/v1/player';
 import { PlayViewReply } from '@proto/bilibili/app/playurl/v1/playurl';
 import { PopularReply } from '@proto/bilibili/app/show/popular/v1/popular';
 import {
+    Chronos,
     TFInfoReply,
     ViewReply as IpadViewReply,
     ViewProgressReply as IpadViewProgressReply,
@@ -19,10 +20,11 @@ import {
     ViewProgressReply,
     RelateCard,
 } from '@proto/bilibili/app/viewunite/v1/view';
-import { DmViewReply } from '@proto/bilibili/community/service/dm/v1/dm';
+import { DmSegMobileReply, DmViewReply } from '@proto/bilibili/community/service/dm/v1/dm';
 import { MainListReply } from '@proto/bilibili/main/community/reply/v1/reply';
 import { PlayViewReply as IpadPlayViewReply } from '@proto/bilibili/pgc/gateway/player/v2/playurl.js';
 import { SearchAllResponse } from '@proto/bilibili/polymer/app/search/v1/search';
+import { ChronosConfig, ChronosConfigs } from '@entity/bilibili';
 import { $, BilibiliProtobufHandler } from '../base';
 
 export abstract class BilibiliResponseHandler<T extends object> extends BilibiliProtobufHandler<T> {
@@ -33,6 +35,25 @@ export abstract class BilibiliResponseHandler<T extends object> extends Bilibili
     done(): void {
         this.process();
         $.done({ body: this.toRawBody(this.toBinary()) });
+    }
+
+    protected isIPad(): boolean {
+        let device = '';
+        if (typeof $environment !== 'undefined') {
+            device = $environment['device-model'];
+        } else if (typeof $loon !== 'undefined') {
+            device = $loon;
+        }
+        return device.includes('iPad');
+    }
+
+    protected isHD(): boolean {
+        return $.request.headers?.['user-agent']?.includes('bili-hd');
+    }
+
+    protected isAirborneEnabled(): boolean {
+        const { airborne } = this.options;
+        return Boolean(airborne && airborne !== '#');
     }
 }
 
@@ -189,16 +210,25 @@ export class IpadViewReplyHandler extends BilibiliResponseHandler<IpadViewReply>
 }
 
 export class IpadViewProgressReplyHandler extends BilibiliResponseHandler<IpadViewProgressReply> {
-    private configMap = {
+    static handleChronos(chronos: Chronos, config: ChronosConfig): void {
+        if (chronos.md5 !== config.sourceMd5) {
+            $.debug(`MD5 mismatch detected. Received: ${chronos.md5}; File: ${chronos.file}`);
+        }
+        chronos.md5 = config.processedMd5;
+        chronos.file = config.file;
+        delete chronos.sign;
+    }
+
+    static chronosConfigs: ChronosConfigs = {
         universal: {
-            sourceMd5: 'e6410b22c44fbe040d2ef486f06f0c19',
-            processedMd5: '548571446f794e44a6a288d168748edf',
-            file: 'https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/data/chronos.zip',
+            sourceMd5: '93e55618aafe79f119bc1166c6093bec',
+            processedMd5: '185065c4febd417b29c8d19c2a68bfcf',
+            file: 'https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/data/danmaku-flame.zip',
         },
         hd: {
             sourceMd5: '325e7073ffc6fb5263682fecdcd1058f',
-            processedMd5: 'f0baed5939c353e14d77eee17b9f266c',
-            file: 'https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/data/chronos-hd.zip',
+            processedMd5: 'bae0d6711002af45d9179cb230487dee',
+            file: 'https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/data/danmaku-flame-hd.zip',
         },
     };
 
@@ -207,18 +237,13 @@ export class IpadViewProgressReplyHandler extends BilibiliResponseHandler<IpadVi
     }
 
     protected process(): void {
-        const { airborneDm } = this.options;
         const message = this.message;
         delete message.videoGuide;
-        if (airborneDm && airborneDm !== '#' && message.chronos) {
-            const { chronos } = message;
-            const config = this.isHD() ? this.configMap.hd : this.configMap.universal;
-            if (chronos.md5 !== config.sourceMd5) {
-                $.log(`MD5 mismatch detected:\nReceived: ${chronos.md5}\nFile: ${chronos.file}`);
-            }
-            chronos.md5 = config.processedMd5;
-            chronos.file = config.file;
-            delete chronos.sign;
+        if (this.isAirborneEnabled() && message.chronos) {
+            const config = this.isHD()
+                ? IpadViewProgressReplyHandler.chronosConfigs.hd
+                : IpadViewProgressReplyHandler.chronosConfigs.universal;
+            IpadViewProgressReplyHandler.handleChronos(message.chronos, config);
         }
     }
 }
@@ -298,6 +323,21 @@ export class ViewProgressReplyHandler extends BilibiliResponseHandler<ViewProgre
     protected process(): void {
         const message = this.message;
         delete message.dm;
+        if (this.isAirborneEnabled() && message.chronos) {
+            const config = IpadViewProgressReplyHandler.chronosConfigs.universal;
+            IpadViewProgressReplyHandler.handleChronos(message.chronos, config);
+        }
+    }
+}
+
+export class DmSegMobileReplyHandler extends BilibiliResponseHandler<DmSegMobileReply> {
+    constructor() {
+        super(DmSegMobileReply);
+    }
+
+    protected process(): void {
+        const message = this.message;
+        message.elems = message.elems.filter(item => !item.action?.startsWith('airborne'));
     }
 }
 

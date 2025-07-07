@@ -1,13 +1,14 @@
-import { PlayViewUniteReply, PlayViewUniteReq } from '@proto/bilibili/app/playerunite/v1/player';
-import { PGCAnyModel } from '@proto/bilibili/app/playerunite/pgcanymodel/pgcanymodel';
-import { BizType, ConfType } from '@proto/bilibili/playershared/playershared';
-import { ClipInfo, ClipType } from '@proto/bilibili/pgc/gateway/player/v2/playurl';
+import { MessageType } from '@protobuf-ts/runtime';
 import {
     DanmakuElem,
     DmColorfulType,
     DmSegMobileReply,
     DmSegMobileReq,
 } from '@proto/bilibili/community/service/dm/v1/dm';
+import { PlayViewUniteReply, PlayViewUniteReq } from '@proto/bilibili/app/playerunite/v1/player';
+import { PGCAnyModel } from '@proto/bilibili/app/playerunite/pgcanymodel/pgcanymodel';
+import { BizType, ConfType } from '@proto/bilibili/playershared/playershared';
+import { ClipInfo, ClipType } from '@proto/bilibili/pgc/gateway/player/v2/playurl';
 import { SegmentItem } from '@entity/bilibili';
 import { HttpHeaders } from 'src/types/common';
 import { FetchResponse } from 'src/types/client';
@@ -20,6 +21,10 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
     protected body!: Uint8Array;
 
     protected abstract process(): Promise<void>;
+
+    constructor(type: MessageType<T>) {
+        super(type, $.request.bodyBytes!);
+    }
 
     async done(): Promise<void> {
         await this.process();
@@ -69,9 +74,85 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
     }
 }
 
+export class DmSegMobileReqHandler extends BilibiliRequestHandler<DmSegMobileReq> {
+    constructor() {
+        super(DmSegMobileReq);
+    }
+
+    async process(): Promise<void> {
+        const { pid, oid } = this.message;
+        const videoId = avToBv(pid);
+        try {
+            const [{ headers, bodyBytes }, segments] = await Promise.all([
+                this.fetchRequest(),
+                this.fetchSponsorBlock(videoId, oid),
+            ]);
+            this.headers = headers;
+            this.body = new DmSegMobileReplyHandler(bodyBytes!, segments).done();
+            if (segments.length) {
+                $.info(videoId);
+                $.info(segments);
+            }
+        } catch {
+            $.exit();
+        }
+    }
+}
+
+export class DmSegMobileReplyHandler extends BilibiliProtobufHandler<DmSegMobileReply> {
+    private segments: number[][];
+
+    constructor(data: Uint8Array, segments: number[][]) {
+        super(DmSegMobileReply, data);
+        this.segments = segments;
+    }
+
+    done(): Uint8Array {
+        this.process();
+        return this.toBinary();
+    }
+
+    protected process(): void {
+        const message = this.message;
+        message.elems = message.elems.filter(item => !item.action?.startsWith('airborne'));
+        if (this.segments.length) {
+            message.elems.unshift(...this.getAirBorneDms());
+        }
+    }
+
+    private getAirBorneDms(): DanmakuElem[] {
+        return this.segments.map((segment, index) => {
+            const id = (index + 1).toString();
+            const start = Math.floor(segment[0] * 1000);
+            const end = Math.floor(segment[1] * 1000);
+            return {
+                id,
+                progress: start,
+                mode: 5,
+                fontsize: 50,
+                color: 16777215,
+                midHash: '1948dd5d',
+                content: '空指部已就位',
+                ctime: '1735660800',
+                weight: 11,
+                action: `airborne:${end}`,
+                pool: 0,
+                idStr: id,
+                attr: 1310724,
+                animation: '',
+                extra: '',
+                colorful: DmColorfulType.NONE_TYPE,
+                type: 1,
+                oid: '212364987',
+                dmFrom: 1,
+            };
+        });
+    }
+}
+
 export class PlayViewUniteReqHandler extends BilibiliRequestHandler<PlayViewUniteReq> {
     constructor() {
-        super(PlayViewUniteReq, $.request.bodyBytes!);
+        super(PlayViewUniteReq);
     }
 
     async process(): Promise<void> {
@@ -190,81 +271,5 @@ export class PlayViewUniteReplyHandler extends BilibiliProtobufHandler<PlayViewU
             end: Math.ceil(end),
             clipType: ClipType.CLIP_TYPE_OP,
         }));
-    }
-}
-
-export class DmSegMobileReqHandler extends BilibiliRequestHandler<DmSegMobileReq> {
-    constructor() {
-        super(DmSegMobileReq, $.request.bodyBytes!);
-    }
-
-    async process(): Promise<void> {
-        const { pid, oid } = this.message;
-        const videoId = avToBv(pid);
-        try {
-            const [{ headers, bodyBytes }, segments] = await Promise.all([
-                this.fetchRequest(),
-                this.fetchSponsorBlock(videoId, oid),
-            ]);
-            this.headers = headers;
-            this.body = new DmSegMobileReplyHandler(bodyBytes!, segments).done();
-            if (segments.length) {
-                $.info(videoId);
-                $.info(segments);
-            }
-        } catch {
-            $.exit();
-        }
-    }
-}
-
-export class DmSegMobileReplyHandler extends BilibiliProtobufHandler<DmSegMobileReply> {
-    private segments: number[][];
-
-    constructor(data: Uint8Array, segments: number[][]) {
-        super(DmSegMobileReply, data);
-        this.segments = segments;
-    }
-
-    done(): Uint8Array {
-        this.process();
-        return this.toBinary();
-    }
-
-    protected process(): void {
-        const message = this.message;
-        message.elems = message.elems.filter(item => !item.action?.startsWith('airborne'));
-        if (this.segments.length) {
-            message.elems.unshift(...this.getAirBorneDms());
-        }
-    }
-
-    private getAirBorneDms(): DanmakuElem[] {
-        return this.segments.map((segment, index) => {
-            const id = (index + 1).toString();
-            const start = Math.floor(segment[0] * 1000) + 1000;
-            const end = Math.floor(segment[1] * 1000);
-            return {
-                id,
-                progress: start,
-                mode: 5,
-                fontsize: 50,
-                color: 16777215,
-                midHash: '1948dd5d',
-                content: '空指部已就位',
-                ctime: '1735660800',
-                weight: 11,
-                action: `airborne:${end}`,
-                pool: 0,
-                idStr: id,
-                attr: 1310724,
-                animation: '',
-                extra: '',
-                colorful: DmColorfulType.NONE_TYPE,
-                type: 1,
-                oid: '212364987',
-                dmFrom: 1,
-            };
-        });
     }
 }

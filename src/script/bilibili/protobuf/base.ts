@@ -1,4 +1,3 @@
-import { gunzipSync } from 'fflate';
 import { MessageType } from '@protobuf-ts/runtime';
 import Client from '@core/client';
 import { ProtobufMessage } from '@core/message';
@@ -10,7 +9,7 @@ export abstract class BilibiliProtobufHandler<T extends object> extends Protobuf
     protected options: ProtobufOptions = {
         showUpList: 'auto',
         filterTopReplies: true,
-        airborneDm: false,
+        airborne: true,
     };
 
     constructor(type: MessageType<T>, body: Uint8Array) {
@@ -22,26 +21,11 @@ export abstract class BilibiliProtobufHandler<T extends object> extends Protobuf
 
     abstract done(): void;
 
-    protected isIPad(): boolean {
-        let device = '';
-        if (typeof $environment !== 'undefined') {
-            device = $environment['device-model'];
-        } else if (typeof $loon !== 'undefined') {
-            device = $loon;
-        }
-        return device.includes('iPad');
-    }
-
-    protected isHD(): boolean {
-        return $.request.headers?.['user-agent']?.includes('bili-hd');
-    }
-
     protected fromRawBody(rawBody: Uint8Array): Uint8Array {
         const header = rawBody.slice(0, 5);
         let body = rawBody.slice(5);
         if (header[0]) {
-            const ungzip = typeof $utils === 'object' ? $utils.ungzip : gunzipSync;
-            body = ungzip(body) as Uint8Array<ArrayBuffer>;
+            body = $.ungzip(body) as Uint8Array<ArrayBuffer>;
         }
         return body;
     }

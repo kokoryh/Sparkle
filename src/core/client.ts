@@ -1,3 +1,4 @@
+import { gunzipSync } from 'fflate';
 import * as Surge from '../types/surge.d';
 import * as Loon from '../types/loon.d';
 import * as QuantumultX from '../types/quantumult-x.d';
@@ -38,6 +39,10 @@ export default abstract class Client {
     response!: HttpResponse;
     argument: object | undefined;
 
+    get url(): URL {
+        return new URL(this.request.url);
+    }
+
     constructor(name?: string, className?: string) {
         this.className = className ?? '';
         this.name = name ?? '';
@@ -53,6 +58,8 @@ export default abstract class Client {
     abstract fetch(request: FetchRequest): Promise<FetchResponse>;
 
     abstract msg(title: string, subtitle: string, content: string, options?: NotificationOptions): void;
+
+    abstract ungzip(data: Uint8Array): Uint8Array;
 
     abstract done(result: HttpRequestDone | HttpResponseDone): void;
 
@@ -188,6 +195,10 @@ export class SurgeClient extends Client {
         $notification.post(title, subtitle, content, opts);
     }
 
+    ungzip(data: Uint8Array): Uint8Array {
+        return $utils.ungzip(data);
+    }
+
     done(result: HttpRequestDone | HttpResponseDone): void {
         ($done as Surge.Done)(result);
     }
@@ -304,6 +315,10 @@ export class QuantumultXClient extends Client {
         $notify(title, subtitle, message, opts);
     }
 
+    ungzip(data: Uint8Array): Uint8Array {
+        return gunzipSync(data);
+    }
+
     done(result: HttpRequestDone | HttpResponseDone): void {
         const source = (result as HttpRequestDone).response ?? result;
         const target: QuantumultX.HttpRequestDone | QuantumultX.HttpResponseDone = {};
@@ -317,5 +332,36 @@ export class QuantumultXClient extends Client {
             }
         }
         $done(target);
+    }
+}
+
+export class QXClient extends Client {
+    protected init(): void {
+        this.msg(this.name, '已停止支持QuantumultX');
+        this.exit();
+    }
+
+    msg(title = this.name, subtitle = '', message = ''): void {
+        $notify(title, subtitle, message);
+    }
+
+    getVal(key: string): string | null {
+        throw new Error('Method not implemented.');
+    }
+
+    setVal(val: string, key: string): void {
+        throw new Error('Method not implemented.');
+    }
+
+    fetch(request: FetchRequest): Promise<FetchResponse> {
+        throw new Error('Method not implemented.');
+    }
+
+    ungzip(data: Uint8Array): Uint8Array {
+        throw new Error('Method not implemented.');
+    }
+
+    done(result: HttpRequestDone | HttpResponseDone): void {
+        throw new Error('Method not implemented.');
     }
 }

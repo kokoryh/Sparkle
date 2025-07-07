@@ -2,7 +2,7 @@ import { DmSegMobileReqHandler, PlayViewUniteReqHandler } from './handler';
 
 const handlers = {
     '/DmSegMobile': DmSegMobileReqHandler,
-    '/PlayViewUnite': PlayViewUniteReqHandler,
+    // '/PlayViewUnite': PlayViewUniteReqHandler,
 };
 
 export function createHandler(url: string): InstanceType<(typeof handlers)[keyof typeof handlers]> | null {

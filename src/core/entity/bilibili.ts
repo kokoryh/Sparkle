@@ -5,7 +5,7 @@ export interface JsonOptions {
 export interface ProtobufOptions {
     showUpList: 'auto' | 'show' | 'hide';
     filterTopReplies: boolean | number;
-    airborneDm: boolean | string;
+    airborne: boolean | string;
 }
 
 export interface LayoutItem {
@@ -124,4 +124,15 @@ export interface SegmentItem {
     locked: number;
     votes: number;
     description: string;
+}
+
+export interface ChronosConfig {
+    sourceMd5: string;
+    processedMd5: string;
+    file: string;
+}
+
+export interface ChronosConfigs {
+    universal: ChronosConfig;
+    hd: ChronosConfig;
 }

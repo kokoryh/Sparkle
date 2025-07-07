@@ -11,7 +11,7 @@ import {
     StoryItem,
     VIP,
 } from '@entity/bilibili';
-import locale from './locale';
+import locale from '../locale';
 
 export const $ = Client.getInstance('Bilibili Json');
 

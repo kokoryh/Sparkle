@@ -2,7 +2,7 @@ import { $ } from './handler';
 import { createHandler } from './factory';
 
 try {
-    createHandler($.request.url)?.done();
+    createHandler($.url.pathname)?.done();
 } catch (e) {
     $.info(e);
 } finally {
