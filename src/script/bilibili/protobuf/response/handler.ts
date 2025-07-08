@@ -21,7 +21,7 @@ import {
     RelateCard,
 } from '@proto/bilibili/app/viewunite/v1/view';
 import { DmSegMobileReply, DmViewReply } from '@proto/bilibili/community/service/dm/v1/dm';
-import { MainListReply } from '@proto/bilibili/main/community/reply/v1/reply';
+import { MainListReply, Type } from '@proto/bilibili/main/community/reply/v1/reply';
 import { PlayViewReply as IpadPlayViewReply } from '@proto/bilibili/pgc/gateway/player/v2/playurl.js';
 import { SearchAllResponse } from '@proto/bilibili/polymer/app/search/v1/search';
 import { ChronosConfig, ChronosConfigs } from '@entity/bilibili';
@@ -365,6 +365,7 @@ export class MainListReplyHandler extends BilibiliResponseHandler<MainListReply>
         const { filterTopReplies } = this.options;
         const message = this.message;
         delete message.cm;
+        message.subjectTopCards = message.subjectTopCards.filter(item => item.type !== Type.CM);
         if (filterTopReplies) {
             const pattern = /https:\/\/b23\.tv\/(cm|mall)/;
             message.topReplies = message.topReplies.filter(reply => {

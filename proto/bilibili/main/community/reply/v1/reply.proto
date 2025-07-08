@@ -5,6 +5,7 @@ package bilibili.main.community.reply.v1;
 message MainListReply {
     optional bytes cm = 11;
     repeated ReplyInfo top_replies = 14;
+    repeated SubjectTopCard subject_top_cards = 28;
 }
 
 message ReplyInfo {
@@ -20,4 +21,19 @@ message Url {
     string title = 1;
     string app_name = 5;
     string app_package_name = 6;
+}
+
+message SubjectTopCard {
+    Type type = 1;
+}
+
+enum Type {
+    UNKNOWN = 0;
+    OGV_GRADE = 1;
+    UP_PROTECTION = 2;
+    CM = 3;
+    UP_SELECTION = 4;
+    OPERATION = 5;
+    VOTE = 6;
+    ESPORTS_GRADE = 7;
 }
