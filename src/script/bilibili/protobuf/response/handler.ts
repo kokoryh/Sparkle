@@ -48,7 +48,8 @@ export abstract class BilibiliResponseHandler<T extends object> extends Bilibili
     }
 
     protected isHD(): boolean {
-        return $.request.headers?.['user-agent']?.includes('bili-hd');
+        const headers = $.createCaseInsensitiveDictionary($.request.headers);
+        return headers?.['user-agent']?.includes('bili-hd');
     }
 
     protected isAirborneEnabled(): boolean {

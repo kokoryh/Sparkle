@@ -63,7 +63,10 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
             const body: SegmentItem[] = JSON.parse(response.body as string);
             return body.reduce((result: number[][], item) => {
                 if (item.actionType === 'skip') {
-                    result.push(item.segment);
+                    const [start, end] = item.segment;
+                    if (end - start >= 8) {
+                        result.push(item.segment);
+                    }
                 }
                 return result;
             }, []);

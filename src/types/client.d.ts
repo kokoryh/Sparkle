@@ -34,3 +34,5 @@ export type NotificationOptions = Partial<{
     dismiss: number;
     sound: boolean;
 }>;
+
+export type CaseInsensitiveDictionary<T> = T & { [key: string]: any };

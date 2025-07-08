@@ -1,7 +1,8 @@
 import { gunzipSync } from 'fflate';
-import * as Surge from '../types/surge.d';
-import * as Loon from '../types/loon.d';
-import * as QuantumultX from '../types/quantumult-x.d';
+import { HttpHeaders } from 'src/types/common';
+import * as Surge from 'src/types/surge.d';
+import * as Loon from 'src/types/loon.d';
+import * as QuantumultX from 'src/types/quantumult-x.d';
 import {
     HttpRequest,
     HttpResponse,
@@ -10,6 +11,7 @@ import {
     FetchRequest,
     FetchResponse,
     NotificationOptions,
+    CaseInsensitiveDictionary,
 } from '../types/client';
 
 export default abstract class Client {
@@ -38,9 +40,13 @@ export default abstract class Client {
     request!: HttpRequest;
     response!: HttpResponse;
     argument: object | undefined;
+    private _url: URL | undefined;
 
     get url(): URL {
-        return new URL(this.request.url);
+        if (!this._url) {
+            this._url = new URL(this.request.url);
+        }
+        return this._url;
     }
 
     constructor(name?: string, className?: string) {
@@ -111,6 +117,40 @@ export default abstract class Client {
 
     abort(): void {
         $done();
+    }
+
+    createCaseInsensitiveDictionary<T extends object>(initial: T = {} as T): CaseInsensitiveDictionary<T> {
+        const target = Object.create(null);
+        const normalize = (property: string | symbol) => {
+            return typeof property === 'string' ? property.toLowerCase() : property;
+        };
+        for (const [key, value] of Object.entries(initial)) {
+            target[normalize(key)] = value;
+        }
+        const proxyHandler: ProxyHandler<T> = {
+            get(target, property) {
+                return Reflect.get(target, normalize(property));
+            },
+            set(target, property, value) {
+                return Reflect.set(target, normalize(property), value);
+            },
+            has(target, property) {
+                return Reflect.has(target, normalize(property));
+            },
+            deleteProperty(target, property) {
+                return Reflect.deleteProperty(target, normalize(property));
+            },
+            ownKeys(target) {
+                return Reflect.ownKeys(target);
+            },
+            getOwnPropertyDescriptor(target, property) {
+                return Reflect.getOwnPropertyDescriptor(target, normalize(property));
+            },
+            defineProperty(target, property, descriptor) {
+                return Reflect.defineProperty(target, normalize(property), descriptor);
+            },
+        };
+        return new Proxy(target, proxyHandler);
     }
 }
 

@@ -36,8 +36,7 @@ export abstract class BilibiliJsonHandler<T extends { data: object | null }> ext
     }
 
     protected isEn(): boolean {
-        const url = new URL($.request.url);
-        return Boolean(url.searchParams.get('s_locale')?.startsWith('en'));
+        return Boolean($.url.searchParams.get('s_locale')?.startsWith('en'));
     }
 }
 

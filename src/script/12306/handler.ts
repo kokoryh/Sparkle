@@ -39,7 +39,7 @@ export class MgwHtmHandler extends AbstractMessage {
     }
 
     private isAd(): boolean {
-        const headers = $.request.headers;
+        const headers = $.createCaseInsensitiveDictionary($.request.headers);
         return this.filterList.includes(headers['operation-type']);
     }
 }
