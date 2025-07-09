@@ -1,4 +1,5 @@
 import { MessageType } from '@protobuf-ts/runtime';
+import { getSkipSegments } from '@core/service/sponsor-block.service';
 import {
     DanmakuElem,
     DmColorfulType,
@@ -46,17 +47,9 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
         });
     }
 
-    protected async fetchSponsorBlock(videoId: string, cid = ''): Promise<number[][]> {
-        cid = cid !== '0' ? cid : '';
+    protected async getSkipSegments(videoId: string, cid = ''): Promise<number[][]> {
         try {
-            const response = await $.fetch({
-                method: 'get',
-                url: `https://bsbsb.top/api/skipSegments?videoID=${videoId}&cid=${cid}&category=sponsor`,
-                headers: {
-                    origin: 'https://github.com/kokoryh/Sparkle/blob/master/release/surge/module/bilibili.sgmodule',
-                    'x-ext-version': '1.0.0',
-                },
-            });
+            const response = await getSkipSegments($, videoId, cid);
             if (response.status !== 200) {
                 return [];
             }
@@ -88,7 +81,7 @@ export class DmSegMobileReqHandler extends BilibiliRequestHandler<DmSegMobileReq
         try {
             const [{ headers, bodyBytes }, segments] = await Promise.all([
                 this.fetchRequest(),
-                this.fetchSponsorBlock(videoId, oid),
+                this.getSkipSegments(videoId, oid),
             ]);
             this.headers = headers;
             this.body = new DmSegMobileReplyHandler(bodyBytes!, segments).done();
@@ -165,7 +158,7 @@ export class PlayViewUniteReqHandler extends BilibiliRequestHandler<PlayViewUnit
         try {
             const [{ headers, bodyBytes }, segments] = await Promise.all([
                 this.fetchRequest(),
-                this.fetchSponsorBlock(videoId, cid),
+                this.getSkipSegments(videoId, cid),
             ]);
             this.headers = headers;
             this.body = new PlayViewUniteReplyHandler(bodyBytes!, segments).done();

@@ -1,5 +1,4 @@
 import { gunzipSync } from 'fflate';
-import { HttpHeaders } from 'src/types/common';
 import * as Surge from 'src/types/surge.d';
 import * as Loon from 'src/types/loon.d';
 import * as QuantumultX from 'src/types/quantumult-x.d';
