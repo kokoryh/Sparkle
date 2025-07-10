@@ -21,6 +21,21 @@ export abstract class BilibiliProtobufHandler<T extends object> extends Protobuf
 
     abstract done(): void;
 
+    protected isIPad(): boolean {
+        let device = '';
+        if (typeof $environment !== 'undefined') {
+            device = $environment['device-model'];
+        } else if (typeof $loon !== 'undefined') {
+            device = $loon;
+        }
+        return device.includes('iPad');
+    }
+
+    protected isHD(): boolean {
+        const headers = $.createCaseInsensitiveDictionary($.request.headers);
+        return headers?.['user-agent']?.includes('bili-hd');
+    }
+
     protected fromRawBody(rawBody: Uint8Array): Uint8Array {
         const header = rawBody.slice(0, 5);
         let body = rawBody.slice(5);

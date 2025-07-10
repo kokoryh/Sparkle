@@ -37,21 +37,6 @@ export abstract class BilibiliResponseHandler<T extends object> extends Bilibili
         $.done({ body: this.toRawBody(this.toBinary()) });
     }
 
-    protected isIPad(): boolean {
-        let device = '';
-        if (typeof $environment !== 'undefined') {
-            device = $environment['device-model'];
-        } else if (typeof $loon !== 'undefined') {
-            device = $loon;
-        }
-        return device.includes('iPad');
-    }
-
-    protected isHD(): boolean {
-        const headers = $.createCaseInsensitiveDictionary($.request.headers);
-        return headers?.['user-agent']?.includes('bili-hd');
-    }
-
     protected isAirborneEnabled(): boolean {
         const { airborne } = this.options;
         return Boolean(airborne && airborne !== '#');
@@ -223,12 +208,12 @@ export class IpadViewProgressReplyHandler extends BilibiliResponseHandler<IpadVi
     static chronosConfigs: ChronosConfigs = {
         universal: {
             sourceMd5: '93e55618aafe79f119bc1166c6093bec',
-            processedMd5: '185065c4febd417b29c8d19c2a68bfcf',
+            processedMd5: 'ea4c8b181243faffb7b847aa8fbb986a',
             file: 'https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/data/danmaku-flame.zip',
         },
         hd: {
             sourceMd5: '325e7073ffc6fb5263682fecdcd1058f',
-            processedMd5: 'bae0d6711002af45d9179cb230487dee',
+            processedMd5: '7bfd1de2044f37c1b0f4185085d816af',
             file: 'https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/data/danmaku-flame-hd.zip',
         },
     };

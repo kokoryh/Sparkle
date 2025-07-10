@@ -6,7 +6,7 @@
     if (currentTime > progress) return;
     this._context.videoPlayer.seekTo(endTime);
     this._airborneToast = new toastClass(this.size, this._suggestedFactor);
-    this._airborneToast.onClick = _ => (this._context.videoPlayer.seekTo(Math.floor(progress) + 2), !0);
+    this._airborneToast.onClick = _ => (this._context.videoPlayer.seekTo(Math.ceil(progress) + 1), !0);
     this.view.addSubView(this._airborneToast);
     this._airborneToast.show();
 })(n, s, M, ad);
@@ -19,7 +19,7 @@
     if (currentTime > progress) return;
     this._context.videoPlayer.seekTo(endTime);
     this._airborneToast = new toastClass(this.size, viewSuggestedFactor(this.size));
-    this._airborneToast.onClick = _ => (this._context.videoPlayer.seekTo(Math.floor(progress) + 2), !0);
+    this._airborneToast.onClick = _ => (this._context.videoPlayer.seekTo(Math.ceil(progress) + 1), !0);
     this.view.addSubView(this._airborneToast);
     this._airborneToast.show();
 })(a, e, (0, O.isNumber), D.AirborneToast, g.ViewHelper.viewSuggestedFactor);

@@ -56,10 +56,7 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
             const body: SegmentItem[] = JSON.parse(response.body as string);
             return body.reduce((result: number[][], item) => {
                 if (item.actionType === 'skip') {
-                    const [start, end] = item.segment;
-                    if (end - start >= 8) {
-                        result.push(item.segment);
-                    }
+                    result.push(item.segment);
                 }
                 return result;
             }, []);
@@ -117,11 +114,15 @@ export class DmSegMobileReplyHandler extends BilibiliProtobufHandler<DmSegMobile
     }
 
     private getAirBorneDms(): DanmakuElem[] {
-        return this.segments.map((segment, index) => {
+        const offset = this.isHD() ? 1000 : 2000;
+        return this.segments.reduce((result: DanmakuElem[], segment, index) => {
+            if (segment[1] - segment[0] < 8) {
+                return result;
+            }
             const id = (index + 1).toString();
-            const start = Math.floor(segment[0] * 1000);
+            const start = Math.floor(segment[0] * 1000) + offset;
             const end = Math.floor(segment[1] * 1000);
-            return {
+            result.push({
                 id,
                 progress: start,
                 mode: 5,
@@ -141,8 +142,9 @@ export class DmSegMobileReplyHandler extends BilibiliProtobufHandler<DmSegMobile
                 type: 1,
                 oid: '212364987',
                 dmFrom: 1,
-            };
-        });
+            });
+            return result;
+        }, []);
     }
 }
 
