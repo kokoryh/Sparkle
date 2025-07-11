@@ -129,7 +129,6 @@ export interface SegmentItem {
 export interface ChronosConfig {
     sourceMd5: string;
     processedMd5: string;
-    file: string;
 }
 
 export interface ChronosConfigs {

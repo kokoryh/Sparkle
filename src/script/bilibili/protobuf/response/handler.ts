@@ -201,20 +201,20 @@ export class IpadViewProgressReplyHandler extends BilibiliResponseHandler<IpadVi
             $.debug(`MD5 mismatch detected. Received: ${chronos.md5}; File: ${chronos.file}`);
         }
         chronos.md5 = config.processedMd5;
-        chronos.file = config.file;
+        chronos.file = `${this.prefix}${config.processedMd5}.zip`;
         delete chronos.sign;
     }
+
+    static prefix = 'https://raw.githubusercontent.com/kokoryh/chronos/refs/heads/master/';
 
     static chronosConfigs: ChronosConfigs = {
         universal: {
             sourceMd5: '93e55618aafe79f119bc1166c6093bec',
             processedMd5: 'ea4c8b181243faffb7b847aa8fbb986a',
-            file: 'https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/data/danmaku-flame.zip',
         },
         hd: {
             sourceMd5: '325e7073ffc6fb5263682fecdcd1058f',
             processedMd5: '7bfd1de2044f37c1b0f4185085d816af',
-            file: 'https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/data/danmaku-flame-hd.zip',
         },
     };
 
