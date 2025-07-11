@@ -61,7 +61,7 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
                 return result;
             }, []);
         } catch (e) {
-            $.info(e);
+            $.error(e);
             return [];
         }
     }
@@ -75,6 +75,7 @@ export class DmSegMobileReqHandler extends BilibiliRequestHandler<DmSegMobileReq
     async process(): Promise<void> {
         const { pid, oid } = this.message;
         const videoId = avToBv(pid);
+        $.debug(videoId);
         try {
             const [{ headers, bodyBytes }, segments] = await Promise.all([
                 this.fetchRequest(),
@@ -83,10 +84,10 @@ export class DmSegMobileReqHandler extends BilibiliRequestHandler<DmSegMobileReq
             this.headers = headers;
             this.body = new DmSegMobileReplyHandler(bodyBytes!, segments).done();
             if (segments.length) {
-                $.info(videoId);
-                $.info(segments);
+                $.info(videoId, segments);
             }
-        } catch {
+        } catch (e) {
+            $.error(e);
             $.exit();
         }
     }
@@ -165,8 +166,7 @@ export class PlayViewUniteReqHandler extends BilibiliRequestHandler<PlayViewUnit
             this.headers = headers;
             this.body = new PlayViewUniteReplyHandler(bodyBytes!, segments).done();
             if (segments.length) {
-                $.info(videoId);
-                $.info(segments);
+                $.info(videoId, segments);
             }
         } catch {
             $.exit();

@@ -198,7 +198,7 @@ export class IpadViewReplyHandler extends BilibiliResponseHandler<IpadViewReply>
 export class IpadViewProgressReplyHandler extends BilibiliResponseHandler<IpadViewProgressReply> {
     static handleChronos(chronos: Chronos, config: ChronosConfig): void {
         if (chronos.md5 !== config.sourceMd5) {
-            $.debug(`MD5 mismatch detected. Received: ${chronos.md5}; File: ${chronos.file}`);
+            $.warn(`MD5 mismatch detected. Received: ${chronos.md5}; File: ${chronos.file}`);
         }
         chronos.md5 = config.processedMd5;
         chronos.file = `${this.prefix}${config.processedMd5}.zip`;

@@ -35,7 +35,7 @@ export default abstract class Client {
 
     readonly className: string;
     protected name: string;
-    protected logLevel = 1;
+    protected logLevel = 2;
     request!: HttpRequest;
     response!: HttpResponse;
     argument: object | undefined;
@@ -62,7 +62,7 @@ export default abstract class Client {
 
     abstract fetch(request: FetchRequest): Promise<FetchResponse>;
 
-    abstract msg(title: string, subtitle: string, content: string, options?: NotificationOptions): void;
+    abstract notify(title: string, subtitle: string, content: string, options?: NotificationOptions): void;
 
     abstract ungzip(data: Uint8Array): Uint8Array;
 
@@ -93,21 +93,32 @@ export default abstract class Client {
         this.setVal(JSON.stringify(val), key);
     }
 
-    log(val: any): void {
-        if (typeof val === 'object') {
-            val = JSON.stringify(val);
-        }
-        console.log(val);
+    logWithPrefix(prefix: string, logs: any[]): void {
+        console.log(`${prefix}${logs.map(log => (typeof log === 'object' ? JSON.stringify(log) : log)).join('\n')}`);
     }
 
-    info(val: any): void {
+    log(...logs: any[]): void {
+        this.logWithPrefix('', logs);
+    }
+
+    debug(...logs: any[]): void {
         if (this.logLevel > 1) return;
-        this.log(val);
+        this.logWithPrefix('[DEBUG]', logs);
     }
 
-    debug(val: any): void {
-        if (this.logLevel > 0) return;
-        this.log(val);
+    info(...logs: any[]): void {
+        if (this.logLevel > 2) return;
+        this.logWithPrefix('[INFO]', logs);
+    }
+
+    warn(...logs: any[]): void {
+        if (this.logLevel > 3) return;
+        this.logWithPrefix('[WARN]', logs);
+    }
+
+    error(...logs: any[]): void {
+        if (this.logLevel > 4) return;
+        this.logWithPrefix('[ERROR]', logs);
     }
 
     exit(): void {
@@ -217,7 +228,7 @@ export class SurgeClient extends Client {
         });
     }
 
-    msg(title = this.name, subtitle = '', content = '', options: NotificationOptions = {}): void {
+    notify(title = this.name, subtitle = '', content = '', options: NotificationOptions = {}): void {
         const { openUrl, clipboard, mediaUrl, dismiss, sound = true } = options;
         const opts: Surge.NotificationOptions = {
             url: openUrl,
@@ -265,7 +276,7 @@ export class LoonClient extends SurgeClient {
         return super.fetch(request);
     }
 
-    override msg(title = this.name, subtitle = '', content = '', options: NotificationOptions = {}): void {
+    override notify(title = this.name, subtitle = '', content = '', options: NotificationOptions = {}): void {
         const { openUrl, mediaUrl, clipboard, delay } = options;
         const opts: Loon.NotificationOptions = {
             openUrl: openUrl,
@@ -344,7 +355,7 @@ export class QuantumultXClient extends Client {
         });
     }
 
-    msg(title = this.name, subtitle = '', message = '', options: NotificationOptions = {}): void {
+    notify(title = this.name, subtitle = '', message = '', options: NotificationOptions = {}): void {
         const { openUrl, mediaUrl, clipboard } = options;
         const opts: QuantumultX.NotifyOptions = {
             'open-url': openUrl,
@@ -374,33 +385,40 @@ export class QuantumultXClient extends Client {
     }
 }
 
+/**
+ * @deprecated
+ */
 export class QXClient extends Client {
+    errorMessage = 'QuantumultX is not supported';
+
+    notifyMessage = '已停止支持QuantumultX';
+
     protected init(): void {
-        this.msg(this.name, '已停止支持QuantumultX');
+        this.notify(this.name, this.notifyMessage);
         this.exit();
     }
 
-    msg(title = this.name, subtitle = '', message = ''): void {
+    notify(title = this.name, subtitle = '', message = ''): void {
         $notify(title, subtitle, message);
     }
 
     getVal(key: string): string | null {
-        throw new Error('Method not implemented.');
+        throw new Error(this.errorMessage);
     }
 
     setVal(val: string, key: string): void {
-        throw new Error('Method not implemented.');
+        throw new Error(this.errorMessage);
     }
 
     fetch(request: FetchRequest): Promise<FetchResponse> {
-        throw new Error('Method not implemented.');
+        throw new Error(this.errorMessage);
     }
 
     ungzip(data: Uint8Array): Uint8Array {
-        throw new Error('Method not implemented.');
+        throw new Error(this.errorMessage);
     }
 
     done(result: HttpRequestDone | HttpResponseDone): void {
-        throw new Error('Method not implemented.');
+        throw new Error(this.errorMessage);
     }
 }

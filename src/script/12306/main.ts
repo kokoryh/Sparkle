@@ -3,7 +3,7 @@ import { $, createHandler } from './handler';
 try {
     createHandler($.request.url)?.done();
 } catch (e) {
-    $.info(e);
+    $.error(e);
 } finally {
     $.exit();
 }

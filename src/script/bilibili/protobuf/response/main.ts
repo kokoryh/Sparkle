@@ -4,7 +4,7 @@ import { createHandler } from './factory';
 try {
     createHandler($.request.url)?.done();
 } catch (e) {
-    $.info(e);
+    $.error(e);
 } finally {
     $.exit();
 }
