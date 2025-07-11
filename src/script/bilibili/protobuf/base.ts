@@ -2,6 +2,7 @@ import { MessageType } from '@protobuf-ts/runtime';
 import Client from '@core/client';
 import { ProtobufMessage } from '@core/message';
 import { ProtobufOptions } from '@entity/bilibili';
+import { createCaseInsensitiveDictionary } from '@utils/index';
 
 export const $ = Client.getInstance('Bilibili Protobuf');
 
@@ -21,18 +22,8 @@ export abstract class BilibiliProtobufHandler<T extends object> extends Protobuf
 
     abstract done(): void;
 
-    protected isIPad(): boolean {
-        let device = '';
-        if (typeof $environment !== 'undefined') {
-            device = $environment['device-model'];
-        } else if (typeof $loon !== 'undefined') {
-            device = $loon;
-        }
-        return device.includes('iPad');
-    }
-
     protected isHD(): boolean {
-        const headers = $.createCaseInsensitiveDictionary($.request.headers);
+        const headers = createCaseInsensitiveDictionary($.request.headers);
         return headers?.['user-agent']?.includes('bili-hd');
     }
 

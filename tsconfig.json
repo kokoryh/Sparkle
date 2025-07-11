@@ -12,7 +12,7 @@
             "@entity/*": ["src/core/entity/*"],
             "@core/*": ["src/core/*"],
             "@proto/*": ["src/proto/*"],
-            "@util/*": ["src/util/*"]
+            "@utils/*": ["src/utils/*"]
         },
         "strict": true,
         "noImplicitAny": false,

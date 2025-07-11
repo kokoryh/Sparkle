@@ -1,6 +1,7 @@
 import Client from '@core/client';
 import { AbstractMessage, JsonMessage } from '@core/message';
 import { AdListReq } from '@entity/12306';
+import { createCaseInsensitiveDictionary } from '@utils/index';
 
 export const $ = Client.getInstance('12306');
 
@@ -39,7 +40,7 @@ export class MgwHtmHandler extends AbstractMessage {
     }
 
     private isAd(): boolean {
-        const headers = $.createCaseInsensitiveDictionary($.request.headers);
+        const headers = createCaseInsensitiveDictionary($.request.headers);
         return this.filterList.includes(headers['operation-type']);
     }
 }

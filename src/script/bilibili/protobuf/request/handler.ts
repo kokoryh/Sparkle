@@ -13,7 +13,7 @@ import { ClipInfo, ClipType } from '@proto/bilibili/pgc/gateway/player/v2/playur
 import { SegmentItem } from '@entity/bilibili';
 import { HttpHeaders } from 'src/types/common';
 import { FetchResponse } from 'src/types/client';
-import { avToBv } from '@util/bilibili';
+import { avToBv } from '@utils/bilibili';
 import { $, BilibiliProtobufHandler } from '../base';
 
 export abstract class BilibiliRequestHandler<T extends object> extends BilibiliProtobufHandler<T> {

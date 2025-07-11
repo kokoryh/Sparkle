@@ -25,6 +25,7 @@ import { MainListReply, Type } from '@proto/bilibili/main/community/reply/v1/rep
 import { PlayViewReply as IpadPlayViewReply } from '@proto/bilibili/pgc/gateway/player/v2/playurl.js';
 import { SearchAllResponse } from '@proto/bilibili/polymer/app/search/v1/search';
 import { ChronosConfig, ChronosConfigs } from '@entity/bilibili';
+import { isIPad } from '@utils/index';
 import { $, BilibiliProtobufHandler } from '../base';
 
 export abstract class BilibiliResponseHandler<T extends object> extends BilibiliProtobufHandler<T> {
@@ -61,7 +62,7 @@ export class DynAllReplyMessage extends BilibiliResponseHandler<DynAllReply> {
 
     private handleUpList(): void {
         const { showUpList } = this.options;
-        if (showUpList === 'show' || this.isIPad()) {
+        if (showUpList === 'show' || isIPad()) {
             return;
         }
         const message = this.message;
