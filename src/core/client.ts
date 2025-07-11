@@ -35,7 +35,8 @@ export default abstract class Client {
 
     readonly className: string;
     protected name: string;
-    protected logLevel = 2;
+    protected logLevels = { debug: 1, info: 2, warn: 3, error: 4, off: 5 };
+    protected logLevel = this.logLevels.info;
     request!: HttpRequest;
     response!: HttpResponse;
     argument: object | undefined;
@@ -102,22 +103,22 @@ export default abstract class Client {
     }
 
     debug(...logs: any[]): void {
-        if (this.logLevel > 1) return;
+        if (this.logLevel > this.logLevels.debug) return;
         this.logWithPrefix('[DEBUG]', logs);
     }
 
     info(...logs: any[]): void {
-        if (this.logLevel > 2) return;
+        if (this.logLevel > this.logLevels.info) return;
         this.logWithPrefix('[INFO]', logs);
     }
 
     warn(...logs: any[]): void {
-        if (this.logLevel > 3) return;
+        if (this.logLevel > this.logLevels.warn) return;
         this.logWithPrefix('[WARN]', logs);
     }
 
     error(...logs: any[]): void {
-        if (this.logLevel > 4) return;
+        if (this.logLevel > this.logLevels.error) return;
         this.logWithPrefix('[ERROR]', logs);
     }
 
@@ -190,7 +191,7 @@ export class SurgeClient extends Client {
             this.argument = JSON.parse($argument) as object;
 
             if ('logLevel' in this.argument) {
-                this.logLevel = Number(this.argument.logLevel);
+                this.logLevel = this.logLevels[this.argument.logLevel as string] ?? this.logLevels.info;
             }
         }
     }
@@ -266,7 +267,7 @@ export class LoonClient extends SurgeClient {
             this.argument = $argument;
 
             if ('logLevel' in this.argument) {
-                this.logLevel = Number(this.argument.logLevel);
+                this.logLevel = this.logLevels[this.argument.logLevel as string] ?? this.logLevels.info;
             }
         }
     }
