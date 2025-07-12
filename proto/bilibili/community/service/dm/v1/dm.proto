@@ -14,6 +14,10 @@ message Command {
 message DmSegMobileReq {
     int64 pid = 1;
     int64 oid = 2;
+    int32 type = 3;
+    int64 segment_index = 4;
+    int64 ps = 6;
+    int64 pe = 7;
 }
 
 message DmSegMobileReply {

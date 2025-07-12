@@ -73,14 +73,18 @@ export class DmSegMobileReqHandler extends BilibiliRequestHandler<DmSegMobileReq
     }
 
     async process(): Promise<void> {
-        const { pid, oid } = this.message;
+        const { pid, oid, type } = this.message;
+        const isComic = type === 2;
         const videoId = avToBv(pid);
-        $.debug(videoId);
+        $.debug(videoId, this.message);
         try {
             const [{ headers, bodyBytes }, segments] = await Promise.all([
                 this.fetchRequest(),
-                this.getSkipSegments(videoId, oid),
+                isComic ? Promise.resolve([]) : this.getSkipSegments(videoId, oid),
             ]);
+            if (isComic) {
+                $.done({ response: { headers, body: bodyBytes } });
+            }
             this.headers = headers;
             this.body = new DmSegMobileReplyHandler(bodyBytes!, segments).done();
             if (segments.length) {
