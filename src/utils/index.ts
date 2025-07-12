@@ -2,7 +2,7 @@ type CaseInsensitiveDictionary<T> = T & { [key: string]: any };
 
 export function isIPad(): boolean {
     let device = '';
-    if (typeof $environment !== 'undefined') {
+    if (typeof $environment !== 'undefined' && $environment['device-model']) {
         device = $environment['device-model'];
     } else if (typeof $loon !== 'undefined') {
         device = $loon;
