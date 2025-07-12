@@ -11,6 +11,7 @@ import {
     FetchResponse,
     NotificationOptions,
 } from '../types/client';
+import { stringify } from '@utils/index';
 
 export default abstract class Client {
     static getInstance(name?: string): Client {
@@ -94,7 +95,7 @@ export default abstract class Client {
     }
 
     logWithPrefix(prefix: string, logs: any[]): void {
-        console.log(`${prefix}${logs.map(log => (typeof log === 'object' ? JSON.stringify(log) : log)).join('\n')}`);
+        console.log(`${prefix}${logs.map(log => stringify(log)).join(' | ')}`);
     }
 
     log(...logs: any[]): void {

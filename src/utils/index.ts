@@ -43,3 +43,23 @@ export function createCaseInsensitiveDictionary<T extends object>(initial: T = {
     };
     return new Proxy(target, proxyHandler);
 }
+
+export function stringify(value: any): string {
+    if (typeof value !== 'object' || value === null) {
+        return String(value);
+    }
+    if (typeof value.toString === 'function' && value.toString !== Object.prototype.toString) {
+        return value.toString();
+    }
+    if (value instanceof RegExp) {
+        return value.toString();
+    }
+    if (value instanceof Date) {
+        return value.toISOString();
+    }
+    try {
+        return JSON.stringify(value);
+    } catch {
+        return '[Unserializable Object]';
+    }
+}

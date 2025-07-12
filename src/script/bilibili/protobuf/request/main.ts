@@ -5,7 +5,7 @@ import { createHandler } from './factory';
     await createHandler($.request.url)?.done();
 })()
     .catch(e => {
-        $.error(e);
+        $.error(e, $.request.url);
     })
     .finally(() => {
         $.exit();

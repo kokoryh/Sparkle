@@ -61,7 +61,7 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
                 return result;
             }, []);
         } catch (e) {
-            $.error(e);
+            $.error('[getSkipSegments]', e);
             return [];
         }
     }
@@ -87,7 +87,7 @@ export class DmSegMobileReqHandler extends BilibiliRequestHandler<DmSegMobileReq
                 $.info(videoId, segments);
             }
         } catch (e) {
-            $.error(e);
+            $.error('[DmSegMobileReqHandler]', e);
             $.exit();
         }
     }
