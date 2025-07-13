@@ -24,7 +24,6 @@ import { DmSegMobileReply, DmViewReply } from '@proto/bilibili/community/service
 import { MainListReply, Type } from '@proto/bilibili/main/community/reply/v1/reply';
 import { PlayViewReply as IpadPlayViewReply } from '@proto/bilibili/pgc/gateway/player/v2/playurl.js';
 import { SearchAllResponse } from '@proto/bilibili/polymer/app/search/v1/search';
-import { ChronosConfig, ChronosConfigs } from '@entity/bilibili';
 import { isIPad } from '@utils/index';
 import { $, BilibiliProtobufHandler } from '../base';
 
@@ -197,26 +196,26 @@ export class IpadViewReplyHandler extends BilibiliResponseHandler<IpadViewReply>
 }
 
 export class IpadViewProgressReplyHandler extends BilibiliResponseHandler<IpadViewProgressReply> {
-    static handleChronos(chronos: Chronos, config: ChronosConfig): void {
-        if (chronos.md5 !== config.sourceMd5) {
-            $.warn(`MD5 mismatch detected. Received: ${chronos.md5}; File: ${chronos.file}`);
+    static handleChronos(chronos: Chronos): void {
+        const processedMd5 = this.chronosMd5Map[chronos.md5];
+        if (!processedMd5) {
+            $.warn(
+                `MD5 mismatch detected. Received: ${chronos.md5}; File: ${chronos.file}`,
+                'Please update the app to the latest version. If you are already using the latest version, please contact the author for adjustments'
+            );
+            return;
         }
-        chronos.md5 = config.processedMd5;
-        chronos.file = `${this.prefix}${config.processedMd5}.zip`;
+        chronos.md5 = processedMd5;
+        chronos.file = `${this.prefix}${processedMd5}.zip`;
         delete chronos.sign;
     }
 
     static prefix = 'https://raw.githubusercontent.com/kokoryh/chronos/refs/heads/master/';
 
-    static chronosConfigs: ChronosConfigs = {
-        universal: {
-            sourceMd5: '93e55618aafe79f119bc1166c6093bec',
-            processedMd5: 'ea4c8b181243faffb7b847aa8fbb986a',
-        },
-        hd: {
-            sourceMd5: '325e7073ffc6fb5263682fecdcd1058f',
-            processedMd5: '7bfd1de2044f37c1b0f4185085d816af',
-        },
+    static chronosMd5Map: Record<string, string> = {
+        '93e55618aafe79f119bc1166c6093bec': 'ea4c8b181243faffb7b847aa8fbb986a', // universal 3.4.0
+        '325e7073ffc6fb5263682fecdcd1058f': '7bfd1de2044f37c1b0f4185085d816af', // hd 2.7.4
+        '3a14beddd23328eaddfe9f0eb048d713': '7bfd1de2044f37c1b0f4185085d816af', // inter 2.7.3
     };
 
     constructor() {
@@ -227,10 +226,7 @@ export class IpadViewProgressReplyHandler extends BilibiliResponseHandler<IpadVi
         const message = this.message;
         delete message.videoGuide;
         if (this.isAirborneEnabled() && message.chronos) {
-            const config = this.isHD()
-                ? IpadViewProgressReplyHandler.chronosConfigs.hd
-                : IpadViewProgressReplyHandler.chronosConfigs.universal;
-            IpadViewProgressReplyHandler.handleChronos(message.chronos, config);
+            IpadViewProgressReplyHandler.handleChronos(message.chronos);
         }
     }
 }
@@ -311,8 +307,7 @@ export class ViewProgressReplyHandler extends BilibiliResponseHandler<ViewProgre
         const message = this.message;
         delete message.dm;
         if (this.isAirborneEnabled() && message.chronos) {
-            const config = IpadViewProgressReplyHandler.chronosConfigs.universal;
-            IpadViewProgressReplyHandler.handleChronos(message.chronos, config);
+            IpadViewProgressReplyHandler.handleChronos(message.chronos);
         }
     }
 }

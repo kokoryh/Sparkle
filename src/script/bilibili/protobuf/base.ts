@@ -8,7 +8,7 @@ export const $ = Client.getInstance('Bilibili Protobuf');
 
 export abstract class BilibiliProtobufHandler<T extends object> extends ProtobufMessage<T> {
     protected options: ProtobufOptions = {
-        showUpList: 'auto',
+        showUpList: 'show',
         filterTopReplies: true,
         airborne: true,
     };
@@ -22,10 +22,10 @@ export abstract class BilibiliProtobufHandler<T extends object> extends Protobuf
 
     abstract done(): void;
 
-    protected isHD(): boolean {
-        const headers = createCaseInsensitiveDictionary($.request.headers);
-        return headers?.['user-agent']?.includes('bili-hd');
-    }
+    // protected isHD(): boolean {
+    //     const headers = createCaseInsensitiveDictionary($.request.headers);
+    //     return headers?.['user-agent']?.includes('bili-hd');
+    // }
 
     protected fromRawBody(rawBody: Uint8Array): Uint8Array {
         const header = rawBody.slice(0, 5);

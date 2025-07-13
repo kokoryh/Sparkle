@@ -125,13 +125,3 @@ export interface SegmentItem {
     votes: number;
     description: string;
 }
-
-export interface ChronosConfig {
-    sourceMd5: string;
-    processedMd5: string;
-}
-
-export interface ChronosConfigs {
-    universal: ChronosConfig;
-    hd: ChronosConfig;
-}

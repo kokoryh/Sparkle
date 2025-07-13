@@ -119,7 +119,7 @@ export class DmSegMobileReplyHandler extends BilibiliProtobufHandler<DmSegMobile
     }
 
     private getAirBorneDms(): DanmakuElem[] {
-        const offset = this.isHD() ? 1000 : 2000;
+        const offset = 2000;
         return this.segments.reduce((result: DanmakuElem[], segment, index) => {
             if (segment[1] - segment[0] < 8) {
                 return result;
