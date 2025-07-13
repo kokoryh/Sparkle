@@ -197,13 +197,13 @@ export class IpadViewReplyHandler extends BilibiliResponseHandler<IpadViewReply>
 
 export class IpadViewProgressReplyHandler extends BilibiliResponseHandler<IpadViewProgressReply> {
     static handleChronos(chronos: Chronos): void {
-        const processedMd5 = this.chronosMd5Map[chronos.md5];
+        let processedMd5 = this.chronosMd5Map[chronos.md5];
         if (!processedMd5) {
             $.warn(
                 `MD5 mismatch detected. Received: ${chronos.md5}; File: ${chronos.file}`,
                 'Please update the app to the latest version. If you are already using the latest version, please contact the author for adjustments'
             );
-            return;
+            processedMd5 = this.chronosMd5Map[BilibiliProtobufHandler.getAppEdition()];
         }
         chronos.md5 = processedMd5;
         chronos.file = `${this.prefix}${processedMd5}.zip`;
@@ -212,10 +212,13 @@ export class IpadViewProgressReplyHandler extends BilibiliResponseHandler<IpadVi
 
     static prefix = 'https://raw.githubusercontent.com/kokoryh/chronos/refs/heads/master/';
 
-    static chronosMd5Map: Record<string, string> = {
-        '93e55618aafe79f119bc1166c6093bec': 'ea4c8b181243faffb7b847aa8fbb986a', // universal 3.4.0
-        '325e7073ffc6fb5263682fecdcd1058f': '7bfd1de2044f37c1b0f4185085d816af', // hd 2.7.4
-        '3a14beddd23328eaddfe9f0eb048d713': '7bfd1de2044f37c1b0f4185085d816af', // inter 2.7.3
+    static chronosMd5Map = {
+        universal: 'ea4c8b181243faffb7b847aa8fbb986a',
+        hd: '7bfd1de2044f37c1b0f4185085d816af',
+        inter: '7bfd1de2044f37c1b0f4185085d816af',
+        '93e55618aafe79f119bc1166c6093bec': 'ea4c8b181243faffb7b847aa8fbb986a',
+        '325e7073ffc6fb5263682fecdcd1058f': '7bfd1de2044f37c1b0f4185085d816af',
+        '3a14beddd23328eaddfe9f0eb048d713': '7bfd1de2044f37c1b0f4185085d816af',
     };
 
     constructor() {

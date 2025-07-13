@@ -7,6 +7,18 @@ import { createCaseInsensitiveDictionary } from '@utils/index';
 export const $ = Client.getInstance('Bilibili Protobuf');
 
 export abstract class BilibiliProtobufHandler<T extends object> extends ProtobufMessage<T> {
+    static getAppEdition(): 'universal' | 'hd' | 'inter' {
+        const headers = createCaseInsensitiveDictionary($.request.headers);
+        const ua = headers['user-agent'] || '';
+        if (ua.startsWith('bili-hd')) {
+            return 'hd';
+        } else if (ua.startsWith('bili-inter')) {
+            return 'inter';
+        } else {
+            return 'universal';
+        }
+    }
+
     protected options: ProtobufOptions = {
         showUpList: 'show',
         filterTopReplies: true,
@@ -21,11 +33,6 @@ export abstract class BilibiliProtobufHandler<T extends object> extends Protobuf
     protected abstract process(): void;
 
     abstract done(): void;
-
-    // protected isHD(): boolean {
-    //     const headers = createCaseInsensitiveDictionary($.request.headers);
-    //     return headers?.['user-agent']?.includes('bili-hd');
-    // }
 
     protected fromRawBody(rawBody: Uint8Array): Uint8Array {
         const header = rawBody.slice(0, 5);
