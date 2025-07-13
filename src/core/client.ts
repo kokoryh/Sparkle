@@ -36,7 +36,7 @@ export default abstract class Client {
     readonly className: string;
     protected name: string;
     protected logLevels = { debug: 1, info: 2, warn: 3, error: 4, off: 5 };
-    protected logLevel = this.logLevels.info;
+    protected logLevel = this.logLevels.error;
     request!: HttpRequest;
     response!: HttpResponse;
     argument: object | undefined;
@@ -270,6 +270,8 @@ export class QuantumultXClient extends Client {
     static toArrayBuffer(bodyBytes: Uint8Array): ArrayBuffer {
         return bodyBytes.buffer.slice(bodyBytes.byteOffset, bodyBytes.byteLength + bodyBytes.byteOffset) as ArrayBuffer;
     }
+
+    protected override logLevel = this.logLevels.info;
 
     protected override getFn<T extends object>(target: T, property: string, receiver: any): any {
         const mappedProperty = QuantumultXClient.propertyMap[property] || property;
