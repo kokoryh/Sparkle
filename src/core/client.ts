@@ -29,7 +29,7 @@ export default abstract class Client {
     protected static classNames = {
         Surge: (name?: string, className?: string) => new SurgeClient(name, className),
         Loon: (name?: string, className?: string) => new LoonClient(name, className),
-        QuantumultX: (name?: string, className?: string) => new QuantumultXClient(name, className),
+        QuantumultX: (name?: string, className?: string) => new QXClient(name, className),
     };
     private static instances: Record<string, Client> = {};
 
