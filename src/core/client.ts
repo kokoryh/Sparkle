@@ -271,8 +271,6 @@ export class QuantumultXClient extends Client {
         return bodyBytes.buffer.slice(bodyBytes.byteOffset, bodyBytes.byteLength + bodyBytes.byteOffset) as ArrayBuffer;
     }
 
-    protected override logLevel = this.logLevels.info;
-
     protected override getFn<T extends object>(target: T, property: string, receiver: any): any {
         const mappedProperty = QuantumultXClient.propertyMap[property] || property;
         const value = super.getFn(target, mappedProperty, receiver);
@@ -360,10 +358,8 @@ export class QuantumultXClient extends Client {
 export class QXClient extends Client {
     errorMessage = 'QuantumultX is not supported';
 
-    notifyMessage = '已停止支持QuantumultX';
-
     protected init(): void {
-        this.notify(this.name, this.notifyMessage);
+        this.notify(this.name, '', '已停止支持QuantumultX');
         this.exit();
     }
 
