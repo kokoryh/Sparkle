@@ -6,7 +6,7 @@
     "scripts": {
         "build": "node build.js",
         "generate": "buf generate",
-        "jq": "jq -f ./jq/test/index.jq --indent 4 < ./jq/test/input.json > ./jq/test/output.json"
+        "jq": "jq -f ./jq/dev/index.jq --indent 4 < ./jq/dev/input.json > ./jq/dev/output.json"
     },
     "dependencies": {
         "@protobuf-ts/plugin": "2.9.6",

@@ -157,7 +157,7 @@ export class SurgeClient extends Client {
             this.argument = JSON.parse($argument) as object;
 
             if ('logLevel' in this.argument) {
-                this.logLevel = this.logLevels[this.argument.logLevel as string] ?? this.logLevels.info;
+                this.logLevel = this.logLevels[this.argument.logLevel as string] ?? this.logLevels.error;
             }
         }
     }
@@ -233,7 +233,7 @@ export class LoonClient extends SurgeClient {
             this.argument = $argument;
 
             if ('logLevel' in this.argument) {
-                this.logLevel = this.logLevels[this.argument.logLevel as string] ?? this.logLevels.info;
+                this.logLevel = this.logLevels[this.argument.logLevel as string] ?? this.logLevels.error;
             }
         }
     }

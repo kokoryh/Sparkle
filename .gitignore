@@ -2,12 +2,5 @@
 node_modules
 package-lock.json
 
-jq/test
-src/lib
+**/dev
 src/proto
-src/script/ehentai
-src/script/missav/input.html
-src/script/missav/output.html
-src/util/proto
-
-*.dev.ts
