@@ -9,7 +9,7 @@
     this._airborneToast.onClick = _ => (this._context.videoPlayer.seekTo(Math.ceil(progress) + 1), !0);
     this.view.addSubView(this._airborneToast);
     this._airborneToast.show();
-})(n, s, M, ad);
+})(n, s, B, hu);
 
 // hd
 ((danmaku, endTime, isNum, toastClass, viewSuggestedFactor) => {
