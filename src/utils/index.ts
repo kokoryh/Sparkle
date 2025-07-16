@@ -1,5 +1,3 @@
-type CaseInsensitiveDictionary<T> = T & { [key: string]: any };
-
 export function isIPad(): boolean {
     let device = '';
     if (typeof $environment !== 'undefined' && $environment['device-model']) {
@@ -10,7 +8,7 @@ export function isIPad(): boolean {
     return device.includes('iPad');
 }
 
-export function createCaseInsensitiveDictionary<T extends object>(initial: T = {} as T): CaseInsensitiveDictionary<T> {
+export function createCaseInsensitiveDictionary<T extends object>(initial: T = {} as T): T & { [key: string]: any } {
     const target = Object.create(null);
     const normalize = (property: string | symbol) => {
         return typeof property === 'string' ? property.toLowerCase() : property;
