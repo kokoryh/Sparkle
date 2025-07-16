@@ -69,17 +69,17 @@ export class LayoutHandler extends BilibiliJsonHandler<Layout> {
             },
             {
                 pos: 4,
-                id: 545,
+                id: 3502,
                 name: this.i18n.anime,
                 tab_id: 'bangumi',
-                uri: 'bilibili://pgc/home',
+                uri: 'bilibili://pgc/bangumi_v2',
             },
             {
                 pos: 5,
-                id: 151,
+                id: 3503,
                 name: this.i18n.film,
                 tab_id: 'film',
-                uri: 'bilibili://pgc/cinema-tab',
+                uri: 'bilibili://pgc/cinema_v2',
             },
         ],
         top: [

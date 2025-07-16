@@ -23,17 +23,17 @@
     },
     {
         pos: 4,
-        id: 545,
+        id: 3502,
         name: "\u52A8\u753B",
         tab_id: "bangumi",
-        uri: "bilibili://pgc/home"
+        uri: "bilibili://pgc/bangumi_v2"
     },
     {
         pos: 5,
-        id: 151,
+        id: 3503,
         name: "\u5F71\u89C6",
         tab_id: "film",
-        uri: "bilibili://pgc/cinema-tab"
+        uri: "bilibili://pgc/cinema_v2"
     }
 ] | 
 .data.top = [
