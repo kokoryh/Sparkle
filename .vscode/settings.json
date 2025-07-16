@@ -10,6 +10,7 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"
     },
+    "code-runner.runInTerminal": true,
     "code-runner.executorMap": {
         "typescript": "tsx"
     }

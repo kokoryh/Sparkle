@@ -4,7 +4,7 @@
     "type": "module",
     "sideEffects": false,
     "scripts": {
-        "build": "node build.js",
+        "build": "tsx build.ts",
         "generate": "buf generate",
         "jq": "jq -f ./jq/dev/index.jq --indent 4 < ./jq/dev/input.json > ./jq/dev/output.json"
     },
