@@ -45,6 +45,7 @@ async function buildEntry(entryPath: string) {
         entryPoints: [entryPath],
         bundle: true,
         minify: true,
+        format: 'esm',
         banner: { js: getBanner() },
         sourcemap: false,
         write: false,
