@@ -14,7 +14,7 @@ function getBanner(): string {
 }
 
 function hashContent(content: string): string {
-    const cleanContent = content.replace(/^\/\/ Built at: .+\n/, '');
+    const cleanContent = content.replace(/\r\n/g, '\n').replace(/^\/\/ Built at: .+\n/, '');
     return crypto.createHash('sha256').update(cleanContent).digest('hex');
 }
 
