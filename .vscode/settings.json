@@ -9,5 +9,8 @@
     "eslint.run": "onSave",
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"
+    },
+    "code-runner.executorMap": {
+        "typescript": "tsx"
     }
 }
