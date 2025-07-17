@@ -3,7 +3,7 @@
         "target": "ESNext",
         "lib": ["ESNext", "DOM"],
         "baseUrl": "./",
-        "rootDir": "./",
+        "rootDir": "./src",
         "outDir": "./dist",
         "module": "ESNext",
         "moduleResolution": "bundler",
@@ -17,5 +17,6 @@
         "strict": true,
         "noImplicitAny": false,
         "alwaysStrict": false
-    }
+    },
+    "include": ["src/**/*"]
 }

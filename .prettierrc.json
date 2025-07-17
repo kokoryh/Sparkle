@@ -10,9 +10,10 @@
     "endOfLine": "lf",
     "overrides": [
         {
-            "files": ["*.yaml"],
+            "files": ["*.yaml", "*.yml"],
             "options": {
-                "tabWidth": 2
+                "tabWidth": 2,
+                "singleQuote": false
             }
         }
     ]
