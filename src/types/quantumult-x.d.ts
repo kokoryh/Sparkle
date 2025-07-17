@@ -1,4 +1,4 @@
-import * as Common from './common.d';
+import * as Common from './common';
 
 export interface Prefs {
     valueForKey: (key: string) => string | null;

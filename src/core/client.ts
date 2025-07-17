@@ -1,7 +1,7 @@
 import { gunzipSync } from 'fflate';
-import * as Surge from 'src/types/surge.d';
-import * as Loon from 'src/types/loon.d';
-import * as QuantumultX from 'src/types/quantumult-x.d';
+import * as Surge from 'src/types/surge';
+import * as Loon from 'src/types/loon';
+import * as QuantumultX from 'src/types/quantumult-x';
 import {
     HttpRequest,
     HttpResponse,
@@ -10,7 +10,7 @@ import {
     FetchRequest,
     FetchResponse,
     NotificationOptions,
-} from '../types/client';
+} from 'src/types/client';
 import { stringify } from '@utils/index';
 
 export default abstract class Client {

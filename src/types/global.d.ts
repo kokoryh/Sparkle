@@ -1,6 +1,6 @@
-import * as Surge from './surge.d';
-import * as Loon from './loon.d';
-import * as QuantumultX from './quantumult-x.d';
+import * as Surge from './surge';
+import * as Loon from './loon';
+import * as QuantumultX from './quantumult-x';
 
 declare global {
     const $network: Surge.Network;

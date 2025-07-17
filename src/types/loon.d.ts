@@ -1,5 +1,5 @@
-import * as Common from './common.d';
-import * as Surge from './surge.d';
+import * as Common from './common';
+import * as Surge from './surge';
 
 export type HttpBody = Surge.HttpBody;
 
