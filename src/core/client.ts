@@ -367,23 +367,23 @@ export class QXClient extends Client {
         $notify(title, subtitle, message);
     }
 
-    getVal(key: string): string | null {
+    getVal(): string | null {
         throw new Error(this.errorMessage);
     }
 
-    setVal(val: string, key: string): void {
+    setVal(): void {
         throw new Error(this.errorMessage);
     }
 
-    fetch(request: FetchRequest): Promise<FetchResponse> {
+    fetch(): Promise<FetchResponse> {
         throw new Error(this.errorMessage);
     }
 
-    ungzip(data: Uint8Array): Uint8Array {
+    ungzip(): Uint8Array {
         throw new Error(this.errorMessage);
     }
 
-    done(result: HttpRequestDone | HttpResponseDone): void {
+    done(): void {
         throw new Error(this.errorMessage);
     }
 }

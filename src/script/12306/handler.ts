@@ -1,5 +1,5 @@
 import Client from '@core/client';
-import { AbstractMessage, JsonMessage } from '@core/message';
+import { IMessage, JsonMessage } from '@core/message';
 import { AdListReq } from '@entity/12306';
 import { createCaseInsensitiveDictionary } from '@utils/index';
 
@@ -32,7 +32,7 @@ export class AdListHandler extends JsonMessage<AdListReq> {
     }
 }
 
-export class MgwHtmHandler extends AbstractMessage {
+export class MgwHtmHandler implements IMessage {
     private filterList = ['com.cars.otsmobile.newHomePageBussData'];
 
     done(): void {

@@ -1,16 +1,17 @@
 import { MessageType } from '@protobuf-ts/runtime';
 
-export abstract class AbstractMessage {
-    abstract done(): void | Promise<void>;
+export interface IMessage {
+    done: () => void | Promise<void>;
 }
 
-export abstract class JsonMessage<T extends object> extends AbstractMessage {
+export abstract class JsonMessage<T extends object> implements IMessage {
     protected message: T;
 
     constructor(data: string) {
-        super();
         this.message = this.fromJsonString(data);
     }
+
+    abstract done(): void | Promise<void>;
 
     protected fromJsonString(data: string): T {
         return JSON.parse(data);
@@ -21,16 +22,21 @@ export abstract class JsonMessage<T extends object> extends AbstractMessage {
     }
 }
 
-export abstract class ProtobufMessage<T extends object> extends AbstractMessage {
+export abstract class ProtobufMessage<T extends object> implements IMessage {
     protected type: MessageType<T>;
 
     protected message: T;
 
     constructor(type: MessageType<T>, body: Uint8Array) {
-        super();
         this.type = type;
         this.message = this.fromBinary(this.fromRawBody(body));
     }
+
+    abstract done(): void | Promise<void>;
+
+    protected abstract fromRawBody(body: Uint8Array): Uint8Array;
+
+    protected abstract toRawBody(body: Uint8Array): Uint8Array;
 
     protected fromBinary(data: Uint8Array): T {
         return this.type.fromBinary(data);
@@ -39,12 +45,24 @@ export abstract class ProtobufMessage<T extends object> extends AbstractMessage 
     protected toBinary(): Uint8Array {
         return this.type.toBinary(this.message);
     }
+}
 
-    protected fromRawBody(body: Uint8Array): Uint8Array {
-        return body;
+export abstract class HtmlMessage implements IMessage {
+    protected message: Document;
+
+    private domParser = new DOMParser();
+
+    constructor(data: string) {
+        this.message = this.fromString(data);
     }
 
-    protected toRawBody(body: Uint8Array): Uint8Array {
-        return body;
+    abstract done(): void | Promise<void>;
+
+    protected fromString(data: string): Document {
+        return this.domParser.parseFromString(data, 'text/html');
+    }
+
+    protected toString(): string {
+        return this.message.documentElement.outerHTML;
     }
 }

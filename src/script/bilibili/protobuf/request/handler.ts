@@ -17,7 +17,7 @@ import { avToBv } from '@utils/bilibili';
 import { $, BilibiliProtobufHandler } from '../base';
 
 export abstract class BilibiliRequestHandler<T extends object> extends BilibiliProtobufHandler<T> {
-    protected headers: HttpHeaders = {};
+    protected headers!: HttpHeaders;
 
     protected body!: Uint8Array;
 
@@ -32,7 +32,7 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
         $.done({
             response: {
                 headers: this.headers,
-                body: this.toRawBody(this.body),
+                body: this.body,
             },
         });
     }
@@ -85,11 +85,11 @@ export class DmSegMobileReqHandler extends BilibiliRequestHandler<DmSegMobileReq
             if (isComic) {
                 $.done({ response: { headers, body: bodyBytes } });
             }
-            this.headers = headers;
-            this.body = new DmSegMobileReplyHandler(bodyBytes!, segments).done();
             if (segments.length) {
                 $.info(videoId, segments);
             }
+            this.headers = headers;
+            this.body = new DmSegMobileReplyHandler(bodyBytes!, segments).done();
         } catch (e) {
             $.error('[DmSegMobileReqHandler]', e);
             $.exit();
@@ -107,7 +107,7 @@ export class DmSegMobileReplyHandler extends BilibiliProtobufHandler<DmSegMobile
 
     done(): Uint8Array {
         this.process();
-        return this.toBinary();
+        return this.toRawBody(this.toBinary());
     }
 
     protected process(): void {
@@ -167,11 +167,11 @@ export class PlayViewUniteReqHandler extends BilibiliRequestHandler<PlayViewUnit
                 this.fetchRequest(),
                 this.getSkipSegments(videoId, cid),
             ]);
-            this.headers = headers;
-            this.body = new PlayViewUniteReplyHandler(bodyBytes!, segments).done();
             if (segments.length) {
                 $.info(videoId, segments);
             }
+            this.headers = headers;
+            this.body = new PlayViewUniteReplyHandler(bodyBytes!, segments).done();
         } catch {
             $.exit();
         }
@@ -188,7 +188,7 @@ export class PlayViewUniteReplyHandler extends BilibiliProtobufHandler<PlayViewU
 
     done(): Uint8Array {
         this.process();
-        return this.toBinary();
+        return this.toRawBody(this.toBinary());
     }
 
     protected process(): void {
