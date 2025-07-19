@@ -19,7 +19,8 @@ export default abstract class Client {
         if (typeof $loon !== 'undefined') {
             className = 'Loon';
         } else if (typeof $task !== 'undefined') {
-            className = 'QuantumultX';
+            // className = 'QuantumultX';
+            throw new Error('QuantumultX is not supported');
         }
         if (!Client.instances[className]) {
             Client.instances[className] = Client.classNames[className](name, className);
@@ -29,7 +30,7 @@ export default abstract class Client {
     protected static classNames = {
         Surge: (name?: string, className?: string) => new SurgeClient(name, className),
         Loon: (name?: string, className?: string) => new LoonClient(name, className),
-        QuantumultX: (name?: string, className?: string) => new QXClient(name, className),
+        // QuantumultX: (name?: string, className?: string) => new QuantumultXClient(name, className),
     };
     private static instances: Record<string, Client> = {};
 
@@ -349,41 +350,5 @@ export class QuantumultXClient extends Client {
             }
         }
         $done(target);
-    }
-}
-
-/**
- * @deprecated
- */
-export class QXClient extends Client {
-    errorMessage = 'QuantumultX is not supported';
-
-    protected init(): void {
-        this.notify(this.name, '', '已停止支持QuantumultX');
-        this.exit();
-    }
-
-    notify(title = this.name, subtitle = '', message = ''): void {
-        $notify(title, subtitle, message);
-    }
-
-    getVal(): string | null {
-        throw new Error(this.errorMessage);
-    }
-
-    setVal(): void {
-        throw new Error(this.errorMessage);
-    }
-
-    fetch(): Promise<FetchResponse> {
-        throw new Error(this.errorMessage);
-    }
-
-    ungzip(): Uint8Array {
-        throw new Error(this.errorMessage);
-    }
-
-    done(): void {
-        throw new Error(this.errorMessage);
     }
 }
