@@ -1,4 +1,4 @@
-import { $ } from '../base';
+import { $ } from '../env';
 import { createHandler } from './factory';
 
 (async () => {

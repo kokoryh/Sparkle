@@ -14,7 +14,8 @@ import { SegmentItem } from '@entity/bilibili';
 import { HttpHeaders } from 'src/types/common';
 import { FetchResponse } from 'src/types/client';
 import { avToBv } from '@utils/bilibili';
-import { $, BilibiliProtobufHandler } from '../base';
+import { $ } from '../env';
+import { BilibiliProtobufHandler } from '../base';
 
 export abstract class BilibiliRequestHandler<T extends object> extends BilibiliProtobufHandler<T> {
     protected headers!: HttpHeaders;
@@ -107,7 +108,7 @@ export class DmSegMobileReplyHandler extends BilibiliProtobufHandler<DmSegMobile
 
     done(): Uint8Array {
         this.process();
-        return this.toRawBody(this.toBinary());
+        return this.toBinary();
     }
 
     protected process(): void {
@@ -188,7 +189,7 @@ export class PlayViewUniteReplyHandler extends BilibiliProtobufHandler<PlayViewU
 
     done(): Uint8Array {
         this.process();
-        return this.toRawBody(this.toBinary());
+        return this.toBinary();
     }
 
     protected process(): void {

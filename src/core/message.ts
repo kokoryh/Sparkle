@@ -27,16 +27,12 @@ export abstract class ProtobufMessage<T extends object> implements IMessage {
 
     protected message: T;
 
-    constructor(type: MessageType<T>, body: Uint8Array) {
+    constructor(type: MessageType<T>, data: Uint8Array) {
         this.type = type;
-        this.message = this.fromBinary(this.fromRawBody(body));
+        this.message = this.fromBinary(data);
     }
 
     abstract done(): void | Promise<void>;
-
-    protected abstract fromRawBody(body: Uint8Array): Uint8Array;
-
-    protected abstract toRawBody(body: Uint8Array): Uint8Array;
 
     protected fromBinary(data: Uint8Array): T {
         return this.type.fromBinary(data);
@@ -50,7 +46,7 @@ export abstract class ProtobufMessage<T extends object> implements IMessage {
 export abstract class HtmlMessage implements IMessage {
     protected message: Document;
 
-    private domParser = new DOMParser();
+    protected domParser = new DOMParser();
 
     constructor(data: string) {
         this.message = this.fromString(data);

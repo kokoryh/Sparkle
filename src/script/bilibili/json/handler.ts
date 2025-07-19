@@ -1,4 +1,3 @@
-import Client from '@core/client';
 import { JsonMessage } from '@core/message';
 import {
     AccountInfo,
@@ -12,8 +11,7 @@ import {
     VIP,
 } from '@entity/bilibili';
 import locale from '../locale';
-
-export const $ = Client.getInstance('Bilibili Json');
+import { $ } from './env';
 
 export abstract class BilibiliJsonHandler<T extends { data: object | null }> extends JsonMessage<T> {
     protected options: JsonOptions = {

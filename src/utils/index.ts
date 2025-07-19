@@ -47,7 +47,7 @@ export function stringify(value: any): string {
         return String(value);
     }
     if (typeof value.toString === 'function' && value.toString !== Object.prototype.toString) {
-        return value.toString();
+        return Array.isArray(value) ? JSON.stringify(value) : value.toString();
     }
     if (value instanceof RegExp) {
         return value.toString();
@@ -55,9 +55,5 @@ export function stringify(value: any): string {
     if (value instanceof Date) {
         return value.toISOString();
     }
-    try {
-        return JSON.stringify(value);
-    } catch {
-        return '[Unserializable Object]';
-    }
+    return JSON.stringify(value);
 }

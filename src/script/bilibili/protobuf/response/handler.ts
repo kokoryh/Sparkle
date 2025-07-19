@@ -25,7 +25,8 @@ import { MainListReply, Type } from '@proto/bilibili/main/community/reply/v1/rep
 import { PlayViewReply as IpadPlayViewReply } from '@proto/bilibili/pgc/gateway/player/v2/playurl.js';
 import { SearchAllResponse } from '@proto/bilibili/polymer/app/search/v1/search';
 import { isIPad } from '@utils/index';
-import { $, BilibiliProtobufHandler } from '../base';
+import { $ } from '../env';
+import { BilibiliProtobufHandler } from '../base';
 
 export abstract class BilibiliResponseHandler<T extends object> extends BilibiliProtobufHandler<T> {
     constructor(type: MessageType<T>) {
@@ -34,7 +35,7 @@ export abstract class BilibiliResponseHandler<T extends object> extends Bilibili
 
     done(): void {
         this.process();
-        $.done({ body: this.toRawBody(this.toBinary()) });
+        $.done({ body: this.toBinary() });
     }
 
     protected isAirborneEnabled(): boolean {
@@ -201,7 +202,7 @@ export class IpadViewProgressReplyHandler extends BilibiliResponseHandler<IpadVi
         if (!processedMd5) {
             $.warn(
                 `MD5 mismatch detected. Received: ${chronos.md5}; File: ${chronos.file}`,
-                'Please update the app to the latest version. If you are already using the latest version, please contact the author for adjustments'
+                'Please update the app or script to the latest version. If you are already using the latest version, please contact the author for adjustments'
             );
             processedMd5 = this.chronosMd5Map[BilibiliProtobufHandler.getAppEdition()];
         }

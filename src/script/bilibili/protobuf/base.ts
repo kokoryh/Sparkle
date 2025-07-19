@@ -1,10 +1,8 @@
 import { MessageType } from '@protobuf-ts/runtime';
-import Client from '@core/client';
 import { ProtobufMessage } from '@core/message';
 import { ProtobufOptions } from '@entity/bilibili';
 import { createCaseInsensitiveDictionary } from '@utils/index';
-
-export const $ = Client.getInstance('Bilibili Protobuf');
+import { $ } from './env';
 
 export abstract class BilibiliProtobufHandler<T extends object> extends ProtobufMessage<T> {
     static getAppEdition(): 'universal' | 'hd' | 'inter' {
@@ -35,11 +33,13 @@ export abstract class BilibiliProtobufHandler<T extends object> extends Protobuf
 
     abstract done(): void;
 
-    protected fromRawBody(body: Uint8Array): Uint8Array {
-        return body[0] ? $.ungzip(body.subarray(5)) : body.subarray(5);
+    protected override fromBinary(data: Uint8Array): T {
+        const body = data[0] ? $.ungzip(data.subarray(5)) : data.subarray(5);
+        return super.fromBinary(body);
     }
 
-    protected toRawBody(body: Uint8Array): Uint8Array {
+    protected override toBinary(): Uint8Array {
+        const body = super.toBinary();
         const length = body.length;
         const result = new Uint8Array(5 + length);
         result[0] = 0;

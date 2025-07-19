@@ -1,4 +1,4 @@
-import { $ } from './handler';
+import { $ } from './env';
 import { createHandler } from './factory';
 
 try {
