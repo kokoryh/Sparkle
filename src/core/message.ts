@@ -61,4 +61,12 @@ export abstract class HtmlMessage implements IMessage {
     protected toString(): string {
         return this.message.documentElement.outerHTML;
     }
+
+    protected append(node: Node, ...childNodes: ChildNode[]): Node[] {
+        return childNodes.map(childNode => node.appendChild(childNode));
+    }
+
+    protected remove(...nodes: Node[]): (Node | undefined)[] {
+        return nodes.map(node => node.parentElement?.removeChild(node));
+    }
 }

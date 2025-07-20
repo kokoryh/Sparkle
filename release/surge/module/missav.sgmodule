@@ -8,7 +8,7 @@ DOMAIN-SUFFIX,trackwilltrk.com,REJECT,pre-matching
 DOMAIN-SUFFIX,tsyndicate.com,REJECT,pre-matching
 
 [Script]
-missav.html = type=http-response,pattern=^https:\/\/missav\.ai\/(?!(build|fonts|img|js|api|cdn-cgi)\/).,requires-body=1,max-size=-1,engine=webview,script-path=https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/dist/missav.html.js
+missav.html = type=http-response,pattern=^https:\/\/missav\.ai\/(?!favicon)(?!(build|fonts|img|js|api|cdn-cgi)\/).,requires-body=1,max-size=-1,engine=webview,script-path=https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/dist/missav.js
 
 [MITM]
 hostname = %APPEND% missav.ai
