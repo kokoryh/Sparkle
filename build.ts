@@ -25,11 +25,7 @@ async function findEntryFiles(dir: string): Promise<string[]> {
         const fullpath = path.join(dir, entry.name);
         if (entry.isDirectory()) {
             result.push(...(await findEntryFiles(fullpath)));
-        } else if (
-            entry.isFile() &&
-            entry.name.startsWith('main.ts') &&
-            ['.ts', '.tsx'].includes(path.extname(entry.name))
-        ) {
+        } else if (entry.isFile() && /^main(\.dev)?\.ts$/.test(entry.name)) {
             result.push(fullpath);
         }
     }
@@ -44,7 +40,7 @@ async function buildEntry(entryPath: string) {
     const result = await esbuild.build({
         entryPoints: [entryPath],
         bundle: true,
-        minify: true,
+        minify: !entryPath.endsWith('dev.ts'),
         format: 'esm',
         banner: { js: getBanner() },
         sourcemap: false,
