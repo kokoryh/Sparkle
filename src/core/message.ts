@@ -23,6 +23,16 @@ export abstract class JsonMessage<T extends object> implements IMessage {
     }
 }
 
+export abstract class LosslessJsonMessage<T extends object> extends JsonMessage<T> {
+    protected fromJsonString(data: string): T {
+        return parse(data) as T;
+    }
+
+    protected toJsonString(): string {
+        return stringify(this.message) as string;
+    }
+}
+
 export abstract class ProtobufMessage<T extends object> implements IMessage {
     protected type: MessageType<T>;
 
@@ -63,29 +73,15 @@ export abstract class HtmlMessage implements IMessage {
         return this.message.documentElement.outerHTML;
     }
 
+    protected querySelectorAll<K extends keyof HTMLElementTagNameMap>(selector: K): HTMLElementTagNameMap[K][] {
+        return Array.from(this.message.querySelectorAll(selector));
+    }
+
     protected append(node: Node, ...childNodes: ChildNode[]): Node[] {
         return childNodes.map(childNode => node.appendChild(childNode));
     }
 
-    protected remove(...nodes: Node[]): (Node | undefined)[] {
+    protected remove(nodes: Node[]): (Node | undefined)[] {
         return nodes.map(node => node.parentElement?.removeChild(node));
-    }
-}
-
-export abstract class LosslessJsonMessage<T extends object> implements IMessage {
-    protected message: T;
-
-    constructor(data: string) {
-        this.message = this.fromJsonString(data);
-    }
-
-    abstract done(): void | Promise<void>;
-
-    protected fromJsonString(data: string): T {
-        return parse(data) as T;
-    }
-
-    protected toJsonString(): string {
-        return stringify(this.message) as string;
     }
 }

@@ -1,7 +1,7 @@
 import Client from '@core/client';
 import { HtmlMessage } from '@core/message';
 
-export const $ = Client.getInstance('Missav');
+export const $ = Client.getInstance('missav');
 
 export class MissavHandler extends HtmlMessage {
     private scriptElementFilter = (element: HTMLScriptElement) => {
@@ -29,8 +29,7 @@ export class MissavHandler extends HtmlMessage {
     }
 
     private removeElement(): void {
-        const scriptElements = this.message.getElementsByTagName('script');
-        this.remove(...Array.from(scriptElements).filter(this.scriptElementFilter));
+        this.remove(this.querySelectorAll('script').filter(this.scriptElementFilter));
     }
 
     private addElement(): void {
