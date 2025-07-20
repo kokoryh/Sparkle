@@ -1,4 +1,5 @@
 import { MessageType } from '@protobuf-ts/runtime';
+import { parse, stringify } from 'lossless-json';
 
 export interface IMessage {
     done: () => void | Promise<void>;
@@ -68,5 +69,23 @@ export abstract class HtmlMessage implements IMessage {
 
     protected remove(...nodes: Node[]): (Node | undefined)[] {
         return nodes.map(node => node.parentElement?.removeChild(node));
+    }
+}
+
+export abstract class LosslessJsonMessage<T extends object> implements IMessage {
+    protected message: T;
+
+    constructor(data: string) {
+        this.message = this.fromJsonString(data);
+    }
+
+    abstract done(): void | Promise<void>;
+
+    protected fromJsonString(data: string): T {
+        return parse(data) as T;
+    }
+
+    protected toJsonString(): string {
+        return stringify(this.message) as string;
     }
 }
