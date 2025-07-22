@@ -89,8 +89,11 @@ export class DmSegMobileReqHandler extends BilibiliRequestHandler<DmSegMobileReq
             if (segments.length) {
                 $.info(videoId, segments);
             }
+            if (!bodyBytes) {
+                throw new Error('Response body is empty');
+            }
             this.headers = headers;
-            this.body = new DmSegMobileReplyHandler(bodyBytes!, segments).done();
+            this.body = new DmSegMobileReplyHandler(bodyBytes, segments).done();
         } catch (e) {
             $.error('[DmSegMobileReqHandler]', e);
             $.exit();
@@ -171,9 +174,13 @@ export class PlayViewUniteReqHandler extends BilibiliRequestHandler<PlayViewUnit
             if (segments.length) {
                 $.info(videoId, segments);
             }
+            if (!bodyBytes) {
+                throw new Error('Response body is empty');
+            }
             this.headers = headers;
-            this.body = new PlayViewUniteReplyHandler(bodyBytes!, segments).done();
-        } catch {
+            this.body = new PlayViewUniteReplyHandler(bodyBytes, segments).done();
+        } catch (e) {
+            $.error('[PlayViewUniteReqHandler]', e);
             $.exit();
         }
     }
