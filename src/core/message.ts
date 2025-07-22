@@ -73,7 +73,7 @@ export abstract class HtmlMessage implements IMessage {
         return this.message.documentElement.outerHTML;
     }
 
-    protected querySelectorAll<K extends keyof HTMLElementTagNameMap>(selector: K): HTMLElementTagNameMap[K][] {
+    protected query<K extends keyof HTMLElementTagNameMap>(selector: K): HTMLElementTagNameMap[K][] {
         return Array.from(this.message.querySelectorAll(selector));
     }
 

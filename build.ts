@@ -34,19 +34,22 @@ async function findEntryFiles(dir: string): Promise<string[]> {
 
 async function buildEntry(entryPath: string) {
     const relativePath = path.relative(SRC_DIR, entryPath);
-    const filename = `${path.dirname(relativePath).split(path.sep).join('.')}.js`;
+    const filename = relativePath.split(path.sep).join('.').replace('main.', '').replace('ts', 'js');
     const outPath = path.join(DST_DIR, filename);
     await fs.mkdir(path.dirname(outPath), { recursive: true });
     const result = await esbuild.build({
         entryPoints: [entryPath],
         bundle: true,
-        minify: !entryPath.endsWith('dev.ts'),
+        minify: !filename.includes('.dev.'),
         format: 'esm',
         banner: { js: getBanner() },
         sourcemap: false,
         write: false,
     });
-    const builtContent = result.outputFiles?.[0]?.text || '';
+    let builtContent = result.outputFiles?.[0]?.text || '';
+    if (relativePath.includes('webpage')) {
+        builtContent = await renderTemplate(path.dirname(entryPath), builtContent);
+    }
     const builtContentHash = hashContent(builtContent);
     try {
         const existContent = await fs.readFile(outPath, 'utf-8');
@@ -59,6 +62,37 @@ async function buildEntry(entryPath: string) {
     await fs.writeFile(outPath, builtContent);
     console.log(`[BUILT] Built: ${relativePath} (hash: ${builtContentHash.slice(0, 8)})`);
     return true;
+}
+
+async function renderTemplate(basePath: string, sourceContent: string): Promise<string> {
+    const regex = /"{{\s*@([^\s}]+)\s*}}"/g;
+    const matches = sourceContent.match(regex) || [];
+    const templateIds = Array.from(new Set(matches.map(m => m.replace(regex, '$1'))));
+    const templateCache = new Map<string, string>();
+    await Promise.all(
+        templateIds.map(async templateId => {
+            const templatePath = path.join(basePath, templateId);
+            try {
+                const result = await esbuild.build({
+                    entryPoints: [templatePath],
+                    bundle: true,
+                    minify: !templateId.includes('.dev.'),
+                    format: 'esm',
+                    sourcemap: false,
+                    write: false,
+                });
+                templateCache.set(templateId, result.outputFiles?.[0]?.text || '');
+            } catch (err) {
+                console.error(`[ERROR] Build template "${templateId}" failed: ${err.toString()}`);
+                templateCache.set(templateId, '');
+            }
+        })
+    );
+    return matches.reduce((content, placeholder) => {
+        const templateId = placeholder.replace(regex, '$1');
+        const compiledContent = JSON.stringify(templateCache.get(templateId) || '');
+        return content.split(placeholder).join(compiledContent);
+    }, sourceContent);
 }
 
 async function runBuild() {

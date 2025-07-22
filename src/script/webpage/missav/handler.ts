@@ -1,5 +1,6 @@
 import Client from '@core/client';
 import { HtmlMessage } from '@core/message';
+import { createCaseInsensitiveDictionary } from '@utils/index';
 
 export const $ = Client.getInstance('missav');
 
@@ -18,6 +19,14 @@ export class MissavHandler extends HtmlMessage {
         return false;
     };
 
+    constructor(data: string) {
+        const headers = createCaseInsensitiveDictionary($.response.headers);
+        if (!headers['content-type']?.includes('text/html')) {
+            throw new Error('Invalid URL');
+        }
+        super(data);
+    }
+
     done(): void {
         this.process();
         $.done({ body: this.toString() });
@@ -29,15 +38,15 @@ export class MissavHandler extends HtmlMessage {
     }
 
     private removeElement(): void {
-        this.remove(this.querySelectorAll('script').filter(this.scriptElementFilter));
+        this.remove(this.query('script').filter(this.scriptElementFilter));
     }
 
     private addElement(): void {
         const scriptElement = this.message.createElement('script');
-        scriptElement.textContent = `(function(){'use strict';document.addEventListener('ready',()=>{window.open=()=>{};if(window.player?.pause){const pause=window.player.pause;window.player.pause=()=>{if(document.hasFocus()){pause()}}}})})();`;
+        scriptElement.textContent = '{{ @template/script.js }}';
 
         const styleElement = this.message.createElement('style');
-        styleElement.textContent = `.lg\\:block,.lg\\:hidden,a[href*="//bit.ly/"],div[x-init*="#genki-counter'"],div:has(a[href*='go.myavlive.com']),[x-show$="video_details'"]>div>ul,div[style*='width: 300px; height: 250px;'],.relative>div[x-init*='campaignId=under_player'],div[x-show^='recommendItems']~div[class]:has(>div>div.mx-auto>div.flex>a[rel^='sponsored']){display:none!important}`;
+        styleElement.textContent = '{{ @template/style.css }}';
 
         this.append(this.message.head, scriptElement, styleElement);
     }
