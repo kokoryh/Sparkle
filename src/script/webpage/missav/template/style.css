@@ -1,5 +1,5 @@
-.lg\\:block,
-.lg\\:hidden,
+.lg\:block,
+.lg\:hidden,
 a[href*="//bit.ly/"],
 div[x-init*="#genki-counter'"],
 div:has(a[href*='go.myavlive.com']),
