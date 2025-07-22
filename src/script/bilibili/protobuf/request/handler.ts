@@ -45,6 +45,7 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
             url,
             headers,
             body: bodyBytes,
+            timeout: 3,
         });
     }
 

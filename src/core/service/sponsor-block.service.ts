@@ -10,5 +10,6 @@ export function getSkipSegments($: Client, videoId: string, cid = ''): Promise<F
             origin: 'https://github.com/kokoryh/Sparkle/blob/master/release/surge/module/bilibili.sgmodule',
             'x-ext-version': '1.0.0',
         },
+        timeout: 3,
     });
 }
