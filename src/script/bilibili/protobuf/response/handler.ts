@@ -214,10 +214,10 @@ export class IpadViewProgressReplyHandler extends BilibiliResponseHandler<IpadVi
     static prefix = 'https://raw.githubusercontent.com/kokoryh/chronos/refs/heads/master/';
 
     static chronosMd5Map = {
-        universal: 'bebe078610155a72c716f17b29f2820d',
+        universal: 'df3b771d9f687076eeb3fc924a50fd7c',
         hd: '7bfd1de2044f37c1b0f4185085d816af',
         inter: '7bfd1de2044f37c1b0f4185085d816af',
-        e6755ecc53f89653fa9b5b2e0158b3c7: 'bebe078610155a72c716f17b29f2820d',
+        '1b8a3fa5e6caa78303042798c7a9e492': 'df3b771d9f687076eeb3fc924a50fd7c',
         '325e7073ffc6fb5263682fecdcd1058f': '7bfd1de2044f37c1b0f4185085d816af',
         '3a14beddd23328eaddfe9f0eb048d713': '7bfd1de2044f37c1b0f4185085d816af',
     };
