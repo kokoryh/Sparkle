@@ -4,12 +4,12 @@
 #!tag=Enhancement
 #!system=iOS,iPadOS
 #!system_version=15
-#!loon_version=3.2.9(837)
+#!loon_version=3.3.2(877)
 #!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/Bilibili.png
-#!date=2025-07-11
+#!date=2025-07-23
 
 [Argument]
-showUpList=select,"auto","show","hide",tag=[动态]中[最常访问]的显示方式,desc=show: 始终显示\n- hide: 始终隐藏\n- auto: 仅当列表中存在直播状态时显示
+showUpList=select,"show","hide","auto",tag=[动态]中[最常访问]的显示方式,desc=show: 始终显示\n- hide: 始终隐藏\n- auto: 仅当列表中存在直播状态时显示
 filterTopReplies=switch,true,tag=[评论区]过滤置顶评论广告,desc=true: 开启\n- false: 关闭
 airborne=switch,true,tag=空降助手,desc=true: 开启\n- false: 关闭
 logLevel=select,"info","off","error","warn","debug",tag=日志等级
