@@ -1,11 +1,28 @@
-.lg\:block,
-.lg\:hidden,
-a[href*="//bit.ly/"],
-div[x-init*="#genki-counter'"],
-div:has(a[href*='go.myavlive.com']),
-[x-show$="video_details'"]>div>ul,
-div[style*='width: 300px; height: 250px;'],
-.relative>div[x-init*='campaignId=under_player'],
-div[x-show^='recommendItems']~div[class]:has(> div > div.mx-auto > div.flex > a[rel^='sponsored']) {
+.lg\:block {
+    display: none !important;
+}
+.lg\:hidden {
+    display: none !important;
+}
+a[href*="//bit.ly/"]
+{
+    display: none !important;
+}
+div[x-init*="#genki-counter'"] {
+    display: none !important;
+}
+div:has(a[href*='go.myavlive.com']) {
+    display: none !important;
+}
+[x-show$="video_details'"] > div > ul {
+    display: none !important;
+}
+div[style*='width: 300px; height: 250px;'] {
+    display: none !important;
+}
+.relative > div[x-init*='campaignId=under_player'] {
+    display: none !important;
+}
+div[x-show^='recommendItems'] ~ div[class]:has(> div > div.mx-auto > div.flex > a[rel^='sponsored']) {
     display: none !important;
 }

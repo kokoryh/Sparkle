@@ -1,10 +1,10 @@
 import Client from '@core/client';
-import { MissavHandler } from './handler';
+import { HanimeHandler } from './handler';
 
-const $ = Client.getInstance('missav');
+const $ = Client.getInstance('hanime');
 
 try {
-    new MissavHandler($).done();
+    new HanimeHandler($).done();
 } catch (e) {
     $.error(e, $.request.url);
 } finally {

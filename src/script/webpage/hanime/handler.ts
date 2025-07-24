@@ -1,19 +1,14 @@
 import { HtmlMessage } from '@core/message';
 
-export class MissavHandler extends HtmlMessage {
+export class HanimeHandler extends HtmlMessage {
     protected styleTemplate = '{{ @template/style.css }}';
-
-    protected scriptTemplate = '{{ @template/script.js }}';
 
     protected scriptFilter = (element: HTMLScriptElement) => {
         const innerText = element.innerText || '';
-        if (element.getAttribute('src')?.includes('tsyndicate.com')) {
+        if (element.getAttribute('src')?.includes('googlesyndication.com/pagead/')) {
             return true;
         }
-        if (innerText.includes('TSOutstreamVideo')) {
-            return true;
-        }
-        if (innerText.includes('htmlAds')) {
+        if (innerText.includes('/infinity.js.aspx?')) {
             return true;
         }
         return false;

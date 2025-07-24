@@ -1,5 +1,7 @@
 import { MessageType } from '@protobuf-ts/runtime';
 import { parse, stringify } from 'lossless-json';
+import Client from './client';
+import { createCaseInsensitiveDictionary } from '@utils/index';
 
 export interface IMessage {
     done: () => void | Promise<void>;
@@ -55,22 +57,54 @@ export abstract class ProtobufMessage<T extends object> implements IMessage {
 }
 
 export abstract class HtmlMessage implements IMessage {
+    protected $: Client;
+
     protected message: Document;
 
     protected domParser = new DOMParser();
 
-    constructor(data: string) {
-        this.message = this.fromString(data);
+    protected styleTemplate?: string;
+
+    protected scriptTemplate?: string;
+
+    protected scriptFilter?: (element: HTMLScriptElement) => boolean;
+
+    constructor($: Client) {
+        const headers = createCaseInsensitiveDictionary($.response.headers);
+        if (!headers['content-type']?.includes('text/html')) {
+            throw new Error('Invalid URL');
+        }
+        this.$ = $;
+        this.message = this.fromString($.response.body as string);
     }
 
-    abstract done(): void | Promise<void>;
+    done(): void {
+        this.process();
+        this.$.done({ body: this.toString() });
+    }
+
+    protected process(): void {
+        if (this.scriptFilter) {
+            this.remove(this.query('script').filter(this.scriptFilter));
+        }
+        if (this.scriptTemplate) {
+            const scriptElement = this.message.createElement('script');
+            scriptElement.textContent = this.scriptTemplate;
+            this.append(this.message.head, scriptElement);
+        }
+        if (this.styleTemplate) {
+            const styleElement = this.message.createElement('style');
+            styleElement.textContent = this.styleTemplate;
+            this.append(this.message.head, styleElement);
+        }
+    }
 
     protected fromString(data: string): Document {
         return this.domParser.parseFromString(data, 'text/html');
     }
 
     protected toString(): string {
-        return this.message.documentElement.outerHTML;
+        return `<!DOCTYPE HTML>${this.message.documentElement.outerHTML}`;
     }
 
     protected query<K extends keyof HTMLElementTagNameMap>(selector: K): HTMLElementTagNameMap[K][] {

@@ -1,0 +1,13 @@
+#!name=Hanime去广告
+#!desc=https://hanime1.me
+#!category=AdBlock
+
+[Rule]
+DOMAIN-SUFFIX,jads.co,REJECT,pre-matching
+DOMAIN-SUFFIX,mnaspm.com,REJECT,pre-matching
+
+[Script]
+hanime = type=http-response,pattern=^https:\/\/hanime1\.me\/(?!(favicon|css|js|cdn-cgi|load)),requires-body=1,max-size=-1,engine=webview,script-path=https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/dist/webpage.hanime.js
+
+[MITM]
+hostname = %APPEND% hanime1.me

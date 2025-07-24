@@ -1,0 +1,15 @@
+#bottom-ads {
+    display: none !important;
+}
+a[href*='.labsda.com'] {
+    display: none !important;
+}
+div[style*='width: 310px; height: 282px;'] {
+    display: none !important;
+}
+div:has(> script[src*='jads.co']) {
+    display: none !important;
+}
+.video-show-width > .single-show-list > .hidden-xs[style*='text-align:'] {
+    display: none !important;
+}
