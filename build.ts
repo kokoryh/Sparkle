@@ -77,7 +77,7 @@ async function renderTemplate(basePath: string, sourceContent: string): Promise<
                     entryPoints: [templatePath],
                     bundle: true,
                     minify: !templateId.includes('.dev.'),
-                    format: 'esm',
+                    format: 'iife',
                     sourcemap: false,
                     write: false,
                 });

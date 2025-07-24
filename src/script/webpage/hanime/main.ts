@@ -1,7 +1,7 @@
 import Client from '@core/client';
 import { HanimeHandler } from './handler';
 
-const $ = Client.getInstance('hanime');
+const $ = Client.getInstance('Hanime');
 
 try {
     new HanimeHandler($).done();
