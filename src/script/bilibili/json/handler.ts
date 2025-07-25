@@ -155,7 +155,7 @@ export class FeedIndexHandler extends BilibiliJsonHandler<FeedIndex> {
                 return (
                     !item.banner_item && // remove banner
                     !item.ad_info &&
-                    item.card_goto === GotoType.av &&
+                    item.card_goto === GotoType.AV &&
                     this.typeSet.has(item.card_type)
                 );
             });
@@ -165,9 +165,9 @@ export class FeedIndexHandler extends BilibiliJsonHandler<FeedIndex> {
 
 export class FeedIndexStoryHandler extends BilibiliJsonHandler<FeedIndexStory> {
     private typeSet = new Set<GotoType>([
-        GotoType.vertical_ad_av,
-        GotoType.vertical_ad_live,
-        GotoType.vertical_ad_picture,
+        GotoType.VERTICAL_AD_AV,
+        GotoType.VERTICAL_AD_LIVE,
+        GotoType.VERTICAL_AD_PICTURE,
     ]);
 
     protected process(): void {
