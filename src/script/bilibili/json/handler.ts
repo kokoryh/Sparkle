@@ -4,6 +4,7 @@ import {
     AccountMine,
     FeedIndex,
     FeedIndexStory,
+    GotoType,
     JsonOptions,
     Layout,
     Splash,
@@ -154,7 +155,7 @@ export class FeedIndexHandler extends BilibiliJsonHandler<FeedIndex> {
                 return (
                     !item.banner_item && // remove banner
                     !item.ad_info &&
-                    item.card_goto === 'av' &&
+                    item.card_goto === GotoType.av &&
                     this.typeSet.has(item.card_type)
                 );
             });
@@ -163,13 +164,22 @@ export class FeedIndexHandler extends BilibiliJsonHandler<FeedIndex> {
 }
 
 export class FeedIndexStoryHandler extends BilibiliJsonHandler<FeedIndexStory> {
+    private typeSet = new Set<GotoType>([
+        GotoType.vertical_ad_av,
+        GotoType.vertical_ad_live,
+        GotoType.vertical_ad_picture,
+    ]);
+
     protected process(): void {
         const { data } = this.message;
         if (Array.isArray(data.items)) {
             data.items = data.items.reduce((result: StoryItem[], item) => {
-                if (!item.ad_info && !item.card_goto?.startsWith('ad')) {
+                if (!item.ad_info && item.card_goto && !this.typeSet.has(item.card_goto)) {
                     delete item.story_cart_icon;
                     delete item.free_flow_toast;
+                    delete item.image_infos;
+                    delete item.course_info;
+                    delete item.game_info;
                     result.push(item);
                 }
                 return result;

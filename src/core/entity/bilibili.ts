@@ -34,12 +34,36 @@ export interface Splash {
     };
 }
 
+export enum GotoType {
+    av,
+    player,
+    live,
+    bangumi,
+    bangumi_rcmd,
+    article_s,
+    banner,
+    text,
+    pgc,
+    vip,
+    ai_story,
+    av_ad,
+    picture,
+    vertical_av,
+    vertical_pgc,
+    vertical_live,
+    vertical_game,
+    vertical_course,
+    vertical_ad_av,
+    vertical_ad_picture,
+    vertical_ad_live,
+}
+
 export interface FeedIndex {
     data: {
         items: {
             banner_item: unknown[];
             ad_info: unknown;
-            card_goto: string;
+            card_goto: GotoType;
             card_type: string;
         }[];
     };
@@ -47,9 +71,12 @@ export interface FeedIndex {
 
 export interface StoryItem {
     ad_info?: unknown;
-    card_goto?: string;
+    card_goto?: GotoType;
     story_cart_icon?: unknown;
     free_flow_toast?: unknown;
+    image_infos?: unknown;
+    course_info?: unknown;
+    game_info?: unknown;
 }
 
 export interface FeedIndexStory {
