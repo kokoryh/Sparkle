@@ -32,13 +32,13 @@ function canBeHidden(type: string): boolean {
     return hiddenTypeList.includes(type);
 }
 
-function needToBeHidden(item: TreeItem) {
+function needToBeHidden(item: TreeItem): boolean {
     const jumpAddress = item.props?.jumpAddress;
     if (!jumpAddress) return false;
     return !new URL(jumpAddress).hostname.includes('bilibili');
 }
 
-function traversalTree(treeItems: TreeItem[], path: string[] = []) {
+function traversalTree(treeItems: TreeItem[], path: string[] = []): void {
     for (const item of treeItems) {
         const flag = canBeHidden(item.name);
         if (flag) {
@@ -56,7 +56,7 @@ function traversalTree(treeItems: TreeItem[], path: string[] = []) {
     }
 }
 
-function traversalSlot(slotItems: SlotItem[], path: string[] = []) {
+function traversalSlot(slotItems: SlotItem[], path: string[] = []): void {
     for (const item of slotItems) {
         if (item.children?.length) {
             traversalTree(item.children, path);
@@ -64,14 +64,17 @@ function traversalSlot(slotItems: SlotItem[], path: string[] = []) {
     }
 }
 
-function renderStyle(uuids: string[]) {
+function renderStyle(uuids: string[]): string {
     return uuids.map(id => `#${id}{display:none!important}`).join('');
 }
 
-const layerTree = (window as any).__BILIACT_EVAPAGEDATA__?.layerTree;
-if (layerTree) {
+function run(): void {
+    const layerTree = (window as any).__BILIACT_EVAPAGEDATA__?.layerTree;
+    if (!layerTree) return;
     traversalTree(layerTree);
     const styleElement = document.createElement('style');
     styleElement.textContent = renderStyle(Array.from(uuids));
     document.head.append(styleElement);
 }
+
+run();
