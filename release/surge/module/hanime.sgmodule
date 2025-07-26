@@ -4,6 +4,7 @@
 
 [Rule]
 DOMAIN-SUFFIX,jads.co,REJECT,pre-matching
+DOMAIN-SUFFIX,juicyads.com,REJECT,pre-matching
 DOMAIN-SUFFIX,mnaspm.com,REJECT,pre-matching
 
 [Script]
