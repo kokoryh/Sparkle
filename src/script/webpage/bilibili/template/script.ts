@@ -26,7 +26,7 @@ interface Props {
 
 const uuids = new Set<string>();
 
-const hiddenTypeList = ['EvaLayoutContainer', 'EvaLinkButton'];
+const hiddenTypeList = ['EvaLayoutContainerPrerender', 'EvaLayoutContainer', 'EvaLinkButton'];
 
 function canBeHidden(type: string): boolean {
     return hiddenTypeList.includes(type);
