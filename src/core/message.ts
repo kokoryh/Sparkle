@@ -1,6 +1,6 @@
 import { MessageType } from '@protobuf-ts/runtime';
 import { parse, stringify } from 'lossless-json';
-import Client from './client';
+import { $ } from '@core/env';
 import { createCaseInsensitiveDictionary } from '@utils/index';
 
 export interface IMessage {
@@ -57,8 +57,6 @@ export abstract class ProtobufMessage<T extends object> implements IMessage {
 }
 
 export abstract class HtmlMessage implements IMessage {
-    protected $: Client;
-
     protected message: Document;
 
     protected domParser = new DOMParser();
@@ -69,18 +67,17 @@ export abstract class HtmlMessage implements IMessage {
 
     protected scriptFilter?: (element: HTMLScriptElement) => boolean;
 
-    constructor($: Client) {
+    constructor() {
         const headers = createCaseInsensitiveDictionary($.response.headers);
         if (!headers['content-type']?.includes('text/html')) {
             throw new Error('Invalid URL');
         }
-        this.$ = $;
         this.message = this.fromString($.response.body as string);
     }
 
     done(): void {
         this.process();
-        this.$.done({ body: this.toString() });
+        $.done({ body: this.toString() });
     }
 
     protected process(): void {

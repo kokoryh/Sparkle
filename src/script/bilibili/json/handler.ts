@@ -1,3 +1,4 @@
+import { $ } from '@core/env';
 import { JsonMessage } from '@core/message';
 import {
     AccountInfo,
@@ -12,7 +13,6 @@ import {
     VIP,
 } from '@entity/bilibili';
 import locale from '../locale';
-import { $ } from './env';
 
 export abstract class BilibiliJsonHandler<T extends { data: object | null }> extends JsonMessage<T> {
     protected options: JsonOptions = {

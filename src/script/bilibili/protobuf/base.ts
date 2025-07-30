@@ -1,8 +1,8 @@
 import { MessageType } from '@protobuf-ts/runtime';
+import { $ } from '@core/env';
 import { ProtobufMessage } from '@core/message';
 import { ProtobufOptions } from '@entity/bilibili';
 import { createCaseInsensitiveDictionary } from '@utils/index';
-import { $ } from './env';
 
 export abstract class BilibiliProtobufHandler<T extends object> extends ProtobufMessage<T> {
     static getAppEdition(): 'universal' | 'hd' | 'inter' {

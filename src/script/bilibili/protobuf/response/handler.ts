@@ -1,4 +1,5 @@
 import { MessageType } from '@protobuf-ts/runtime';
+import { $ } from '@core/env';
 import { DynAllReply, DynamicType } from '@proto/bilibili/app/dynamic/v2/dynamic';
 import { DefaultWordsReply } from '@proto/bilibili/app/interface/v1/search';
 import { ModeStatusReply } from '@proto/bilibili/app/interface/v1/teenagers';
@@ -25,7 +26,6 @@ import { MainListReply, Type } from '@proto/bilibili/main/community/reply/v1/rep
 import { PlayViewReply as IpadPlayViewReply } from '@proto/bilibili/pgc/gateway/player/v2/playurl.js';
 import { SearchAllResponse } from '@proto/bilibili/polymer/app/search/v1/search';
 import { isIPad } from '@utils/index';
-import { $ } from '../env';
 import { BilibiliProtobufHandler } from '../base';
 
 export abstract class BilibiliResponseHandler<T extends object> extends BilibiliProtobufHandler<T> {

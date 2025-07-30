@@ -1,7 +1,7 @@
-import Client from '@core/client';
+import { $ } from '@core/env';
 import { FetchResponse } from 'src/types/client';
 
-export function getSkipSegments($: Client, videoId: string, cid = ''): Promise<FetchResponse> {
+export function getSkipSegments(videoId: string, cid = ''): Promise<FetchResponse> {
     cid = cid !== '0' ? cid : '';
     return $.fetch({
         method: 'get',

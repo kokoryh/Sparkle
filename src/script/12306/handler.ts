@@ -1,9 +1,10 @@
-import Client from '@core/client';
+import { $ } from '@core/env';
 import { IMessage, JsonMessage } from '@core/message';
-import { AdListReq } from '@entity/12306';
 import { createCaseInsensitiveDictionary } from '@utils/index';
 
-export const $ = Client.getInstance('12306');
+interface AdListReq {
+    placementNo: string;
+}
 
 export function createHandler(url: string): AdListHandler | MgwHtmHandler | null {
     if (url.endsWith('/getAdList')) {

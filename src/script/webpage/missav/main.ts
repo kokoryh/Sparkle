@@ -1,10 +1,8 @@
-import Client from '@core/client';
+import { $ } from '@core/env';
 import { MissavHandler } from './handler';
 
-const $ = Client.getInstance('Missav');
-
 try {
-    new MissavHandler($).done();
+    new MissavHandler().done();
 } catch (e) {
     $.error(e, $.request.url);
 } finally {

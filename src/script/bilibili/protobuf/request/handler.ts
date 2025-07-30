@@ -1,4 +1,5 @@
 import { MessageType } from '@protobuf-ts/runtime';
+import { $ } from '@core/env';
 import { getSkipSegments } from '@core/service/sponsor-block.service';
 import {
     DanmakuElem,
@@ -14,7 +15,6 @@ import { SegmentItem } from '@entity/bilibili';
 import { HttpHeaders } from 'src/types/common';
 import { FetchResponse } from 'src/types/client';
 import { avToBv } from '@utils/bilibili';
-import { $ } from '../env';
 import { BilibiliProtobufHandler } from '../base';
 
 export abstract class BilibiliRequestHandler<T extends object> extends BilibiliProtobufHandler<T> {
@@ -51,7 +51,7 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
 
     protected async getSkipSegments(videoId: string, cid = ''): Promise<number[][]> {
         try {
-            const response = await getSkipSegments($, videoId, cid);
+            const response = await getSkipSegments(videoId, cid);
             if (response.status !== 200) {
                 return [];
             }

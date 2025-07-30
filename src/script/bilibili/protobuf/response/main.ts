@@ -1,4 +1,4 @@
-import { $ } from '../env';
+import { $ } from '@core/env';
 import { createHandler } from './factory';
 
 try {

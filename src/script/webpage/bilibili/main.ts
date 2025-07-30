@@ -1,10 +1,8 @@
-import Client from '@core/client';
-import { BilibiliHtmlHandler } from './handler';
-
-const $ = Client.getInstance('Bilibili HTML');
+import { $ } from '@core/env';
+import { BilibiliWebpageHandler } from './handler';
 
 try {
-    new BilibiliHtmlHandler($).done();
+    new BilibiliWebpageHandler().done();
 } catch (e) {
     $.error(e, $.request.url);
 } finally {

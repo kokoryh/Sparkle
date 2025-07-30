@@ -1,4 +1,5 @@
-import { $, createHandler } from './handler';
+import { $ } from '@core/env';
+import { createHandler } from './handler';
 
 try {
     createHandler($.request.url)?.done();

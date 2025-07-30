@@ -70,6 +70,8 @@ export default abstract class Client {
 
     abstract done(result: HttpRequestDone | HttpResponseDone): void;
 
+    abstract abort(): void;
+
     protected createProxy<T extends object, C extends object>(target: T): C {
         return new Proxy(target, {
             get: this.getFn,
@@ -84,6 +86,10 @@ export default abstract class Client {
     protected setFn<T extends object>(target: T, property: string, value: any, receiver: any): boolean {
         Reflect.set(target, property, value, receiver);
         return true;
+    }
+
+    setName(name: string): void {
+        this.name = name;
     }
 
     getJSON(key: string): object | null {
@@ -125,10 +131,6 @@ export default abstract class Client {
 
     exit(): void {
         $done({});
-    }
-
-    abort(): void {
-        $done();
     }
 }
 
@@ -221,7 +223,7 @@ export class SurgeClient extends Client {
         ($done as Surge.Done)(result);
     }
 
-    override abort(): void {
+    abort(): void {
         $done({ abort: true });
     }
 }
@@ -350,5 +352,9 @@ export class QuantumultXClient extends Client {
             }
         }
         $done(target);
+    }
+
+    abort(): void {
+        $done();
     }
 }

@@ -1,10 +1,8 @@
-import Client from '@core/client';
+import { $ } from '@core/env';
 import { HanimeHandler } from './handler';
 
-const $ = Client.getInstance('Hanime');
-
 try {
-    new HanimeHandler($).done();
+    new HanimeHandler().done();
 } catch (e) {
     $.error(e, $.request.url);
 } finally {
