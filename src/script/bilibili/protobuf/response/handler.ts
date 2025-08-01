@@ -29,16 +29,22 @@ import { isIPad } from '@utils/index';
 import { BilibiliProtobufHandler } from '../base';
 
 export abstract class BilibiliResponseHandler<T extends object> extends BilibiliProtobufHandler<T> {
+    headers = $.response.headers;
+
     constructor(type: MessageType<T>) {
         super(type, $.response.bodyBytes!);
     }
 
     done(): void {
-        $.done({ body: this.toBinary() });
+        $.done({
+            headers: this.headers,
+            body: this.toBinary(),
+        });
     }
 
     process(): this {
         this._process(this.message);
+        this._processHeaders(this.headers);
         return this;
     }
 

@@ -37,6 +37,7 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
 
     async process(): Promise<this> {
         await this._process(this.message);
+        this._processHeaders(this.headers);
         return this;
     }
 
