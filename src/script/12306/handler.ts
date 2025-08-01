@@ -20,6 +20,10 @@ export class AdListHandler extends JsonMessage<AdListReq> {
         $.done({ response: { body: this.getResponseBody() } });
     }
 
+    process(): this {
+        return this;
+    }
+
     private getResponseBody(): string {
         const { placementNo } = this.message;
         switch (placementNo) {

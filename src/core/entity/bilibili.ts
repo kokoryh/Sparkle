@@ -29,8 +29,10 @@ export interface Layout {
 
 export interface Splash {
     data: {
-        show: unknown[];
-        event_list: unknown[];
+        show?: unknown[];
+        event_list?: unknown[];
+        min_interval?: number;
+        pull_interval?: number;
     };
 }
 

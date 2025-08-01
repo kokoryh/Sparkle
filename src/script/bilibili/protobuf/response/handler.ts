@@ -1,5 +1,4 @@
 import { MessageType } from '@protobuf-ts/runtime';
-import { $ } from '@core/env';
 import { DynAllReply, DynamicType } from '@proto/bilibili/app/dynamic/v2/dynamic';
 import { DefaultWordsReply } from '@proto/bilibili/app/interface/v1/search';
 import { ModeStatusReply } from '@proto/bilibili/app/interface/v1/teenagers';
@@ -25,6 +24,7 @@ import { DmSegMobileReply, DmViewReply } from '@proto/bilibili/community/service
 import { MainListReply, Type } from '@proto/bilibili/main/community/reply/v1/reply';
 import { PlayViewReply as IpadPlayViewReply } from '@proto/bilibili/pgc/gateway/player/v2/playurl.js';
 import { SearchAllResponse } from '@proto/bilibili/polymer/app/search/v1/search';
+import { $ } from '@core/env';
 import { isIPad } from '@utils/index';
 import { BilibiliProtobufHandler } from '../base';
 
@@ -34,9 +34,15 @@ export abstract class BilibiliResponseHandler<T extends object> extends Bilibili
     }
 
     done(): void {
-        this.process();
         $.done({ body: this.toBinary() });
     }
+
+    process(): this {
+        this._process(this.message);
+        return this;
+    }
+
+    protected abstract _process(message: T): void;
 
     protected isAirborneEnabled(): boolean {
         const { airborne } = this.options;
@@ -49,23 +55,21 @@ export class DynAllReplyMessage extends BilibiliResponseHandler<DynAllReply> {
         super(DynAllReply);
     }
 
-    protected process(): void {
-        const message = this.message;
+    protected _process(message: DynAllReply): void {
         delete message.topicList;
         if (message.dynamicList) {
             message.dynamicList.list = message.dynamicList.list.filter(
                 item => ![DynamicType.AD, DynamicType.LIVE_RCMD].includes(item.cardType)
             );
         }
-        this.handleUpList();
+        this.processUpList(message);
     }
 
-    private handleUpList(): void {
+    private processUpList(message: DynAllReply): void {
         const { showUpList } = this.options;
         if (showUpList === 'show' || isIPad()) {
             return;
         }
-        const message = this.message;
         if (showUpList === 'hide' || !message.upList?.showLiveNum) {
             delete message.upList;
             return;
@@ -85,8 +89,7 @@ export class DefaultWordsReplyHandler extends BilibiliResponseHandler<DefaultWor
         super(DefaultWordsReply);
     }
 
-    protected process(): void {
-        const message = this.message;
+    protected _process(message: DefaultWordsReply): void {
         message.show = '搜索视频、番剧或up主';
         message.word = '';
         message.goto = '';
@@ -100,8 +103,7 @@ export class ModeStatusReplyHandler extends BilibiliResponseHandler<ModeStatusRe
         super(ModeStatusReply);
     }
 
-    protected process(): void {
-        const message = this.message;
+    protected _process(message: ModeStatusReply): void {
         const teenagersModel = message.userModels.find(item => item.mode === 'teenagers');
         if (teenagersModel?.policy?.interval && teenagersModel.policy.interval !== '0') {
             teenagersModel.policy.interval = '0';
@@ -114,8 +116,7 @@ export class PlayViewUniteReplyHandler extends BilibiliResponseHandler<PlayViewU
         super(PlayViewUniteReply);
     }
 
-    protected process(): void {
-        const message = this.message;
+    protected _process(message: PlayViewUniteReply): void {
         delete message.viewInfo?.promptBar;
         if (message.playArcConf?.arcConfs) {
             Object.values(message.playArcConf.arcConfs).forEach(item => {
@@ -134,8 +135,7 @@ export class PlayViewReplyHandler extends BilibiliResponseHandler<PlayViewReply>
         super(PlayViewReply);
     }
 
-    protected process(): void {
-        const message = this.message;
+    protected _process(message: PlayViewReply): void {
         const { backgroundPlayConf, castConf } = message.playArc || {};
         [backgroundPlayConf, castConf].forEach(arcConf => {
             if (arcConf && (!arcConf.isSupport || arcConf.disabled)) {
@@ -153,8 +153,7 @@ export class PopularReplyHandler extends BilibiliResponseHandler<PopularReply> {
         super(PopularReply);
     }
 
-    protected process(): void {
-        const message = this.message;
+    protected _process(message: PopularReply): void {
         message.items = message.items.filter(item => {
             if (item.item.oneofKind === 'smallCoverV5') {
                 const card = item.item.smallCoverV5;
@@ -170,8 +169,7 @@ export class TFInfoReplyHandler extends BilibiliResponseHandler<TFInfoReply> {
         super(TFInfoReply);
     }
 
-    protected process(): void {
-        const message = this.message;
+    protected _process(message: TFInfoReply): void {
         if (message.tipsId !== '0') {
             delete message.tfToast;
             delete message.tfPanelCustomized;
@@ -184,8 +182,7 @@ export class IpadViewReplyHandler extends BilibiliResponseHandler<IpadViewReply>
         super(IpadViewReply);
     }
 
-    protected process(): void {
-        const message = this.message;
+    protected _process(message: IpadViewReply): void {
         delete message.label;
         delete message.cmIpad;
         delete message.cmConfig;
@@ -197,7 +194,7 @@ export class IpadViewReplyHandler extends BilibiliResponseHandler<IpadViewReply>
 }
 
 export class IpadViewProgressReplyHandler extends BilibiliResponseHandler<IpadViewProgressReply> {
-    static handleChronos(chronos: Chronos): void {
+    static processChronos(chronos: Chronos): void {
         let processedMd5 = this.chronosMd5Map[chronos.md5];
         if (!processedMd5) {
             $.warn(
@@ -226,11 +223,10 @@ export class IpadViewProgressReplyHandler extends BilibiliResponseHandler<IpadVi
         super(IpadViewProgressReply);
     }
 
-    protected process(): void {
-        const message = this.message;
+    protected _process(message: IpadViewProgressReply): void {
         delete message.videoGuide;
         if (this.isAirborneEnabled() && message.chronos) {
-            IpadViewProgressReplyHandler.handleChronos(message.chronos);
+            IpadViewProgressReplyHandler.processChronos(message.chronos);
         }
     }
 }
@@ -256,8 +252,7 @@ export class RelatesFeedReplyHandler extends BilibiliResponseHandler<RelatesFeed
         super(RelatesFeedReply);
     }
 
-    protected process(): void {
-        const message = this.message;
+    protected _process(message: RelatesFeedReply): void {
         message.relates = message.relates.filter(RelatesFeedReplyHandler.filterRelateCard);
     }
 }
@@ -267,8 +262,7 @@ export class ViewReplyHandler extends BilibiliResponseHandler<ViewReply> {
         super(ViewReply);
     }
 
-    protected process(): void {
-        const message = this.message;
+    protected _process(message: ViewReply): void {
         delete message.cm;
         delete message.reqUser?.elecPlusBtn;
         message.tab?.tabModule.forEach(tabModule => {
@@ -307,11 +301,10 @@ export class ViewProgressReplyHandler extends BilibiliResponseHandler<ViewProgre
         super(ViewProgressReply);
     }
 
-    protected process(): void {
-        const message = this.message;
+    protected _process(message: ViewProgressReply): void {
         delete message.dm;
         if (this.isAirborneEnabled() && message.chronos) {
-            IpadViewProgressReplyHandler.handleChronos(message.chronos);
+            IpadViewProgressReplyHandler.processChronos(message.chronos);
         }
     }
 }
@@ -321,8 +314,7 @@ export class DmSegMobileReplyHandler extends BilibiliResponseHandler<DmSegMobile
         super(DmSegMobileReply);
     }
 
-    protected process(): void {
-        const message = this.message;
+    protected _process(message: DmSegMobileReply): void {
         message.elems = message.elems.filter(item => !item.action?.startsWith('airborne'));
     }
 }
@@ -332,8 +324,7 @@ export class DmViewReplyHandler extends BilibiliResponseHandler<DmViewReply> {
         super(DmViewReply);
     }
 
-    protected process(): void {
-        const message = this.message;
+    protected _process(message: DmViewReply): void {
         message.activityMeta.length = 0;
         if (message.command?.commandDms.length) {
             message.command.commandDms.length = 0;
@@ -346,9 +337,8 @@ export class MainListReplyHandler extends BilibiliResponseHandler<MainListReply>
         super(MainListReply);
     }
 
-    protected process(): void {
+    protected _process(message: MainListReply): void {
         const { filterTopReplies } = this.options;
-        const message = this.message;
         delete message.cm;
         message.subjectTopCards = message.subjectTopCards.filter(item => item.type !== Type.CM);
         if (filterTopReplies) {
@@ -367,8 +357,7 @@ export class IpadPlayViewReplyHandler extends BilibiliResponseHandler<IpadPlayVi
         super(IpadPlayViewReply);
     }
 
-    protected process(): void {
-        const message = this.message;
+    protected _process(message: IpadPlayViewReply): void {
         delete message.viewInfo?.tryWatchPromptBar;
         if (message.playExtConf?.castTips) {
             message.playExtConf.castTips = { code: 0, message: '' };
@@ -381,8 +370,7 @@ export class SearchAllResponseHandler extends BilibiliResponseHandler<SearchAllR
         super(SearchAllResponse);
     }
 
-    protected process(): void {
-        const message = this.message;
+    protected _process(message: SearchAllResponse): void {
         message.item = message.item.filter(item => !item.linktype.endsWith('_ad'));
     }
 }

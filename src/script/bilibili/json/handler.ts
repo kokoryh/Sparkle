@@ -21,18 +21,22 @@ export abstract class BilibiliJsonHandler<T extends { data: object | null }> ext
 
     constructor() {
         super($.response.body as string);
-        if (!this.message.data) {
-            $.exit();
-        }
         Object.assign(this.options, $.argument);
     }
 
-    protected abstract process(): void;
-
     done(): void {
-        this.process();
         $.done({ body: this.toJsonString() });
     }
+
+    process(): this {
+        if (!this.message.data) {
+            $.exit();
+        }
+        this._process(this.message);
+        return this;
+    }
+
+    protected abstract _process(message: T): void;
 
     protected isEn(): boolean {
         return Boolean($.url.searchParams.get('s_locale')?.startsWith('en'));
@@ -122,8 +126,7 @@ export class LayoutHandler extends BilibiliJsonHandler<Layout> {
         ],
     };
 
-    protected process(): void {
-        const { data } = this.message;
+    protected _process({ data }: Layout): void {
         Object.assign(data, this.layoutData);
     }
 }
@@ -131,8 +134,13 @@ export class LayoutHandler extends BilibiliJsonHandler<Layout> {
 export class SplashHandler extends BilibiliJsonHandler<Splash> {
     private keyList = ['show', 'event_list'];
 
-    protected process(): void {
-        const { data } = this.message;
+    protected _process({ data }: Splash): void {
+        if (data.min_interval) {
+            data.min_interval = 864000;
+        }
+        if (data.pull_interval) {
+            data.pull_interval = 864000;
+        }
         this.keyList.forEach(key => {
             if (data[key]) {
                 data[key] = [];
@@ -148,8 +156,7 @@ export class FeedIndexHandler extends BilibiliJsonHandler<FeedIndex> {
         'large_cover_v1', // ipad
     ]);
 
-    protected process(): void {
-        const { data } = this.message;
+    protected _process({ data }: FeedIndex): void {
         if (Array.isArray(data.items)) {
             data.items = data.items.filter(item => {
                 return (
@@ -170,8 +177,7 @@ export class FeedIndexStoryHandler extends BilibiliJsonHandler<FeedIndexStory> {
         GotoType.VERTICAL_AD_PICTURE,
     ]);
 
-    protected process(): void {
-        const { data } = this.message;
+    protected _process({ data }: FeedIndexStory): void {
         if (Array.isArray(data.items)) {
             data.items = data.items.reduce((result: StoryItem[], item) => {
                 if (!item.ad_info && item.card_goto && !this.typeSet.has(item.card_goto)) {
@@ -482,9 +488,8 @@ export class AccountMineHandler extends BilibiliJsonHandler<AccountMine> {
         up_title: this.i18n.creator_hub,
     };
 
-    protected process(): void {
+    protected _process({ data }: AccountMine): void {
         const { showCreatorHub } = this.options;
-        const { data } = this.message;
         Object.entries(this.sectionMap).forEach(([key, value]) => {
             if (data[key]) {
                 data[key] = value;
@@ -504,8 +509,7 @@ export class AccountMineHandler extends BilibiliJsonHandler<AccountMine> {
 }
 
 export class AccountInfoHandler extends BilibiliJsonHandler<AccountInfo> {
-    protected process(): void {
-        const { data } = this.message;
+    protected _process({ data }: AccountInfo): void {
         data.vip = AccountMineHandler.getHundredAnnualVipData();
     }
 }

@@ -29,9 +29,9 @@ export abstract class BilibiliProtobufHandler<T extends object> extends Protobuf
         $.debug(this.options);
     }
 
-    protected abstract process(): void;
-
     abstract done(): void;
+
+    abstract process(): this | Promise<this>;
 
     protected override fromBinary(data: Uint8Array): T {
         const body = data[0] ? $.ungzip(data.subarray(5)) : data.subarray(5);

@@ -2,7 +2,7 @@ import { $ } from '@core/env';
 import { MissavHandler } from './handler';
 
 try {
-    new MissavHandler().done();
+    new MissavHandler().process().done();
 } catch (e) {
     $.error(e, $.request.url);
 } finally {

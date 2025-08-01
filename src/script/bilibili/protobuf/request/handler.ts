@@ -1,6 +1,4 @@
 import { MessageType } from '@protobuf-ts/runtime';
-import { $ } from '@core/env';
-import { getSkipSegments } from '@core/service/sponsor-block.service';
 import {
     DanmakuElem,
     DmColorfulType,
@@ -14,6 +12,8 @@ import { ClipInfo, ClipType } from '@proto/bilibili/pgc/gateway/player/v2/playur
 import { SegmentItem } from '@entity/bilibili';
 import { HttpHeaders } from 'src/types/common';
 import { FetchResponse } from 'src/types/client';
+import { $ } from '@core/env';
+import { getSkipSegments } from '@core/service/sponsor-block.service';
 import { avToBv } from '@utils/bilibili';
 import { BilibiliProtobufHandler } from '../base';
 
@@ -22,14 +22,11 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
 
     protected body!: Uint8Array;
 
-    protected abstract process(): Promise<void>;
-
     constructor(type: MessageType<T>) {
         super(type, $.request.bodyBytes!);
     }
 
-    async done(): Promise<void> {
-        await this.process();
+    done(): void {
         $.done({
             response: {
                 headers: this.headers,
@@ -37,6 +34,13 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
             },
         });
     }
+
+    async process(): Promise<this> {
+        await this._process(this.message);
+        return this;
+    }
+
+    protected abstract _process(message: T): Promise<void>;
 
     protected fetchRequest(): Promise<FetchResponse> {
         const { url, headers, bodyBytes } = $.request;
@@ -74,11 +78,11 @@ export class DmSegMobileReqHandler extends BilibiliRequestHandler<DmSegMobileReq
         super(DmSegMobileReq);
     }
 
-    async process(): Promise<void> {
-        const { pid, oid, type } = this.message;
+    async _process(message: DmSegMobileReq): Promise<void> {
+        const { pid, oid, type } = message;
         const isComic = type === 2;
         const videoId = avToBv(pid);
-        $.debug(videoId, this.message);
+        $.debug(videoId, message);
         try {
             const [{ headers, bodyBytes }, segments] = await Promise.all([
                 this.fetchRequest(),
@@ -94,7 +98,7 @@ export class DmSegMobileReqHandler extends BilibiliRequestHandler<DmSegMobileReq
                 throw new Error('Response body is empty');
             }
             this.headers = headers;
-            this.body = new DmSegMobileReplyHandler(bodyBytes, segments).done();
+            this.body = new DmSegMobileReplyHandler(bodyBytes, segments).process().done();
         } catch (e) {
             $.error('[DmSegMobileReqHandler]', e);
             $.exit();
@@ -111,12 +115,15 @@ export class DmSegMobileReplyHandler extends BilibiliProtobufHandler<DmSegMobile
     }
 
     done(): Uint8Array {
-        this.process();
         return this.toBinary();
     }
 
-    protected process(): void {
-        const message = this.message;
+    process(): this {
+        this._process(this.message);
+        return this;
+    }
+
+    protected _process(message: DmSegMobileReply): void {
         message.elems = message.elems.filter(item => !item.action?.startsWith('airborne'));
         if (this.segments.length) {
             message.elems.unshift(...this.getAirBorneDms());
@@ -163,8 +170,8 @@ export class PlayViewUniteReqHandler extends BilibiliRequestHandler<PlayViewUnit
         super(PlayViewUniteReq);
     }
 
-    async process(): Promise<void> {
-        const { vod, bvid } = this.message;
+    async _process(message: PlayViewUniteReq): Promise<void> {
+        const { vod, bvid } = message;
         const { aid, cid } = vod || {};
         const videoId = bvid || avToBv(aid!);
         try {
@@ -179,7 +186,7 @@ export class PlayViewUniteReqHandler extends BilibiliRequestHandler<PlayViewUnit
                 throw new Error('Response body is empty');
             }
             this.headers = headers;
-            this.body = new PlayViewUniteReplyHandler(bodyBytes, segments).done();
+            this.body = new PlayViewUniteReplyHandler(bodyBytes, segments).process().done();
         } catch (e) {
             $.error('[PlayViewUniteReqHandler]', e);
             $.exit();
@@ -200,8 +207,12 @@ export class PlayViewUniteReplyHandler extends BilibiliProtobufHandler<PlayViewU
         return this.toBinary();
     }
 
-    protected process(): void {
-        const message = this.message;
+    process(): this {
+        this._process(this.message);
+        return this;
+    }
+
+    protected _process(message: PlayViewUniteReply): void {
         delete message.viewInfo?.promptBar;
         if (!this.segments.length && message.playArcConf?.arcConfs) {
             Object.values(message.playArcConf.arcConfs).forEach(item => {

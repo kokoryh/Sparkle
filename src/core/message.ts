@@ -16,6 +16,8 @@ export abstract class JsonMessage<T extends object> implements IMessage {
 
     abstract done(): void | Promise<void>;
 
+    abstract process(): this | Promise<this>;
+
     protected fromJsonString(data: string): T {
         return JSON.parse(data);
     }
@@ -47,6 +49,8 @@ export abstract class ProtobufMessage<T extends object> implements IMessage {
 
     abstract done(): void | Promise<void>;
 
+    abstract process(): this | Promise<this>;
+
     protected fromBinary(data: Uint8Array): T {
         return this.type.fromBinary(data);
     }
@@ -76,11 +80,10 @@ export abstract class HtmlMessage implements IMessage {
     }
 
     done(): void {
-        this.process();
         $.done({ body: this.toString() });
     }
 
-    protected process(): void {
+    process(): this {
         if (this.scriptFilter) {
             this.remove(this.query('script').filter(this.scriptFilter));
         }
@@ -94,6 +97,7 @@ export abstract class HtmlMessage implements IMessage {
             styleElement.textContent = this.styleTemplate;
             this.append(this.message.head, styleElement);
         }
+        return this;
     }
 
     protected fromString(data: string): Document {

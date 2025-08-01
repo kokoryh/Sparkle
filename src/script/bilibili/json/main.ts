@@ -2,7 +2,7 @@ import { $ } from '@core/env';
 import { createHandler } from './factory';
 
 try {
-    createHandler($.url.pathname)?.done();
+    createHandler($.url.pathname)?.process().done();
 } catch (e) {
     $.error(e, $.request.url);
 } finally {
