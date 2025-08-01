@@ -214,6 +214,7 @@ export class IpadViewProgressReplyHandler extends BilibiliResponseHandler<IpadVi
         universal: 'df3b771d9f687076eeb3fc924a50fd7c',
         hd: '7bfd1de2044f37c1b0f4185085d816af',
         inter: '7bfd1de2044f37c1b0f4185085d816af',
+        '0ec3e3ac2351b6d9caf9a5ddfce3eebf': 'df3b771d9f687076eeb3fc924a50fd7c',
         '1b8a3fa5e6caa78303042798c7a9e492': 'df3b771d9f687076eeb3fc924a50fd7c',
         '325e7073ffc6fb5263682fecdcd1058f': '7bfd1de2044f37c1b0f4185085d816af',
         '3a14beddd23328eaddfe9f0eb048d713': '7bfd1de2044f37c1b0f4185085d816af',

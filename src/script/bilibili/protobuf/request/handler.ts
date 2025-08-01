@@ -78,7 +78,7 @@ export class DmSegMobileReqHandler extends BilibiliRequestHandler<DmSegMobileReq
         super(DmSegMobileReq);
     }
 
-    async _process(message: DmSegMobileReq): Promise<void> {
+    protected async _process(message: DmSegMobileReq): Promise<void> {
         const { pid, oid, type } = message;
         const isComic = type === 2;
         const videoId = avToBv(pid);
@@ -170,7 +170,7 @@ export class PlayViewUniteReqHandler extends BilibiliRequestHandler<PlayViewUnit
         super(PlayViewUniteReq);
     }
 
-    async _process(message: PlayViewUniteReq): Promise<void> {
+    protected async _process(message: PlayViewUniteReq): Promise<void> {
         const { vod, bvid } = message;
         const { aid, cid } = vod || {};
         const videoId = bvid || avToBv(aid!);

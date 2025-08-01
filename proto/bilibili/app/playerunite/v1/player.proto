@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package bilibili.app.playerunite.v1;
 
-import "google/protobuf/any.proto";
+// import "google/protobuf/any.proto";
 import "bilibili/playershared/playershared.proto";
 
 message PlayViewUniteReq {
@@ -11,9 +11,9 @@ message PlayViewUniteReq {
 }
 
 message PlayViewUniteReply {
-    bilibili.playershared.VodInfo vod_info = 1;
+    // bilibili.playershared.VodInfo vod_info = 1;
     bilibili.playershared.PlayArcConf play_arc_conf = 2;
-    google.protobuf.Any supplement = 5;
-    bilibili.playershared.PlayArc play_arc = 6;
+    // google.protobuf.Any supplement = 5;
+    // bilibili.playershared.PlayArc play_arc = 6;
     bilibili.playershared.ViewInfo view_info = 9;
 }
