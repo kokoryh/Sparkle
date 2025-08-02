@@ -1,4 +1,7 @@
 import { MessageType } from '@protobuf-ts/runtime';
+import { HttpHeaders } from 'src/types/common';
+import { FetchResponse, HttpResponse } from 'src/types/client';
+import { SegmentItem } from '@entity/bilibili';
 import {
     DanmakuElem,
     DmColorfulType,
@@ -9,9 +12,6 @@ import { PlayViewUniteReply, PlayViewUniteReq } from '@proto/bilibili/app/player
 import { PGCAnyModel } from '@proto/bilibili/app/playerunite/pgcanymodel/pgcanymodel';
 import { BizType, ConfType } from '@proto/bilibili/playershared/playershared';
 import { ClipInfo, ClipType } from '@proto/bilibili/pgc/gateway/player/v2/playurl';
-import { SegmentItem } from '@entity/bilibili';
-import { HttpHeaders } from 'src/types/common';
-import { FetchResponse } from 'src/types/client';
 import { $ } from '@core/env';
 import { getSkipSegments } from '@core/service/sponsor-block.service';
 import { avToBv } from '@utils/bilibili';
@@ -43,7 +43,11 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
 
     protected abstract _process(message: T): Promise<void>;
 
-    protected fetchRequest(): Promise<FetchResponse> {
+    protected fetchAll(videoId: string, cid = ''): Promise<[HttpResponse, SegmentItem[]]> {
+        return Promise.all([this.fetchBilibili(), this.fetchSponsorBlock(videoId, cid)]);
+    }
+
+    private fetchBilibili(): Promise<FetchResponse> {
         const { url, headers, bodyBytes } = $.request;
         return $.fetch({
             method: 'post',
@@ -54,21 +58,12 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
         });
     }
 
-    protected async getSkipSegments(videoId: string, cid = ''): Promise<number[][]> {
+    private async fetchSponsorBlock(videoId: string, cid: string): Promise<SegmentItem[]> {
         try {
             const response = await getSkipSegments(videoId, cid);
-            if (response.status !== 200) {
-                return [];
-            }
-            const body: SegmentItem[] = JSON.parse(response.body as string);
-            return body.reduce((result: number[][], item) => {
-                if (item.actionType === 'skip') {
-                    result.push(item.segment);
-                }
-                return result;
-            }, []);
+            return response.status === 200 ? JSON.parse(response.body as string) : [];
         } catch (e) {
-            $.error('[getSkipSegments]', e);
+            $.error('[fetchSponsorBlock]', e);
             return [];
         }
     }
@@ -81,20 +76,13 @@ export class DmSegMobileReqHandler extends BilibiliRequestHandler<DmSegMobileReq
 
     protected async _process(message: DmSegMobileReq): Promise<void> {
         const { pid, oid, type } = message;
-        const isComic = type === 2;
+        if (type !== 1) {
+            $.exit();
+        }
         const videoId = avToBv(pid);
-        $.debug(videoId, message);
         try {
-            const [{ headers, bodyBytes }, segments] = await Promise.all([
-                this.fetchRequest(),
-                isComic ? Promise.resolve([]) : this.getSkipSegments(videoId, oid),
-            ]);
-            if (isComic) {
-                $.done({ response: { headers, body: bodyBytes } });
-            }
-            if (segments.length) {
-                $.info(videoId, segments);
-            }
+            const [{ headers, bodyBytes }, segments] = await this.fetchAll(videoId, oid);
+            $.debug(videoId, message, segments);
             if (!bodyBytes) {
                 throw new Error('Response body is empty');
             }
@@ -108,9 +96,9 @@ export class DmSegMobileReqHandler extends BilibiliRequestHandler<DmSegMobileReq
 }
 
 export class DmSegMobileReplyHandler extends BilibiliProtobufHandler<DmSegMobileReply> {
-    private segments: number[][];
+    private segments: SegmentItem[];
 
-    constructor(data: Uint8Array, segments: number[][]) {
+    constructor(data: Uint8Array, segments: SegmentItem[]) {
         super(DmSegMobileReply, data);
         this.segments = segments;
     }
@@ -133,8 +121,8 @@ export class DmSegMobileReplyHandler extends BilibiliProtobufHandler<DmSegMobile
 
     private getAirBorneDms(): DanmakuElem[] {
         const offset = 2000;
-        return this.segments.reduce((result: DanmakuElem[], segment, index) => {
-            if (segment[1] - segment[0] < 8) {
+        return this.segments.reduce((result: DanmakuElem[], { actionType, segment }, index) => {
+            if (actionType !== 'skip' || segment[1] - segment[0] < 8) {
                 return result;
             }
             const id = (index + 1).toString();
@@ -176,13 +164,7 @@ export class PlayViewUniteReqHandler extends BilibiliRequestHandler<PlayViewUnit
         const { aid, cid } = vod || {};
         const videoId = bvid || avToBv(aid!);
         try {
-            const [{ headers, bodyBytes }, segments] = await Promise.all([
-                this.fetchRequest(),
-                this.getSkipSegments(videoId, cid),
-            ]);
-            if (segments.length) {
-                $.info(videoId, segments);
-            }
+            const [{ headers, bodyBytes }, segments] = await this.fetchAll(videoId, cid);
             if (!bodyBytes) {
                 throw new Error('Response body is empty');
             }
@@ -196,9 +178,9 @@ export class PlayViewUniteReqHandler extends BilibiliRequestHandler<PlayViewUnit
 }
 
 export class PlayViewUniteReplyHandler extends BilibiliProtobufHandler<PlayViewUniteReply> {
-    private segments: number[][];
+    private segments: SegmentItem[];
 
-    constructor(data: Uint8Array, segments: number[][]) {
+    constructor(data: Uint8Array, segments: SegmentItem[]) {
         super(PlayViewUniteReply, data);
         this.segments = segments;
     }
@@ -289,10 +271,15 @@ export class PlayViewUniteReplyHandler extends BilibiliProtobufHandler<PlayViewU
     }
 
     private getClipInfo(): ClipInfo[] {
-        return this.segments.map(([start, end]) => ({
-            start: Math.floor(start),
-            end: Math.ceil(end),
-            clipType: ClipType.CLIP_TYPE_OP,
-        }));
+        return this.segments.reduce((result: ClipInfo[], { actionType, segment }) => {
+            if (actionType === 'skip') {
+                result.push({
+                    start: Math.floor(segment[0]),
+                    end: Math.ceil(segment[1]),
+                    clipType: ClipType.CLIP_TYPE_OP,
+                });
+            }
+            return result;
+        }, []);
     }
 }

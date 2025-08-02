@@ -1,13 +1,3 @@
-export interface JsonOptions {
-    showCreatorHub: boolean | number;
-}
-
-export interface ProtobufOptions {
-    showUpList: 'auto' | 'show' | 'hide';
-    filterTopReplies: boolean | number;
-    airborne: boolean | string;
-}
-
 export interface LayoutItem {
     pos: number;
     id: number;

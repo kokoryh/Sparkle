@@ -29,10 +29,34 @@ import { isIPad } from '@utils/index';
 import { BilibiliProtobufHandler } from '../base';
 
 export abstract class BilibiliResponseHandler<T extends object> extends BilibiliProtobufHandler<T> {
+    static getAppEdition(): 'universal' | 'hd' | 'inter' {
+        const headers = $.request.headers;
+        const ua = headers['user-agent'] || headers['User-Agent'] || '';
+        if (ua.startsWith('bili-hd')) {
+            return 'hd';
+        } else if (ua.startsWith('bili-inter')) {
+            return 'inter';
+        } else {
+            return 'universal';
+        }
+    }
+
     headers = $.response.headers;
+
+    protected options: {
+        showUpList: 'auto' | 'show' | 'hide';
+        purifyTopReplies: boolean | number;
+        airborne: boolean | string;
+    } = {
+        showUpList: 'show',
+        purifyTopReplies: true,
+        airborne: true,
+    };
 
     constructor(type: MessageType<T>) {
         super(type, $.response.bodyBytes!);
+        Object.assign(this.options, $.argument);
+        $.debug(this.options);
     }
 
     done(): void {
@@ -345,10 +369,10 @@ export class MainListReplyHandler extends BilibiliResponseHandler<MainListReply>
     }
 
     protected _process(message: MainListReply): void {
-        const { filterTopReplies } = this.options;
+        const { purifyTopReplies } = this.options;
         delete message.cm;
         message.subjectTopCards = message.subjectTopCards.filter(item => item.type !== Type.CM);
-        if (filterTopReplies) {
+        if (purifyTopReplies) {
             const pattern = /https:\/\/b23\.tv\/(cm|mall)/;
             message.topReplies = message.topReplies.filter(reply => {
                 const urls = reply.content?.urls || {};

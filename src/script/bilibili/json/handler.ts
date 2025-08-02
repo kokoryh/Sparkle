@@ -6,7 +6,6 @@ import {
     FeedIndex,
     FeedIndexStory,
     GotoType,
-    JsonOptions,
     Layout,
     Splash,
     StoryItem,
@@ -15,7 +14,9 @@ import {
 import locale from '../locale';
 
 export abstract class BilibiliJsonHandler<T extends { data: object | null }> extends JsonMessage<T> {
-    protected options: JsonOptions = {
+    protected options: {
+        showCreatorHub: boolean | number;
+    } = {
         showCreatorHub: false,
     };
 

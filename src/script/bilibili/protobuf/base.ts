@@ -1,32 +1,10 @@
 import { MessageType } from '@protobuf-ts/runtime';
 import { $ } from '@core/env';
 import { ProtobufMessage } from '@core/message';
-import { ProtobufOptions } from '@entity/bilibili';
-import { createCaseInsensitiveDictionary } from '@utils/index';
 
 export abstract class BilibiliProtobufHandler<T extends object> extends ProtobufMessage<T> {
-    static getAppEdition(): 'universal' | 'hd' | 'inter' {
-        const headers = createCaseInsensitiveDictionary($.request.headers);
-        const ua = headers['user-agent'] || '';
-        if (ua.startsWith('bili-hd')) {
-            return 'hd';
-        } else if (ua.startsWith('bili-inter')) {
-            return 'inter';
-        } else {
-            return 'universal';
-        }
-    }
-
-    protected options: ProtobufOptions = {
-        showUpList: 'show',
-        filterTopReplies: true,
-        airborne: true,
-    };
-
     constructor(type: MessageType<T>, body: Uint8Array) {
         super(type, body);
-        Object.assign(this.options, $.argument);
-        $.debug(this.options);
     }
 
     abstract done(): void;
