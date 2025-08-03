@@ -186,7 +186,6 @@ export class PlayViewUniteReplyHandler extends BilibiliProtobufHandler<PlayViewU
     }
 
     done(): Uint8Array {
-        this.process();
         return this.toBinary();
     }
 

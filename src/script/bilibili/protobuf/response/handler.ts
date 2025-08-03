@@ -26,21 +26,10 @@ import { PlayViewReply as IpadPlayViewReply } from '@proto/bilibili/pgc/gateway/
 import { SearchAllResponse } from '@proto/bilibili/polymer/app/search/v1/search';
 import { $ } from '@core/env';
 import { isIPad } from '@utils/index';
+import { getAppEdition } from '@utils/bilibili';
 import { BilibiliProtobufHandler } from '../base';
 
 export abstract class BilibiliResponseHandler<T extends object> extends BilibiliProtobufHandler<T> {
-    static getAppEdition(): 'universal' | 'hd' | 'inter' {
-        const headers = $.request.headers;
-        const ua = headers['user-agent'] || headers['User-Agent'] || '';
-        if (ua.startsWith('bili-hd')) {
-            return 'hd';
-        } else if (ua.startsWith('bili-inter')) {
-            return 'inter';
-        } else {
-            return 'universal';
-        }
-    }
-
     headers = $.response.headers;
 
     protected options: {
@@ -231,14 +220,12 @@ export class IpadViewProgressReplyHandler extends BilibiliResponseHandler<IpadVi
                 `MD5 mismatch detected. Received: ${chronos.md5}; File: ${chronos.file}`,
                 'Please update the app or script to the latest version. If you are already using the latest version, please contact the author for adjustments'
             );
-            processedMd5 = this.chronosMd5Map[BilibiliProtobufHandler.getAppEdition()];
+            processedMd5 = this.chronosMd5Map[getAppEdition()];
         }
         chronos.md5 = processedMd5;
-        chronos.file = `${this.prefix}${processedMd5}.zip`;
+        chronos.file = `https://raw.githubusercontent.com/kokoryh/chronos/refs/heads/master/${processedMd5}.zip`;
         delete chronos.sign;
     }
-
-    static prefix = 'https://raw.githubusercontent.com/kokoryh/chronos/refs/heads/master/';
 
     static chronosMd5Map = {
         universal: 'df3b771d9f687076eeb3fc924a50fd7c',

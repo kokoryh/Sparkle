@@ -1,5 +1,5 @@
 import { $ } from '@core/env';
-import { IMessage, JsonMessage } from '@core/message';
+import { IMessage } from '@core/message';
 import { createCaseInsensitiveDictionary } from '@utils/index';
 
 interface AdListReq {
@@ -8,24 +8,20 @@ interface AdListReq {
 
 export function createHandler(url: string): AdListHandler | MgwHtmHandler | null {
     if (url.endsWith('/getAdList')) {
-        return new AdListHandler($.request.body as string);
+        return new AdListHandler();
     } else if (url.endsWith('/mgw.htm')) {
         return new MgwHtmHandler();
     }
     return null;
 }
 
-export class AdListHandler extends JsonMessage<AdListReq> {
+export class AdListHandler implements IMessage {
     done(): void {
         $.done({ response: { body: this.getResponseBody() } });
     }
 
-    process(): this {
-        return this;
-    }
-
     private getResponseBody(): string {
-        const { placementNo } = this.message;
+        const { placementNo } = JSON.parse($.request.body as string) as AdListReq;
         switch (placementNo) {
             case '0007':
                 return '{"materialsList":[{"billMaterialsId":"1","filePath":"#","creativeType":1}],"advertParam":{"skipTime":1}}';
