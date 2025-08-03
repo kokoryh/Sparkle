@@ -4,7 +4,6 @@
 
 [URL Rewrite]
 ^https?:\/\/(www.)?(g|google)\.cn https://www.google.com 307
-^https?:\/\/exhentai\.org https://e-hentai.org 307
 
 [MITM]
-hostname = %APPEND% www.google.cn, exhentai.org
+hostname = %APPEND% www.google.cn

@@ -1,0 +1,12 @@
+#!name=E-Hentai增强
+#!desc=https://e-hentai.org
+#!category=Enhancement
+
+[URL Rewrite]
+^https:\/\/exhentai\.org https://e-hentai.org 307
+
+[Script]
+ehentai = type=http-response,pattern=^https:\/\/e-hentai\.org\/g\/,requires-body=1,max-size=-1,engine=webview,script-path=https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/dist/webpage.ehentai.js
+
+[MITM]
+hostname = %APPEND% e-hentai.org, exhentai.org
