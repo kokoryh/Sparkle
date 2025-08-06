@@ -1,6 +1,6 @@
 import { MessageType } from '@protobuf-ts/runtime';
 import { HttpHeaders } from 'src/types/common';
-import { FetchResponse, HttpResponse } from 'src/types/client';
+import { FetchResponse } from 'src/types/client';
 import { SegmentItem } from '@entity/bilibili';
 import {
     DanmakuElem,
@@ -24,6 +24,7 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
 
     constructor(type: MessageType<T>) {
         super(type, $.request.bodyBytes!);
+        $.debug(this.message);
     }
 
     done(): void {
@@ -37,13 +38,12 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
 
     async process(): Promise<this> {
         await this._process(this.message);
-        this._processHeaders(this.headers);
         return this;
     }
 
     protected abstract _process(message: T): Promise<void>;
 
-    protected fetchAll(videoId: string, cid = ''): Promise<[HttpResponse, SegmentItem[]]> {
+    protected fetchAll(videoId: string, cid = ''): Promise<[FetchResponse, number[][]]> {
         return Promise.all([this.fetchBilibili(), this.fetchSponsorBlock(videoId, cid)]);
     }
 
@@ -58,10 +58,19 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
         });
     }
 
-    private async fetchSponsorBlock(videoId: string, cid: string): Promise<SegmentItem[]> {
+    private async fetchSponsorBlock(videoId: string, cid: string): Promise<number[][]> {
         try {
-            const response = await getSkipSegments(videoId, cid);
-            return response.status === 200 ? JSON.parse(response.body as string) : [];
+            const { status, body } = await getSkipSegments(videoId, cid);
+            $.debug(videoId, status, body);
+            if (status !== 200) {
+                return [];
+            }
+            return (<SegmentItem[]>JSON.parse(body as string)).reduce((result: number[][], { actionType, segment }) => {
+                if (actionType === 'skip' && segment[1] - segment[0] >= 8) {
+                    result.push(segment);
+                }
+                return result;
+            }, []);
         } catch (e) {
             $.error('[fetchSponsorBlock]', e);
             return [];
@@ -75,30 +84,32 @@ export class DmSegMobileReqHandler extends BilibiliRequestHandler<DmSegMobileReq
     }
 
     protected async _process(message: DmSegMobileReq): Promise<void> {
-        const { pid, oid, type } = message;
-        if (type !== 1) {
+        if (message.type !== 1) {
             $.exit();
         }
+        const { pid, oid } = message;
         const videoId = avToBv(pid);
         try {
-            const [{ headers, bodyBytes }, segments] = await this.fetchAll(videoId, oid);
-            $.debug(videoId, message, segments);
+            const [{ status, headers, bodyBytes }, segments] = await this.fetchAll(videoId, oid);
+            if (status !== 200) {
+                throw new Error(`Response status code is ${status}`);
+            }
             if (!bodyBytes) {
                 throw new Error('Response body is empty');
             }
             this.headers = headers;
-            this.body = new DmSegMobileReplyHandler(bodyBytes, segments).process().done();
+            this.body = segments.length ? new DmSegMobileReplyHandler(bodyBytes, segments).process().done() : bodyBytes;
         } catch (e) {
-            $.error('[DmSegMobileReqHandler]', e);
+            $.error('[processDmSegMobileReq]', e);
             $.exit();
         }
     }
 }
 
 export class DmSegMobileReplyHandler extends BilibiliProtobufHandler<DmSegMobileReply> {
-    private segments: SegmentItem[];
+    private segments: number[][];
 
-    constructor(data: Uint8Array, segments: SegmentItem[]) {
+    constructor(data: Uint8Array, segments: number[][]) {
         super(DmSegMobileReply, data);
         this.segments = segments;
     }
@@ -113,22 +124,16 @@ export class DmSegMobileReplyHandler extends BilibiliProtobufHandler<DmSegMobile
     }
 
     protected _process(message: DmSegMobileReply): void {
-        message.elems = message.elems.filter(item => !item.action?.startsWith('airborne'));
-        if (this.segments.length) {
-            message.elems.unshift(...this.getAirBorneDms());
-        }
+        message.elems.push(...this.getAirBorneDms());
     }
 
     private getAirBorneDms(): DanmakuElem[] {
         const offset = 2000;
-        return this.segments.reduce((result: DanmakuElem[], { actionType, segment }, index) => {
-            if (actionType !== 'skip' || segment[1] - segment[0] < 8) {
-                return result;
-            }
+        return this.segments.map((segment, index) => {
             const id = (index + 1).toString();
             const start = Math.floor(segment[0] * 1000) + offset;
             const end = Math.floor(segment[1] * 1000);
-            result.push({
+            return {
                 id,
                 progress: start,
                 mode: 5,
@@ -148,9 +153,8 @@ export class DmSegMobileReplyHandler extends BilibiliProtobufHandler<DmSegMobile
                 type: 1,
                 oid: '212364987',
                 dmFrom: 1,
-            });
-            return result;
-        }, []);
+            };
+        });
     }
 }
 
@@ -164,23 +168,26 @@ export class PlayViewUniteReqHandler extends BilibiliRequestHandler<PlayViewUnit
         const { aid, cid } = vod || {};
         const videoId = bvid || avToBv(aid!);
         try {
-            const [{ headers, bodyBytes }, segments] = await this.fetchAll(videoId, cid);
+            const [{ status, headers, bodyBytes }, segments] = await this.fetchAll(videoId, cid);
+            if (status !== 200) {
+                throw new Error(`Response status code is ${status}`);
+            }
             if (!bodyBytes) {
                 throw new Error('Response body is empty');
             }
             this.headers = headers;
             this.body = new PlayViewUniteReplyHandler(bodyBytes, segments).process().done();
         } catch (e) {
-            $.error('[PlayViewUniteReqHandler]', e);
+            $.error('[processPlayViewUniteReq]', e);
             $.exit();
         }
     }
 }
 
 export class PlayViewUniteReplyHandler extends BilibiliProtobufHandler<PlayViewUniteReply> {
-    private segments: SegmentItem[];
+    private segments: number[][];
 
-    constructor(data: Uint8Array, segments: SegmentItem[]) {
+    constructor(data: Uint8Array, segments: number[][]) {
         super(PlayViewUniteReply, data);
         this.segments = segments;
     }
@@ -270,15 +277,10 @@ export class PlayViewUniteReplyHandler extends BilibiliProtobufHandler<PlayViewU
     }
 
     private getClipInfo(): ClipInfo[] {
-        return this.segments.reduce((result: ClipInfo[], { actionType, segment }) => {
-            if (actionType === 'skip') {
-                result.push({
-                    start: Math.floor(segment[0]),
-                    end: Math.ceil(segment[1]),
-                    clipType: ClipType.CLIP_TYPE_OP,
-                });
-            }
-            return result;
-        }, []);
+        return this.segments.map(([start, end]) => ({
+            start: Math.floor(start),
+            end: Math.ceil(end),
+            clipType: ClipType.CLIP_TYPE_OP,
+        }));
     }
 }

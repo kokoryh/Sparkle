@@ -20,7 +20,7 @@ import {
     ViewProgressReply,
     RelateCard,
 } from '@proto/bilibili/app/viewunite/v1/view';
-import { DmSegMobileReply, DmViewReply } from '@proto/bilibili/community/service/dm/v1/dm';
+import { DmViewReply } from '@proto/bilibili/community/service/dm/v1/dm';
 import { MainListReply, Type } from '@proto/bilibili/main/community/reply/v1/reply';
 import { PlayViewReply as IpadPlayViewReply } from '@proto/bilibili/pgc/gateway/player/v2/playurl.js';
 import { SearchAllResponse } from '@proto/bilibili/polymer/app/search/v1/search';
@@ -30,8 +30,6 @@ import { getAppEdition } from '@utils/bilibili';
 import { BilibiliProtobufHandler } from '../base';
 
 export abstract class BilibiliResponseHandler<T extends object> extends BilibiliProtobufHandler<T> {
-    headers = $.response.headers;
-
     protected options: {
         showUpList: 'auto' | 'show' | 'hide';
         purifyTopReplies: boolean | number;
@@ -50,14 +48,12 @@ export abstract class BilibiliResponseHandler<T extends object> extends Bilibili
 
     done(): void {
         $.done({
-            headers: this.headers,
             body: this.toBinary(),
         });
     }
 
     process(): this {
         this._process(this.message);
-        this._processHeaders(this.headers);
         return this;
     }
 
@@ -97,7 +93,7 @@ export class DynAllReplyMessage extends BilibiliResponseHandler<DynAllReply> {
         const lastItem = listSecond.at(-1);
         if (lastItem) {
             lastItem.separator = true;
-            list.unshift(...listSecond);
+            message.upList.list = [...listSecond, ...list];
             listSecond.length = 0;
         }
     }
@@ -228,13 +224,12 @@ export class IpadViewProgressReplyHandler extends BilibiliResponseHandler<IpadVi
     }
 
     static chronosMd5Map = {
-        universal: 'df3b771d9f687076eeb3fc924a50fd7c',
-        hd: '7bfd1de2044f37c1b0f4185085d816af',
-        inter: '7bfd1de2044f37c1b0f4185085d816af',
-        '0ec3e3ac2351b6d9caf9a5ddfce3eebf': 'df3b771d9f687076eeb3fc924a50fd7c',
-        '1b8a3fa5e6caa78303042798c7a9e492': 'df3b771d9f687076eeb3fc924a50fd7c',
-        '325e7073ffc6fb5263682fecdcd1058f': '7bfd1de2044f37c1b0f4185085d816af',
-        '3a14beddd23328eaddfe9f0eb048d713': '7bfd1de2044f37c1b0f4185085d816af',
+        universal: '590d1a3797a5ca06bcf6af9cf9c90734',
+        hd: '603cb5b99d1b592237e03ffd735ae164',
+        inter: '603cb5b99d1b592237e03ffd735ae164',
+        '0ec3e3ac2351b6d9caf9a5ddfce3eebf': '590d1a3797a5ca06bcf6af9cf9c90734',
+        '325e7073ffc6fb5263682fecdcd1058f': '603cb5b99d1b592237e03ffd735ae164',
+        '3a14beddd23328eaddfe9f0eb048d713': '603cb5b99d1b592237e03ffd735ae164',
     };
 
     constructor() {
@@ -324,16 +319,6 @@ export class ViewProgressReplyHandler extends BilibiliResponseHandler<ViewProgre
         if (this.isAirborneEnabled() && message.chronos) {
             IpadViewProgressReplyHandler.processChronos(message.chronos);
         }
-    }
-}
-
-export class DmSegMobileReplyHandler extends BilibiliResponseHandler<DmSegMobileReply> {
-    constructor() {
-        super(DmSegMobileReply);
-    }
-
-    protected _process(message: DmSegMobileReply): void {
-        message.elems = message.elems.filter(item => !item.action?.startsWith('airborne'));
     }
 }
 

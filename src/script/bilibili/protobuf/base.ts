@@ -11,15 +11,6 @@ export abstract class BilibiliProtobufHandler<T extends object> extends Protobuf
 
     abstract process(): this | Promise<this>;
 
-    protected _processHeaders(headers: Record<string, string>): void {
-        if (headers['grpc-encoding'] === 'gzip') {
-            headers['grpc-encoding'] = 'identity';
-        }
-        if (headers['Grpc-Encoding'] === 'gzip') {
-            headers['Grpc-Encoding'] = 'identity';
-        }
-    }
-
     protected override fromBinary(data: Uint8Array): T {
         const body = data[0] ? $.ungzip(data.subarray(5)) : data.subarray(5);
         return super.fromBinary(body);

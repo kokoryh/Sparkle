@@ -133,8 +133,6 @@ export class LayoutHandler extends BilibiliJsonHandler<Layout> {
 }
 
 export class SplashHandler extends BilibiliJsonHandler<Splash> {
-    private keyList = ['show', 'event_list'];
-
     protected _process({ data }: Splash): void {
         if (data.min_interval) {
             data.min_interval = 864000;
@@ -142,11 +140,12 @@ export class SplashHandler extends BilibiliJsonHandler<Splash> {
         if (data.pull_interval) {
             data.pull_interval = 864000;
         }
-        this.keyList.forEach(key => {
-            if (data[key]) {
-                data[key] = [];
-            }
-        });
+        if (data.show) {
+            data.show.length = 0;
+        }
+        if (data.event_list) {
+            data.event_list.length = 0;
+        }
     }
 }
 
