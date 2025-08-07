@@ -37,7 +37,6 @@ export function getAppEdition(): 'universal' | 'hd' | 'inter' {
         return 'hd';
     } else if (ua.startsWith('bili-inter')) {
         return 'inter';
-    } else {
-        return 'universal';
     }
+    return 'universal';
 }
