@@ -158,6 +158,9 @@ export class DmSegMobileReplyHandler extends BilibiliProtobufHandler<DmSegMobile
     }
 }
 
+/**
+ * @deprecated
+ */
 export class PlayViewUniteReqHandler extends BilibiliRequestHandler<PlayViewUniteReq> {
     constructor() {
         super(PlayViewUniteReq);
@@ -184,6 +187,9 @@ export class PlayViewUniteReqHandler extends BilibiliRequestHandler<PlayViewUnit
     }
 }
 
+/**
+ * @deprecated
+ */
 export class PlayViewUniteReplyHandler extends BilibiliProtobufHandler<PlayViewUniteReply> {
     private segments: number[][];
 

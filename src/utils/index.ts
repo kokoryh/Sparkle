@@ -46,22 +46,25 @@ export function stringify(value: any): string {
     if (typeof value !== 'object' || value === null) {
         return String(value);
     }
-    if (typeof value.toString === 'function' && value.toString !== Object.prototype.toString) {
-        return Array.isArray(value) ? JSON.stringify(value) : value.toString();
+    if (value instanceof Date) {
+        return value.toISOString();
     }
     if (value instanceof RegExp) {
         return value.toString();
     }
-    if (value instanceof Date) {
-        return value.toISOString();
+    if (Array.isArray(value)) {
+        return JSON.stringify(value);
+    }
+    if (typeof value.toString === 'function' && value.toString !== Object.prototype.toString) {
+        return value.toString();
     }
     return JSON.stringify(value);
 }
 
 export function uuid() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = (Math.random() * 16) | 0,
-            v = c == 'x' ? r : (r & 0x3) | 0x8;
+        const r = (Math.random() * 16) | 0;
+        const v = c == 'x' ? r : (r & 0x3) | 0x8;
         return v.toString(16);
     });
 }

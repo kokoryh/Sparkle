@@ -19,8 +19,8 @@ export default abstract class Client {
         if (typeof $loon !== 'undefined') {
             className = 'Loon';
         } else if (typeof $task !== 'undefined') {
-            // className = 'QuantumultX';
             throw new Error('QuantumultX is not supported');
+            // className = 'QuantumultX';
         }
         if (!Client.instances[className]) {
             Client.instances[className] = Client.classNames[className](name, className);
