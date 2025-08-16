@@ -69,7 +69,7 @@ export abstract class HtmlMessage implements IMessage {
 
     protected scriptTemplate?: string;
 
-    protected scriptFilter?: (element: HTMLScriptElement) => boolean;
+    protected filterMap?: Record<string, (element: any) => boolean>;
 
     constructor() {
         const headers = createCaseInsensitiveDictionary($.response.headers);
@@ -84,8 +84,10 @@ export abstract class HtmlMessage implements IMessage {
     }
 
     process(): this {
-        if (this.scriptFilter) {
-            this.remove(this.query('script').filter(this.scriptFilter));
+        if (this.filterMap) {
+            for (const [selector, filterFn] of Object.entries(this.filterMap)) {
+                this.remove(this.query(selector).filter(filterFn));
+            }
         }
         if (this.scriptTemplate) {
             const scriptElement = this.message.createElement('script');
@@ -108,7 +110,7 @@ export abstract class HtmlMessage implements IMessage {
         return `<!DOCTYPE HTML>${this.message.documentElement.outerHTML}`;
     }
 
-    protected query<K extends keyof HTMLElementTagNameMap>(selector: K): HTMLElementTagNameMap[K][] {
+    protected query<K extends keyof HTMLElementTagNameMap>(selector: string): HTMLElementTagNameMap[K][] {
         return Array.from(this.message.querySelectorAll(selector));
     }
 

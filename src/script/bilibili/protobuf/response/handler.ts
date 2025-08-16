@@ -99,6 +99,9 @@ export class DynAllReplyMessage extends BilibiliResponseHandler<DynAllReply> {
     }
 }
 
+/**
+ * @deprecated
+ */
 export class DefaultWordsReplyHandler extends BilibiliResponseHandler<DefaultWordsReply> {
     constructor() {
         super(DefaultWordsReply);
@@ -113,6 +116,9 @@ export class DefaultWordsReplyHandler extends BilibiliResponseHandler<DefaultWor
     }
 }
 
+/**
+ * @deprecated
+ */
 export class ModeStatusReplyHandler extends BilibiliResponseHandler<ModeStatusReply> {
     constructor() {
         super(ModeStatusReply);
@@ -179,6 +185,9 @@ export class PopularReplyHandler extends BilibiliResponseHandler<PopularReply> {
     }
 }
 
+/**
+ * @deprecated
+ */
 export class TFInfoReplyHandler extends BilibiliResponseHandler<TFInfoReply> {
     constructor() {
         super(TFInfoReply);
