@@ -1,7 +1,7 @@
 import { gunzipSync } from 'fflate';
-import * as Surge from 'src/types/surge';
-import * as Loon from 'src/types/loon';
-import * as QuantumultX from 'src/types/quantumult-x';
+import * as Surge from '@/types/surge';
+import * as Loon from '@/types/loon';
+import * as QuantumultX from '@/types/quantumult-x';
 import {
     HttpRequest,
     HttpResponse,
@@ -10,7 +10,7 @@ import {
     FetchRequest,
     FetchResponse,
     NotificationOptions,
-} from 'src/types/client';
+} from '@/types/client';
 import { stringify } from '@utils/index';
 
 export default abstract class Client {
@@ -312,6 +312,9 @@ export class QuantumultXClient extends Client {
             } else {
                 fetchRequest[key] = value;
             }
+        }
+        if (!request.body?.length && ['POST', 'PUT', 'PATCH'].includes(fetchRequest.method!)) {
+            fetchRequest.headers = { ...fetchRequest.headers, 'Content-Length': '0' };
         }
         return new Promise((resolve, reject) => {
             $task.fetch(fetchRequest).then(

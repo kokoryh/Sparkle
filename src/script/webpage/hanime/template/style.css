@@ -1,7 +1,14 @@
+#mobile-ad {
+    display: none !important;
+}
 #bottom-ads {
     display: none !important;
 }
 a[href*='.labsda.com'] {
+    display: none !important;
+}
+a[href^="https://go.rmhfrtnd.com/"]
+{
     display: none !important;
 }
 div[style*='width: 310px; height: 282px;'] {
@@ -11,5 +18,14 @@ div:has(> script[src*='jads.co']) {
     display: none !important;
 }
 .video-show-width > .single-show-list > .hidden-xs[style*='text-align:'] {
+    display: none !important;
+}
+div:has(> .scaled-juicyads) {
+    height: 90px !important;
+}
+.scaled-exoclick {
+    display: none !important;
+}
+.scaled-juicyads {
     display: none !important;
 }

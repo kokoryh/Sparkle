@@ -60,6 +60,11 @@ export abstract class ProtobufMessage<T extends object> implements IMessage {
     }
 }
 
+export interface ElementFilter {
+    selector: string;
+    filterFn: (element: any) => boolean;
+}
+
 export abstract class HtmlMessage implements IMessage {
     protected message: Document;
 
@@ -69,7 +74,7 @@ export abstract class HtmlMessage implements IMessage {
 
     protected scriptTemplate?: string;
 
-    protected scriptFilter?: (element: HTMLScriptElement) => boolean;
+    protected filterList?: ElementFilter[];
 
     constructor() {
         const headers = createCaseInsensitiveDictionary($.response.headers);
@@ -84,8 +89,10 @@ export abstract class HtmlMessage implements IMessage {
     }
 
     process(): this {
-        if (this.scriptFilter) {
-            this.remove(this.query('script').filter(this.scriptFilter));
+        if (this.filterList) {
+            this.filterList.forEach(({ selector, filterFn }) => {
+                this.remove(this.query(selector).filter(filterFn));
+            });
         }
         if (this.scriptTemplate) {
             const scriptElement = this.message.createElement('script');
@@ -108,7 +115,7 @@ export abstract class HtmlMessage implements IMessage {
         return `<!DOCTYPE HTML>${this.message.documentElement.outerHTML}`;
     }
 
-    protected query<K extends keyof HTMLElementTagNameMap>(selector: K): HTMLElementTagNameMap[K][] {
+    protected query<K extends keyof HTMLElementTagNameMap>(selector: string): HTMLElementTagNameMap[K][] {
         return Array.from(this.message.querySelectorAll(selector));
     }
 

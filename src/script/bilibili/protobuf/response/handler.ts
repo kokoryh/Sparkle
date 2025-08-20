@@ -99,6 +99,9 @@ export class DynAllReplyMessage extends BilibiliResponseHandler<DynAllReply> {
     }
 }
 
+/**
+ * @deprecated
+ */
 export class DefaultWordsReplyHandler extends BilibiliResponseHandler<DefaultWordsReply> {
     constructor() {
         super(DefaultWordsReply);
@@ -113,6 +116,9 @@ export class DefaultWordsReplyHandler extends BilibiliResponseHandler<DefaultWor
     }
 }
 
+/**
+ * @deprecated
+ */
 export class ModeStatusReplyHandler extends BilibiliResponseHandler<ModeStatusReply> {
     constructor() {
         super(ModeStatusReply);
@@ -179,6 +185,9 @@ export class PopularReplyHandler extends BilibiliResponseHandler<PopularReply> {
     }
 }
 
+/**
+ * @deprecated
+ */
 export class TFInfoReplyHandler extends BilibiliResponseHandler<TFInfoReply> {
     constructor() {
         super(TFInfoReply);
@@ -224,10 +233,10 @@ export class IpadViewProgressReplyHandler extends BilibiliResponseHandler<IpadVi
     }
 
     static chronosMd5Map = {
-        universal: 'bf48b865e19a0dfef470d375f1a0bd8b',
+        universal: 'f1bafcbf71230f7d14d98f11c0bb187c',
         hd: '603cb5b99d1b592237e03ffd735ae164',
         inter: '603cb5b99d1b592237e03ffd735ae164',
-        '29d1e2ec4afbcf17c80f98d939a8e3f3': 'bf48b865e19a0dfef470d375f1a0bd8b',
+        '0442b388a5ad532d1e738e545b81251d': 'f1bafcbf71230f7d14d98f11c0bb187c',
         '325e7073ffc6fb5263682fecdcd1058f': '603cb5b99d1b592237e03ffd735ae164',
         '3a14beddd23328eaddfe9f0eb048d713': '603cb5b99d1b592237e03ffd735ae164',
     };

@@ -1,6 +1,6 @@
 import { MessageType } from '@protobuf-ts/runtime';
-import { HttpHeaders } from 'src/types/common';
-import { FetchResponse } from 'src/types/client';
+import { HttpHeaders } from '@/types/common';
+import { FetchResponse } from '@/types/client';
 import { SegmentItem } from '@entity/bilibili';
 import {
     DanmakuElem,

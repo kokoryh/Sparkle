@@ -1,5 +1,5 @@
 import { $ } from '@core/env';
-import { FetchResponse } from 'src/types/client';
+import { FetchResponse } from '@/types/client';
 
 export function getSkipSegments(videoId: string, cid = ''): Promise<FetchResponse> {
     cid = cid !== '0' ? cid : '';
