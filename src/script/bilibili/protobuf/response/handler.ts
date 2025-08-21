@@ -383,6 +383,6 @@ export class SearchAllResponseHandler extends BilibiliResponseHandler<SearchAllR
     }
 
     protected _process(message: SearchAllResponse): void {
-        message.item = message.item.filter(item => !item.linktype.endsWith('_ad'));
+        message.item = message.item.filter(item => !/_ad_?/.test(item.linktype));
     }
 }
