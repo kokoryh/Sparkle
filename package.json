@@ -9,7 +9,7 @@
         "jq": "jq -f ./jq/dev/index.jq --indent 4 < ./jq/dev/input.json > ./jq/dev/output.json"
     },
     "dependencies": {
-        "@protobuf-ts/plugin": "2.9.6",
+        "@protobuf-ts/plugin": "2.11.1",
         "fflate": "0.8.2",
         "lossless-json": "4.0.2"
     },
