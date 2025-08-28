@@ -233,12 +233,13 @@ export class IpadViewProgressReplyHandler extends BilibiliResponseHandler<IpadVi
     }
 
     static chronosMd5Map = {
-        universal: '4e1992455ebaa7f392a048b3d0dc3706',
-        hd: '91c1d87ef49e4547b6c123452fc8cb5f',
+        universal: 'ecca73e42e160074e0caf4b3ddb54a52',
+        hd: '932002070dc1b51241198a074d2279fc',
         inter: '8c3feda2e92bf60e8a7aeade1a231586',
-        e552fedeb7894a2b98339b8f4e0eafc2: '4e1992455ebaa7f392a048b3d0dc3706',
-        '29d1e2ec4afbcf17c80f98d939a8e3f3': '91c1d87ef49e4547b6c123452fc8cb5f',
-        '3a14beddd23328eaddfe9f0eb048d713': '8c3feda2e92bf60e8a7aeade1a231586',
+        c29bd8f2b64a8f57f49c3622c0f763db: 'ecca73e42e160074e0caf4b3ddb54a52', // universal 3.6.4
+        '8232ffb6ee43b687b5fe5add5b3e97de': 'feaca416bbc1174b8e935cf87ff8f0b5', // hd 3.6.3
+        '325e7073ffc6fb5263682fecdcd1058f': '932002070dc1b51241198a074d2279fc', // hd 2.7.4
+        '3a14beddd23328eaddfe9f0eb048d713': '8c3feda2e92bf60e8a7aeade1a231586', // inter 2.7.3
     };
 
     constructor() {
