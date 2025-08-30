@@ -7,9 +7,9 @@
 [Rule]
 {{{STUN}}},STUN,REJECT
 
-{{{Bilibili}}},4480,REJECT-NO-DROP
-{{{Bilibili}}},4483,REJECT-NO-DROP
-{{{Bilibili}}},9102,REJECT-NO-DROP
+{{{Bilibili}}},4480,REJECT-NO-DROP,pre-matching
+{{{Bilibili}}},4483,REJECT-NO-DROP,pre-matching
+{{{Bilibili}}},9102,REJECT-NO-DROP,pre-matching
 
 {{{通用域名}}},www.googleadservices.com,REJECT,pre-matching
 {{{通用域名}}},googleads.g.doubleclick.net,REJECT,pre-matching
