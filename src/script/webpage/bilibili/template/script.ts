@@ -22,11 +22,20 @@ interface SlotItem {
 
 interface Props {
     jumpAddress?: string;
+    list?: Slider[];
+}
+
+interface Slider {
+    title: string;
+    link: string;
+    image: {
+        url: string;
+    };
 }
 
 const uuids = new Set<string>();
 
-const hiddenTypeList = ['EvaLayoutContainerPrerender', 'EvaLayoutContainer', 'EvaLinkButton'];
+const hiddenTypeList = ['EvaLayoutContainerPrerender', 'EvaLayoutContainer', 'EvaLinkButton', 'H5Slider'];
 
 function canBeHidden(type: string): boolean {
     return hiddenTypeList.includes(type);
@@ -34,8 +43,8 @@ function canBeHidden(type: string): boolean {
 
 function needToBeHidden(item: TreeItem): boolean {
     const jumpAddress = item.props?.jumpAddress;
-    if (!jumpAddress) return false;
-    return !new URL(jumpAddress).hostname.includes('bilibili');
+    const links = item.props?.list?.map(item => item.link) || [];
+    return [jumpAddress, ...links].some(url => url && !new URL(url).hostname.includes('bilibili'));
 }
 
 function traversalTree(treeItems: TreeItem[], path: string[] = []): void {
