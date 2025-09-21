@@ -62,7 +62,7 @@ export abstract class BilibiliRequestHandler<T extends object> extends BilibiliP
         try {
             const { status, body } = await getSkipSegments(videoId, cid);
             $.debug(videoId, status, body);
-            if (status !== 200) {
+            if (status !== 200 || !body || body === '[]') {
                 return [];
             }
             return (<SegmentItem[]>JSON.parse(body as string)).reduce((result: number[][], { actionType, segment }) => {
