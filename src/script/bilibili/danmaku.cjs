@@ -1,4 +1,4 @@
-// universal 3.6.4
+// universal 3.7.2
 ((danmaku, endTime, isNum, toastClass) => {
     if (danmaku.meta.content !== '空指部已就位') return;
     if (!isNum(endTime)) return;

@@ -233,10 +233,10 @@ export class IpadViewProgressReplyHandler extends BilibiliResponseHandler<IpadVi
     }
 
     static chronosMd5Map = {
-        universal: 'ecca73e42e160074e0caf4b3ddb54a52',
+        universal: '2c80effb5c7ff582ad82ed7439e8f79a',
         hd: '932002070dc1b51241198a074d2279fc',
         inter: '8c3feda2e92bf60e8a7aeade1a231586',
-        '512efee7fb48d06e49f5d230fec122eb': 'ecca73e42e160074e0caf4b3ddb54a52',
+        '9e5e20312fafe73494f069a7bac5761e': '2c80effb5c7ff582ad82ed7439e8f79a', // universal 3.7.2
         c29bd8f2b64a8f57f49c3622c0f763db: 'ecca73e42e160074e0caf4b3ddb54a52', // universal 3.6.4
         '8232ffb6ee43b687b5fe5add5b3e97de': 'feaca416bbc1174b8e935cf87ff8f0b5', // hd 3.6.3
         '325e7073ffc6fb5263682fecdcd1058f': '932002070dc1b51241198a074d2279fc', // hd 2.7.4
