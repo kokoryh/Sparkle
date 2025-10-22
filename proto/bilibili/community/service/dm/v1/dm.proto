@@ -5,6 +5,7 @@ package bilibili.community.service.dm.v1;
 message DmViewReply {
     repeated string activity_meta = 18;
     Command command = 22;
+    optional bytes qoe = 25;
 }
 
 message Command {

@@ -339,6 +339,7 @@ export class DmViewReplyHandler extends BilibiliResponseHandler<DmViewReply> {
     }
 
     protected _process(message: DmViewReply): void {
+        delete message.qoe;
         message.activityMeta.length = 0;
         if (message.command?.commandDms.length) {
             message.command.commandDms.length = 0;
