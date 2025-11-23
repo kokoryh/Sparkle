@@ -2,32 +2,32 @@ export type HttpHeaders = Record<string, string>;
 
 export type HttpBody = string | Uint8Array;
 
-export interface HttpRequest<T> {
+export interface HttpRequest<T = HttpBody> {
     url: string;
     method: string;
     headers: HttpHeaders;
     body?: T;
 }
 
-export interface HttpResponse<T> {
+export interface HttpResponse<T = HttpBody> {
     status: number;
     headers: HttpHeaders;
     body?: T;
 }
 
-export interface HttpRequestDone<T> {
+export interface HttpRequestDone<T = HttpBody> {
     url?: string;
     headers?: HttpHeaders;
     body?: T;
 }
 
-export interface HttpResponseDone<T> {
+export interface HttpResponseDone<T = HttpBody> {
     status?: number;
     headers?: HttpHeaders;
     body?: T;
 }
 
-export interface FetchRequest<T> {
+export interface FetchRequest<T = HttpBody> {
     url: string;
     headers?: HttpHeaders;
     body?: T;

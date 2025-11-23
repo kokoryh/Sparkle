@@ -1,8 +1,6 @@
 import * as Common from './common';
 import * as Surge from './surge';
 
-export type HttpBody = Surge.HttpBody;
-
 export interface Script extends Omit<Surge.Script, 'type'> {}
 
 export interface PersistentStore extends Surge.PersistentStore {
@@ -17,17 +15,19 @@ export interface Notification {
     post: (title: string, subtitle: string, content: string, attach?: NotificationOptions, delay?: number) => void;
 }
 
-export interface HttpRequest extends Common.HttpRequest<HttpBody> {}
+export interface HttpRequest extends Common.HttpRequest {}
 
-export interface HttpResponse extends Common.HttpResponse<HttpBody> {}
+export interface HttpResponse extends Common.HttpResponse {}
 
-export interface HttpRequestDone extends Common.HttpRequestDone<HttpBody> {}
+export interface HttpRequestDone extends Common.HttpRequestDone {}
 
-export interface HttpResponseDone extends Common.HttpResponseDone<HttpBody> {}
+export interface HttpResponseDone extends Common.HttpResponseDone {}
 
 export type Done = (result?: HttpRequestDone | HttpResponseDone) => void;
 
-export interface FetchRequest extends Surge.FetchRequest {}
+export interface FetchRequest extends Surge.FetchRequest {
+    alpn?: 'h1' | 'h2';
+}
 
 export interface FetchResponse extends Surge.FetchResponse {}
 

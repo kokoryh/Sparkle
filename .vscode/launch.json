@@ -9,15 +9,6 @@
             "runtimeExecutable": "tsx",
             "runtimeArgs": ["watch"],
             "skipFiles": ["<node_internals>/**"]
-        },
-        {
-            "name": "Bilibili Protobuf",
-            "type": "node",
-            "request": "launch",
-            "program": "${workspaceFolder}/src/script/bilibili/protobuf/response/main.ts",
-            "runtimeExecutable": "tsx",
-            "runtimeArgs": ["watch"],
-            "skipFiles": ["<node_internals>/**"]
         }
     ]
 }

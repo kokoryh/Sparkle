@@ -11,7 +11,7 @@ export interface Task {
     fetch: (request: FetchRequest) => Promise<FetchResponse>;
 }
 
-export type Notify = (title: string, subtitle: string, message: string, options?: NotifyOptions) => void;
+export type Notify = (title: string, subtitle: string, message: string, options?: NotificationOptions) => void;
 
 export interface HttpRequest extends Common.HttpRequest<string> {
     scheme: string;
@@ -43,12 +43,12 @@ export interface FetchRequest extends Common.FetchRequest<string> {
 
 export interface FetchResponse {
     statusCode: number;
-    headers: Record<string, string>;
+    headers: Common.HttpHeaders;
     body?: string;
     bodyBytes?: ArrayBuffer;
 }
 
-export type NotifyOptions = Partial<{
+export type NotificationOptions = Partial<{
     'open-url': string;
     'media-url': string;
     'update-pasteboard': string;

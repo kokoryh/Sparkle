@@ -1,13 +1,15 @@
-import { $ } from '@core/env';
+// const XOR_CODE = 23442827791579n;
+// const MASK_CODE = 2251799813685247n;
+// const MAX_AID = 1n << 51n;
+// const BASE = 58n;
 
-const XOR_CODE = 23442827791579n;
-const MASK_CODE = 2251799813685247n;
-const MAX_AID = 1n << 51n;
-const BASE = 58n;
-
-const data = 'FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf';
+// const data = 'FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf';
 
 export function avToBv(avid: string | number): string {
+    const XOR_CODE = 23442827791579n;
+    const MAX_AID = 1n << 51n;
+    const BASE = 58n;
+    const data = 'FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf';
     const bytes = ['B', 'V', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0'];
     let bvIndex = bytes.length - 1;
     let tmp = (MAX_AID | BigInt(avid)) ^ XOR_CODE;
@@ -22,21 +24,13 @@ export function avToBv(avid: string | number): string {
 }
 
 export function bvToAv(bvid: string): number {
+    const XOR_CODE = 23442827791579n;
+    const MASK_CODE = 2251799813685247n;
+    const BASE = 58n;
     const bvidArr = Array.from(bvid);
     [bvidArr[3], bvidArr[9]] = [bvidArr[9], bvidArr[3]];
     [bvidArr[4], bvidArr[7]] = [bvidArr[7], bvidArr[4]];
     bvidArr.splice(0, 3);
     const tmp = bvidArr.reduce((pre, bvidChar) => pre * BASE + BigInt(data.indexOf(bvidChar)), 0n);
     return Number((tmp & MASK_CODE) ^ XOR_CODE);
-}
-
-export function getAppEdition(): 'universal' | 'hd' | 'inter' {
-    const headers = $.request.headers;
-    const ua = headers['user-agent'] || headers['User-Agent'] || '';
-    if (ua.startsWith('bili-hd')) {
-        return 'hd';
-    } else if (ua.startsWith('bili-inter')) {
-        return 'inter';
-    }
-    return 'universal';
 }

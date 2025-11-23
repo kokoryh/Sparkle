@@ -1,12 +1,3 @@
-import { $ } from '@core/env';
-import { DmSegMobileReqHandler } from './handler';
+import app from './app';
 
-void (async () => {
-    try {
-        (await new DmSegMobileReqHandler().process()).done();
-    } catch (e) {
-        $.error(e, $.request.url);
-    } finally {
-        $.exit();
-    }
-})();
+app.run();

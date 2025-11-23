@@ -83,7 +83,7 @@ async function renderTemplate(basePath: string, sourceContent: string): Promise<
                 });
                 templateCache.set(templateId, result.outputFiles?.[0]?.text || '');
             } catch (err) {
-                console.error(`[ERROR] Build template "${templateId}" failed: ${err.toString()}`);
+                console.error(`[ERROR] Build template "${templateId}" failed: ${String(err)}`);
                 templateCache.set(templateId, '');
             }
         })

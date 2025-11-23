@@ -3,4 +3,6 @@ node_modules
 package-lock.json
 
 **/dev
+src/core/debug.ts
 src/proto
+src/script/bilibili/danmaku.cjs

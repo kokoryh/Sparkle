@@ -1,13 +1,3 @@
-export function isIPad(): boolean {
-    let device = '';
-    if (typeof $environment !== 'undefined' && $environment['device-model']) {
-        device = $environment['device-model'];
-    } else if (typeof $loon !== 'undefined') {
-        device = $loon;
-    }
-    return device.includes('iPad');
-}
-
 export function createCaseInsensitiveDictionary<T extends object>(initial: T = {} as T): T & { [key: string]: any } {
     const target = Object.create(null);
     const normalize = (property: string | symbol) => {
@@ -67,4 +57,14 @@ export function uuid() {
         const v = c == 'x' ? r : (r & 0x3) | 0x8;
         return v.toString(16);
     });
+}
+
+export function getDevice(): string {
+    let device = '';
+    if (typeof $environment !== 'undefined' && $environment['device-model']) {
+        device = $environment['device-model'];
+    } else if (typeof $loon !== 'undefined') {
+        device = $loon;
+    }
+    return device;
 }

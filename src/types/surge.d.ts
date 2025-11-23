@@ -45,8 +45,8 @@ export interface PersistentStore {
 export type HttpAPI = (method: string, path: string, body: object, callback: (result: object) => void) => void;
 
 export interface HttpClient {
-    post: (options: FetchRequest, callback: (error: unknown, response: FetchResponse, data: HttpBody) => void) => void;
     get: (options: FetchRequest, callback: (error: unknown, response: FetchResponse, data: HttpBody) => void) => void;
+    post: (options: FetchRequest, callback: (error: unknown, response: FetchResponse, data: HttpBody) => void) => void;
 }
 
 export interface Utils {
@@ -60,22 +60,22 @@ export interface Notification {
     post: (title: string, subtitle: string, body: string, options?: NotificationOptions) => void;
 }
 
-export interface HttpRequest extends Common.HttpRequest<HttpBody> {}
+export interface HttpRequest extends Common.HttpRequest {}
 
-export interface HttpResponse extends Common.HttpResponse<HttpBody> {}
+export interface HttpResponse extends Common.HttpResponse {}
 
-export interface HttpRequestDone extends Common.HttpRequestDone<HttpBody> {
+export interface HttpRequestDone extends Common.HttpRequestDone {
     response?: Omit<HttpResponseDone, 'abort'>;
     abort?: boolean;
 }
 
-export interface HttpResponseDone extends Common.HttpResponseDone<HttpBody> {
+export interface HttpResponseDone extends Common.HttpResponseDone {
     abort?: boolean;
 }
 
 export type Done = (result?: HttpRequestDone | HttpResponseDone) => void;
 
-export interface FetchRequest extends Common.FetchRequest<HttpBody> {
+export interface FetchRequest extends Common.FetchRequest {
     ['binary-mode']?: boolean;
     timeout?: number;
 }

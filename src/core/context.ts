@@ -10,37 +10,37 @@ import {
     FetchRequest,
     FetchResponse,
     NotificationOptions,
-} from '@/types/client';
+} from '@/types/context';
 import { stringify } from '@utils/index';
+import { toArrayBuffer, toUint8Array } from '@utils/binary';
 
-export default abstract class Client {
-    static getInstance(name?: string): Client {
-        let className = 'Surge';
-        if (typeof $loon !== 'undefined') {
-            className = 'Loon';
-        } else if (typeof $task !== 'undefined') {
-            throw new Error('QuantumultX is not supported');
-            // className = 'QuantumultX';
+export abstract class Context {
+    static getInstance(): Context {
+        if (!Context.instance) {
+            let className = 'Surge';
+            if (typeof $loon !== 'undefined') {
+                className = 'Loon';
+            } else if (typeof $task !== 'undefined') {
+                throw new Error('QuantumultX is not supported');
+            }
+            Context.instance = Context.classNames[className]();
         }
-        if (!Client.instances[className]) {
-            Client.instances[className] = Client.classNames[className](name, className);
-        }
-        return Client.instances[className];
+        return Context.instance;
     }
-    protected static classNames = {
-        Surge: (name?: string, className?: string) => new SurgeClient(name, className),
-        Loon: (name?: string, className?: string) => new LoonClient(name, className),
-        // QuantumultX: (name?: string, className?: string) => new QuantumultXClient(name, className),
+    static classNames = {
+        Surge: () => new SurgeContext(),
+        Loon: () => new LoonContext(),
     };
-    private static instances: Record<string, Client> = {};
+    private static instance: Context;
 
-    readonly className: string;
-    protected name: string;
+    req = Object.create(null);
+    res = Object.create(null);
+    request: HttpRequest = Object.create(null);
+    response: HttpResponse = Object.create(null);
+    argument: object = Object.create(null);
+    state: Record<string, any> = Object.create(null);
     protected logLevels = { debug: 1, info: 2, warn: 3, error: 4, off: 5 };
     protected logLevel = this.logLevels.error;
-    request!: HttpRequest;
-    response!: HttpResponse;
-    argument: object | undefined;
     private _url: URL | undefined;
 
     get url(): URL {
@@ -50,13 +50,30 @@ export default abstract class Client {
         return this._url;
     }
 
-    constructor(name?: string, className?: string) {
-        this.className = className ?? '';
-        this.name = name ?? '';
-        this.init();
+    get method() {
+        return this.request.method;
     }
 
-    protected abstract init(): void;
+    get path() {
+        return this.url.pathname;
+    }
+
+    constructor() {
+        if (typeof $request !== 'undefined') {
+            this.req = $request;
+            this.request = this.createRequest($request);
+        }
+        if (typeof $response !== 'undefined') {
+            this.res = $response;
+            this.response = this.createResponse($response);
+        }
+    }
+
+    abstract createRequest(request: typeof $request): HttpRequest;
+
+    abstract createResponse(response: typeof $response): HttpResponse;
+
+    abstract createArgument(argument: object): void;
 
     abstract getVal(key: string): string | null;
 
@@ -71,26 +88,6 @@ export default abstract class Client {
     abstract done(result: HttpRequestDone | HttpResponseDone): void;
 
     abstract abort(): void;
-
-    protected createProxy<T extends object, C extends object>(target: T): C {
-        return new Proxy(target, {
-            get: this.getFn,
-            set: this.setFn,
-        }) as unknown as C;
-    }
-
-    protected getFn<T extends object>(target: T, property: string, receiver: any): any {
-        return Reflect.get(target, property, receiver);
-    }
-
-    protected setFn<T extends object>(target: T, property: string, value: any, receiver: any): boolean {
-        Reflect.set(target, property, value, receiver);
-        return true;
-    }
-
-    setName(name: string): void {
-        this.name = name;
-    }
 
     getJSON(key: string): object | null {
         const val = this.getVal(key);
@@ -134,30 +131,36 @@ export default abstract class Client {
     }
 }
 
-export class SurgeClient extends Client {
-    static propertyMap: Record<string, string> = {
-        bodyBytes: 'body',
-    };
-
-    protected override getFn<T extends object>(target: T, property: string, receiver: any): any {
-        const mappedProperty = SurgeClient.propertyMap[property] || property;
-        return super.getFn(target, mappedProperty, receiver);
+export class SurgeContext extends Context {
+    createRequest(request: typeof $request): HttpRequest {
+        return Object.create(request, {
+            bodyBytes: {
+                get() {
+                    return this.body;
+                },
+                set(value) {
+                    this.body = value;
+                },
+            },
+        });
     }
 
-    protected override setFn<T extends object>(target: T, property: string, value: any, receiver: any): boolean {
-        const mappedProperty = SurgeClient.propertyMap[property] || property;
-        return super.setFn(target, mappedProperty, value, receiver);
+    createResponse(response: typeof $response): HttpResponse {
+        return Object.create(response, {
+            bodyBytes: {
+                get() {
+                    return this.body;
+                },
+                set(value) {
+                    this.body = value;
+                },
+            },
+        });
     }
 
-    protected init(): void {
-        if (typeof $request === 'object') {
-            this.request = this.createProxy<Surge.HttpRequest, HttpRequest>($request as Surge.HttpRequest);
-        }
-        if (typeof $response === 'object') {
-            this.response = this.createProxy<Surge.HttpResponse, HttpResponse>($response as Surge.HttpResponse);
-        }
+    createArgument(argument: object): void {
         if (typeof $argument === 'string') {
-            this.argument = JSON.parse($argument) as object;
+            this.argument = Object.assign(argument, JSON.parse($argument));
 
             if ('logLevel' in this.argument) {
                 this.logLevel = this.logLevels[this.argument.logLevel as string] ?? this.logLevels.error;
@@ -176,7 +179,7 @@ export class SurgeClient extends Client {
     fetch(request: FetchRequest): Promise<FetchResponse> {
         const { method, body, timeout = 5, ...rest } = request;
         return new Promise((resolve, reject) => {
-            $httpClient[method](
+            $httpClient[method.toLowerCase()](
                 {
                     ...rest,
                     body,
@@ -187,18 +190,13 @@ export class SurgeClient extends Client {
                     if (error) {
                         return reject(error);
                     }
-                    const body = data instanceof Uint8Array ? 'bodyBytes' : 'body';
-                    resolve({
-                        status: response.status,
-                        headers: response.headers,
-                        [body]: data,
-                    });
+                    resolve(this.createResponse({ ...response, body: data }));
                 }
             );
         });
     }
 
-    notify(title = this.name, subtitle = '', content = '', options: NotificationOptions = {}): void {
+    notify(title = '', subtitle = '', content = '', options: NotificationOptions = {}): void {
         const { openUrl, clipboard, mediaUrl, dismiss, sound = true } = options;
         const opts: Surge.NotificationOptions = {
             url: openUrl,
@@ -220,6 +218,10 @@ export class SurgeClient extends Client {
     }
 
     done(result: HttpRequestDone | HttpResponseDone): void {
+        result = { ...result };
+        if ('response' in result) {
+            result.response = { ...result.response };
+        }
         ($done as Surge.Done)(result);
     }
 
@@ -228,12 +230,12 @@ export class SurgeClient extends Client {
     }
 }
 
-export class LoonClient extends SurgeClient {
-    protected override init(): void {
-        super.init();
+export class LoonContext extends SurgeContext {
+    override createArgument(argument: object): void {
+        super.createArgument(argument);
 
         if (typeof $argument === 'object') {
-            this.argument = $argument;
+            this.argument = Object.assign(argument, $argument);
 
             if ('logLevel' in this.argument) {
                 this.logLevel = this.logLevels[this.argument.logLevel as string] ?? this.logLevels.error;
@@ -242,11 +244,12 @@ export class LoonClient extends SurgeClient {
     }
 
     override fetch(request: FetchRequest): Promise<FetchResponse> {
+        request.alpn = 'h2';
         request.timeout = (request.timeout ?? 5) * 1000;
         return super.fetch(request);
     }
 
-    override notify(title = this.name, subtitle = '', content = '', options: NotificationOptions = {}): void {
+    override notify(title = '', subtitle = '', content = '', options: NotificationOptions = {}): void {
         const { openUrl, mediaUrl, clipboard, delay } = options;
         const opts: Loon.NotificationOptions = {
             openUrl: openUrl,
@@ -261,34 +264,49 @@ export class LoonClient extends SurgeClient {
     }
 }
 
-export class QuantumultXClient extends Client {
-    static propertyMap: Record<string, string> = {
-        status: 'statusCode',
-    };
-
-    static toUint8Array(bodyBytes: ArrayBuffer | undefined): Uint8Array | undefined {
-        return bodyBytes ? new Uint8Array(bodyBytes) : bodyBytes;
+export class QuantumultXContext extends Context {
+    createRequest(request: typeof $request): HttpRequest {
+        return Object.create(request, {
+            bodyBytes: {
+                get() {
+                    if (this.body instanceof Uint8Array) {
+                        return this.body;
+                    }
+                    return toUint8Array(Object.getPrototypeOf(this).bodyBytes);
+                },
+                set(value) {
+                    this.body = value;
+                },
+            },
+        });
     }
 
-    static toArrayBuffer(bodyBytes: Uint8Array): ArrayBuffer {
-        return bodyBytes.buffer.slice(bodyBytes.byteOffset, bodyBytes.byteLength + bodyBytes.byteOffset) as ArrayBuffer;
+    createResponse(response: QuantumultX.HttpResponse): HttpResponse {
+        return Object.create(response, {
+            status: {
+                get() {
+                    return this.statusCode;
+                },
+                set(value) {
+                    this.statusCode = value;
+                },
+            },
+            bodyBytes: {
+                get() {
+                    if (this.body instanceof Uint8Array) {
+                        return this.body;
+                    }
+                    return toUint8Array(Object.getPrototypeOf(this).bodyBytes);
+                },
+                set(value) {
+                    this.body = value;
+                },
+            },
+        });
     }
 
-    protected override getFn<T extends object>(target: T, property: string, receiver: any): any {
-        const mappedProperty = QuantumultXClient.propertyMap[property] || property;
-        const value = super.getFn(target, mappedProperty, receiver);
-        return property === 'bodyBytes' ? QuantumultXClient.toUint8Array(value) : value;
-    }
-
-    protected init(): void {
-        if (typeof $request === 'object') {
-            this.request = this.createProxy<QuantumultX.HttpRequest, HttpRequest>($request as QuantumultX.HttpRequest);
-        }
-        if (typeof $response === 'object') {
-            this.response = this.createProxy<QuantumultX.HttpResponse, HttpResponse>(
-                $response as QuantumultX.HttpResponse
-            );
-        }
+    createArgument(argument: object): void {
+        this.argument = argument;
     }
 
     getVal(key: string): string | null {
@@ -306,20 +324,17 @@ export class QuantumultXClient extends Client {
         };
         for (const [key, value] of Object.entries(request)) {
             if (key === 'body' && value instanceof Uint8Array) {
-                fetchRequest.bodyBytes = QuantumultXClient.toArrayBuffer(value);
+                fetchRequest.bodyBytes = toArrayBuffer(value);
             } else if (key === 'method') {
                 fetchRequest.method = (value as string).toUpperCase();
             } else {
                 fetchRequest[key] = value;
             }
         }
-        if (!request.body?.length && ['POST', 'PUT', 'PATCH'].includes(fetchRequest.method!)) {
-            fetchRequest.headers = { ...fetchRequest.headers, 'Content-Length': '0' };
-        }
         return new Promise((resolve, reject) => {
             $task.fetch(fetchRequest).then(
                 response => {
-                    resolve(this.createProxy(response));
+                    resolve(this.createResponse(response));
                 },
                 error => {
                     reject(error);
@@ -328,9 +343,9 @@ export class QuantumultXClient extends Client {
         });
     }
 
-    notify(title = this.name, subtitle = '', message = '', options: NotificationOptions = {}): void {
+    notify(title = '', subtitle = '', message = '', options: NotificationOptions = {}): void {
         const { openUrl, mediaUrl, clipboard } = options;
-        const opts: QuantumultX.NotifyOptions = {
+        const opts: QuantumultX.NotificationOptions = {
             'open-url': openUrl,
             'media-url': mediaUrl,
             'update-pasteboard': clipboard,
@@ -343,13 +358,13 @@ export class QuantumultXClient extends Client {
     }
 
     done(result: HttpRequestDone | HttpResponseDone): void {
-        const source = (result as HttpRequestDone).response ?? result;
+        const source = Object.assign({}, (result as HttpRequestDone).response ?? result);
         const target: QuantumultX.HttpRequestDone | QuantumultX.HttpResponseDone = {};
         for (const [key, value] of Object.entries(source)) {
-            if (key === 'status') {
+            if (key === 'statusCode') {
                 (target as QuantumultX.HttpResponseDone).status = `HTTP/1.1 ${value as number}`;
             } else if (key === 'body' && value instanceof Uint8Array) {
-                target.bodyBytes = QuantumultXClient.toArrayBuffer(value);
+                target.bodyBytes = toArrayBuffer(value);
             } else {
                 target[key] = value;
             }

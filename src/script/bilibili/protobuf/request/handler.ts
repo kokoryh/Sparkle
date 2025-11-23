@@ -13,7 +13,7 @@ import { PGCAnyModel } from '@proto/bilibili/app/playerunite/pgcanymodel/pgcanym
 import { BizType, ConfType } from '@proto/bilibili/playershared/playershared';
 import { ClipInfo, ClipType } from '@proto/bilibili/pgc/gateway/player/v2/playurl';
 import { $ } from '@core/env';
-import { getSkipSegments } from '@core/service/sponsor-block.service';
+import { getSkipSegments } from '@service/sponsor-block.service';
 import { avToBv } from '@utils/bilibili';
 import { BilibiliProtobufHandler } from '../base';
 

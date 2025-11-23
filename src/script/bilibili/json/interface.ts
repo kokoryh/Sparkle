@@ -1,3 +1,11 @@
+export interface Layout {
+    data: {
+        tab: LayoutItem[];
+        top: LayoutItem[];
+        bottom: LayoutItem[];
+    };
+}
+
 export interface LayoutItem {
     pos: number;
     id: number;
@@ -9,20 +17,23 @@ export interface LayoutItem {
     icon_selected?: string;
 }
 
-export interface Layout {
-    data: {
-        tab: LayoutItem[];
-        top: LayoutItem[];
-        bottom: LayoutItem[];
-    };
-}
-
 export interface Splash {
     data: {
         show?: unknown[];
         event_list?: unknown[];
         min_interval?: number;
         pull_interval?: number;
+    };
+}
+
+export interface FeedIndex {
+    data: {
+        items: {
+            banner_item: unknown[];
+            ad_info: unknown;
+            card_goto: GotoType;
+            card_type: string;
+        }[];
     };
 }
 
@@ -50,14 +61,9 @@ export enum GotoType {
     VERTICAL_AD_LIVE = 'vertical_ad_live',
 }
 
-export interface FeedIndex {
+export interface FeedIndexStory {
     data: {
-        items: {
-            banner_item: unknown[];
-            ad_info: unknown;
-            card_goto: GotoType;
-            card_type: string;
-        }[];
+        items: StoryItem[];
     };
 }
 
@@ -69,12 +75,6 @@ export interface StoryItem {
     image_infos?: unknown;
     course_info?: unknown;
     game_info?: unknown;
-}
-
-export interface FeedIndexStory {
-    data: {
-        items: StoryItem[];
-    };
 }
 
 export interface AccountMine {
@@ -131,16 +131,4 @@ export interface VIP {
         img_label_uri_hans_static: string;
         img_label_uri_hant_static: string;
     };
-}
-
-export interface SegmentItem {
-    cid: string;
-    category: string;
-    actionType: string;
-    segment: [number, number];
-    UUID: string;
-    videoDuration: number;
-    locked: number;
-    votes: number;
-    description: string;
 }
