@@ -199,10 +199,10 @@ function handleChronos(chronos: Chronos, ctx: Context): void {
 
 function getChronosMd5Map(): Record<string, string> {
     return {
-        universal: '2c80effb5c7ff582ad82ed7439e8f79a',
+        universal: '9c65f59c76b1653b3605fa61b85c1436',
         hd: '932002070dc1b51241198a074d2279fc',
         inter: '8c3feda2e92bf60e8a7aeade1a231586',
-        '9e5e20312fafe73494f069a7bac5761e': '2c80effb5c7ff582ad82ed7439e8f79a', // universal 3.7.2
+        a18e503ae25c92c45f01b61eefd83ed1: '9c65f59c76b1653b3605fa61b85c1436', // universal 3.8.1
         c29bd8f2b64a8f57f49c3622c0f763db: 'ecca73e42e160074e0caf4b3ddb54a52', // universal 3.6.4
         '8232ffb6ee43b687b5fe5add5b3e97de': 'feaca416bbc1174b8e935cf87ff8f0b5', // hd 3.6.3
         '325e7073ffc6fb5263682fecdcd1058f': '932002070dc1b51241198a074d2279fc', // hd 2.7.4
@@ -311,71 +311,70 @@ export const handleSearchAllResponse: Middleware = async (ctx, next) => {
     return next();
 };
 
-export const fetchRequest: Middleware = async (ctx, next) => {
-    ctx.response = await ctx.fetch({ ...ctx.req, timeout: 3 });
+export const handleRequest: Middleware = async (ctx, next) => {
+    ctx.response = await fetchRequest(ctx);
     return next();
 };
+
+function fetchRequest(ctx: Context) {
+    const { method, url, headers, bodyBytes } = ctx.request;
+    return ctx.fetch({ method, url, headers, body: bodyBytes, timeout: 3 });
+}
 
 export const handleDmSegMobileReq: Middleware = async (ctx, next) => {
     let body = ctx.request.bodyBytes;
     let data = body[0] ? ctx.ungzip(body.subarray(5)) : body.subarray(5);
     const message = DmSegMobileReq.fromBinary(data);
-    if (message.type !== 1) return ctx.exit();
-
+    if (message.type !== 1) {
+        return ctx.exit();
+    }
     const { pid, oid } = message;
     const videoId = avToBv(pid);
-    try {
-        await Promise.all([ctx.fetch({ ...ctx.req, timeout: 3 }), fetchSponsorBlock(ctx, videoId, oid)]).then(
-            ([response, segments]) => {
-                const { status, bodyBytes } = response;
-                if (status !== 200) {
-                    throw new Error(`Response status code is ${status}`);
-                }
-                if (!bodyBytes) {
-                    throw new Error('Response body is empty');
-                }
-                ctx.response = response;
-                if (segments.length) {
-                    ctx.state.segments = segments;
-                    return next();
-                }
-            }
-        );
-    } catch (e) {
-        ctx.error('[handleDmSegMobileReq]', e);
-        ctx.exit();
+    const [response, segments] = await Promise.all([fetchRequest(ctx), fetchSponsorBlock(ctx, videoId, oid)]);
+    const { status, headers, bodyBytes } = response;
+    if (status !== 200) {
+        throw new Error(`Response status code is ${status}`);
+    }
+    if (!bodyBytes) {
+        throw new Error('Response body is empty');
+    }
+    ctx.response.headers = headers;
+    ctx.response.bodyBytes = bodyBytes;
+    if (segments.length) {
+        ctx.state.segments = segments;
+        return next();
     }
 };
 
 async function fetchSponsorBlock(ctx: Context, videoId: string, cid: string): Promise<number[][]> {
     try {
-        return await getSkipSegments(ctx, videoId, cid).then(({ status, body }) => {
-            if (status !== 200 || !body || body === '[]') {
-                return [];
+        const { status, body } = await getSkipSegments(ctx, videoId, cid);
+        if (status !== 200 || !body || body === '[]') {
+            return [];
+        }
+        return (JSON.parse(body) as SegmentItem[]).reduce((memo: number[][], { actionType, segment }) => {
+            if (actionType === 'skip' && segment[1] - segment[0] >= 8) {
+                memo.push(segment);
             }
-            return (<SegmentItem[]>JSON.parse(body)).reduce((memo: number[][], { actionType, segment }) => {
-                if (actionType === 'skip' && segment[1] - segment[0] >= 8) {
-                    memo.push(segment);
-                }
-                return memo;
-            }, []);
-        });
+            return memo;
+        }, []);
     } catch (e) {
+        ctx.error('[fetchSponsorBlock]', e);
         return [];
     }
 }
 
 export const handleDmSegMobileReply: Middleware = async (ctx, next) => {
     const message = DmSegMobileReply.fromBinary(ctx.response.bodyBytes);
-    message.elems.push(...getAirBorneDms(ctx.state.segments));
+    message.elems.push(...getAirborneDanmaku(ctx.state.segments));
     ctx.response.bodyBytes = DmSegMobileReply.toBinary(message);
     return next();
 };
 
-function getAirBorneDms(segments: number[][]): DanmakuElem[] {
+function getAirborneDanmaku(segments: number[][]): DanmakuElem[] {
     const offset = 2000;
     return segments.map((segment, index) => {
-        const id = (index + 1).toString();
+        const id = String(index + 1);
         const start = Math.floor(segment[0] * 1000) + offset;
         const end = Math.floor(segment[1] * 1000);
         return {

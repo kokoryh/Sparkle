@@ -1,11 +1,11 @@
 import { Router } from '@core/router';
 import { parseGrpcResponse } from '@core/middleware';
 import {
-    fetchRequest,
-    handleDmSegMobileReply,
     handleDmSegMobileReq,
-    handleMainListReply,
+    handleDmSegMobileReply,
+    handleRequest,
     handleViewReply,
+    handleMainListReply,
 } from '../handler';
 import { withArgument } from '../middleware';
 
@@ -14,7 +14,7 @@ const router = new Router({
 });
 
 router.add('v1.DM/DmSegMobile', handleDmSegMobileReq, parseGrpcResponse, handleDmSegMobileReply);
-router.add('viewunite.v1.View/View', fetchRequest, parseGrpcResponse, handleViewReply);
-router.add('v1.Reply/MainList', fetchRequest, parseGrpcResponse, withArgument, handleMainListReply);
+router.add('viewunite.v1.View/View', handleRequest, parseGrpcResponse, handleViewReply);
+router.add('v1.Reply/MainList', handleRequest, parseGrpcResponse, withArgument, handleMainListReply);
 
 export default router;

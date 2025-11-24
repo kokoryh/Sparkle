@@ -33,10 +33,8 @@ export abstract class Context {
     };
     private static instance: Context;
 
-    req = Object.create(null);
-    res = Object.create(null);
-    request: HttpRequest = Object.create(null);
-    response: HttpResponse = Object.create(null);
+    readonly request: HttpRequest;
+    readonly response: HttpResponse;
     argument: object = Object.create(null);
     state: Record<string, any> = Object.create(null);
     protected logLevels = { debug: 1, info: 2, warn: 3, error: 4, off: 5 };
@@ -59,19 +57,13 @@ export abstract class Context {
     }
 
     constructor() {
-        if (typeof $request !== 'undefined') {
-            this.req = $request;
-            this.request = this.createRequest($request);
-        }
-        if (typeof $response !== 'undefined') {
-            this.res = $response;
-            this.response = this.createResponse($response);
-        }
+        this.request = this.createRequest(typeof $request !== 'undefined' ? $request : null);
+        this.response = this.createResponse(typeof $response !== 'undefined' ? $response : null);
     }
 
-    abstract createRequest(request: typeof $request): HttpRequest;
+    abstract createRequest(request: typeof $request | null): HttpRequest;
 
-    abstract createResponse(response: typeof $response): HttpResponse;
+    abstract createResponse(response: typeof $response | null): HttpResponse;
 
     abstract createArgument(argument: object): void;
 
@@ -132,7 +124,7 @@ export abstract class Context {
 }
 
 export class SurgeContext extends Context {
-    createRequest(request: typeof $request): HttpRequest {
+    createRequest(request: typeof $request | null): HttpRequest {
         return Object.create(request, {
             bodyBytes: {
                 get() {
@@ -145,7 +137,7 @@ export class SurgeContext extends Context {
         });
     }
 
-    createResponse(response: typeof $response): HttpResponse {
+    createResponse(response: typeof $response | null): HttpResponse {
         return Object.create(response, {
             bodyBytes: {
                 get() {
@@ -218,11 +210,7 @@ export class SurgeContext extends Context {
     }
 
     done(result: HttpRequestDone | HttpResponseDone): void {
-        result = { ...result };
-        if ('response' in result) {
-            result.response = { ...result.response };
-        }
-        ($done as Surge.Done)(result);
+        ($done as Surge.Done)({ ...result });
     }
 
     abort(): void {
@@ -265,7 +253,7 @@ export class LoonContext extends SurgeContext {
 }
 
 export class QuantumultXContext extends Context {
-    createRequest(request: typeof $request): HttpRequest {
+    createRequest(request: typeof $request | null): HttpRequest {
         return Object.create(request, {
             bodyBytes: {
                 get() {

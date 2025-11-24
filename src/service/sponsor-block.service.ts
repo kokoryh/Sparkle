@@ -22,6 +22,6 @@ export function getSkipSegments(ctx: Context, videoId: string, cid = ''): Promis
             origin: 'https://github.com/kokoryh/Sparkle/blob/master/release/surge/module/bilibili.sgmodule',
             'x-ext-version': '1.0.0',
         },
-        timeout: 5,
+        timeout: 3,
     });
 }
