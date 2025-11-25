@@ -35,21 +35,15 @@ export abstract class Context {
 
     readonly request: HttpRequest;
     readonly response: HttpResponse;
-    argument: object = Object.create(null);
-    state: Record<string, any> = Object.create(null);
+    readonly argument: object = Object.create(null);
+    readonly state: Record<string, any> = Object.create(null);
     protected logLevels = { debug: 1, info: 2, warn: 3, error: 4, off: 5 };
     protected logLevel = this.logLevels.error;
     private _url: URL | undefined;
 
     get url(): URL {
-        if (!this._url) {
-            this._url = new URL(this.request.url);
-        }
+        if (!this._url) this._url = new URL(this.request.url);
         return this._url;
-    }
-
-    get method() {
-        return this.request.method;
     }
 
     get path() {
@@ -65,7 +59,7 @@ export abstract class Context {
 
     abstract createResponse(response: typeof $response | null): HttpResponse;
 
-    abstract createArgument(argument: object): void;
+    abstract initArgument(argument: object): void;
 
     abstract getVal(key: string): string | null;
 
@@ -90,32 +84,28 @@ export abstract class Context {
         this.setVal(JSON.stringify(val), key);
     }
 
-    logWithPrefix(prefix: string, logs: any[]): void {
-        console.log(`${prefix}${logs.map(log => stringify(log)).join(' | ')}`);
-    }
-
     log(...logs: any[]): void {
-        this.logWithPrefix('', logs);
+        console.log(logs.map(log => stringify(log)).join(' '));
     }
 
     debug(...logs: any[]): void {
         if (this.logLevel > this.logLevels.debug) return;
-        this.logWithPrefix('[DEBUG]', logs);
+        this.log('[DEBUG]', ...logs);
     }
 
     info(...logs: any[]): void {
         if (this.logLevel > this.logLevels.info) return;
-        this.logWithPrefix('[INFO]', logs);
+        this.log('[INFO]', ...logs);
     }
 
     warn(...logs: any[]): void {
         if (this.logLevel > this.logLevels.warn) return;
-        this.logWithPrefix('[WARN]', logs);
+        this.log('[WARN]', ...logs);
     }
 
     error(...logs: any[]): void {
         if (this.logLevel > this.logLevels.error) return;
-        this.logWithPrefix('[ERROR]', logs);
+        this.log('[ERROR]', ...logs);
     }
 
     exit(): void {
@@ -150,12 +140,18 @@ export class SurgeContext extends Context {
         });
     }
 
-    createArgument(argument: object): void {
+    initArgument(argument: object): void {
+        Object.assign(this.argument, argument);
+
         if (typeof $argument === 'string') {
-            this.argument = Object.assign(argument, JSON.parse($argument));
+            try {
+                Object.assign(this.argument, JSON.parse($argument));
+            } catch (e) {
+                console.log(e);
+            }
 
             if ('logLevel' in this.argument) {
-                this.logLevel = this.logLevels[this.argument.logLevel as string] ?? this.logLevels.error;
+                this.logLevel = Number(this.argument.logLevel) ?? this.logLevels.error;
             }
         }
     }
@@ -219,11 +215,11 @@ export class SurgeContext extends Context {
 }
 
 export class LoonContext extends SurgeContext {
-    override createArgument(argument: object): void {
-        super.createArgument(argument);
+    override initArgument(argument: object): void {
+        super.initArgument(argument);
 
         if (typeof $argument === 'object') {
-            this.argument = Object.assign(argument, $argument);
+            Object.assign(this.argument, $argument);
 
             if ('logLevel' in this.argument) {
                 this.logLevel = this.logLevels[this.argument.logLevel as string] ?? this.logLevels.error;
@@ -232,8 +228,8 @@ export class LoonContext extends SurgeContext {
     }
 
     override fetch(request: FetchRequest): Promise<FetchResponse> {
-        request.alpn = 'h2';
         request.timeout = (request.timeout ?? 5) * 1000;
+        request.alpn = 'h2';
         return super.fetch(request);
     }
 
@@ -293,8 +289,8 @@ export class QuantumultXContext extends Context {
         });
     }
 
-    createArgument(argument: object): void {
-        this.argument = argument;
+    initArgument(argument: object): void {
+        Object.assign(this.argument, argument);
     }
 
     getVal(key: string): string | null {

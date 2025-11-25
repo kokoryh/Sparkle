@@ -36,11 +36,8 @@ export function stringify(value: any): string {
     if (typeof value !== 'object' || value === null) {
         return String(value);
     }
-    if (value instanceof Date) {
-        return value.toISOString();
-    }
-    if (value instanceof RegExp) {
-        return value.toString();
+    if (value instanceof Error && value.cause) {
+        return `${value.toString()} { [cause]: ${stringify(value.cause)} }`;
     }
     if (Array.isArray(value)) {
         return JSON.stringify(value);

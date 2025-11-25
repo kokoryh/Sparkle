@@ -13,7 +13,7 @@ export class Application {
     run(): void {
         const ctx = Context.getInstance();
         compose(this.middleware)(ctx)
-            .catch(e => ctx.error(e))
+            .catch(e => ctx.error(e, ctx.request.url))
             .finally(() => ctx.exit());
     }
 }

@@ -1,4 +1,4 @@
-import { createArgument, Middleware } from '@core/middleware';
+import { initArgument, Middleware } from '@core/middleware';
 
 export interface Argument {
     displayUpList: 'auto' | 'show' | 'hide';
@@ -6,7 +6,7 @@ export interface Argument {
     sponsorBlock: boolean | string;
 }
 
-export const withArgument: Middleware = createArgument({
+export const withArgument: Middleware = initArgument({
     displayUpList: 'show',
     purifyComment: true,
     sponsorBlock: true,

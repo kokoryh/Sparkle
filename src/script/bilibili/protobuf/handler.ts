@@ -31,7 +31,7 @@ import { PlayViewReply as IpadPlayViewReply } from '@proto/bilibili/pgc/gateway/
 import { SearchAllResponse } from '@proto/bilibili/polymer/app/search/v1/search';
 import { Context } from '@core/context';
 import { Middleware } from '@core/middleware';
-import { getSkipSegments, SegmentItem } from '@service/sponsor-block.service';
+import { SegmentItem } from '@service/sponsor-block.service';
 import { getDevice } from '@utils/index';
 import { avToBv } from '@utils/bilibili';
 import { Argument } from './middleware';
@@ -187,9 +187,9 @@ function handleChronos(chronos: Chronos, ctx: Context): void {
     if (!processedMd5) {
         processedMd5 = chronosMd5Map[getEdition(ctx.request.headers)];
         ctx.warn(
-            `MD5 mismatch detected. Received: ${chronos.md5}; File: ${chronos.file}`,
-            'Please update the app or script to the latest version',
-            'If you are already using the latest version, please contact the author for adjustments'
+            `MD5 mismatch detected. Received: ${chronos.md5}; File: ${chronos.file}.`,
+            'Please update the app or script to the latest version.',
+            'If you are already using the latest version, please contact the author for adjustments.'
         );
     }
     chronos.md5 = processedMd5;
@@ -312,56 +312,75 @@ export const handleSearchAllResponse: Middleware = async (ctx, next) => {
 };
 
 export const handleRequest: Middleware = async (ctx, next) => {
-    ctx.response = await fetchRequest(ctx);
+    const { headers, bodyBytes } = await fetchRequest(ctx);
+    Object.assign(ctx.response, { headers, bodyBytes });
     return next();
 };
-
-function fetchRequest(ctx: Context) {
-    const { method, url, headers, bodyBytes } = ctx.request;
-    return ctx.fetch({ method, url, headers, body: bodyBytes, timeout: 3 });
-}
 
 export const handleDmSegMobileReq: Middleware = async (ctx, next) => {
     let body = ctx.request.bodyBytes;
     let data = body[0] ? ctx.ungzip(body.subarray(5)) : body.subarray(5);
     const message = DmSegMobileReq.fromBinary(data);
-    if (message.type !== 1) {
-        return ctx.exit();
-    }
+    if (message.type !== 1) return ctx.exit();
     const { pid, oid } = message;
     const videoId = avToBv(pid);
-    const [response, segments] = await Promise.all([fetchRequest(ctx), fetchSponsorBlock(ctx, videoId, oid)]);
-    const { status, headers, bodyBytes } = response;
-    if (status !== 200) {
-        throw new Error(`Response status code is ${status}`);
-    }
-    if (!bodyBytes) {
-        throw new Error('Response body is empty');
-    }
-    ctx.response.headers = headers;
-    ctx.response.bodyBytes = bodyBytes;
+    const [{ headers, bodyBytes }, segments] = await Promise.all([
+        fetchRequest(ctx),
+        fetchSponsorBlock(ctx, videoId, oid),
+    ]);
+    Object.assign(ctx.response, { headers, bodyBytes });
     if (segments.length) {
         ctx.state.segments = segments;
         return next();
     }
 };
 
-async function fetchSponsorBlock(ctx: Context, videoId: string, cid: string): Promise<number[][]> {
-    try {
-        const { status, body } = await getSkipSegments(ctx, videoId, cid);
-        if (status !== 200 || !body || body === '[]') {
-            return [];
-        }
-        return (JSON.parse(body) as SegmentItem[]).reduce((memo: number[][], { actionType, segment }) => {
-            if (actionType === 'skip' && segment[1] - segment[0] >= 8) {
-                memo.push(segment);
+function fetchRequest(ctx: Context) {
+    const { method, url, headers, bodyBytes } = ctx.request;
+    return ctx
+        .fetch({ method, url, headers, body: bodyBytes, timeout: 3 })
+        .then(response => {
+            if (response.status !== 200) {
+                throw new Error(`Response status code is ${response.status}`);
             }
-            return memo;
-        }, []);
-    } catch (e) {
-        ctx.error('[fetchSponsorBlock]', e);
-        return [];
-    }
+            if (!response.bodyBytes) {
+                throw new Error('Response body is empty');
+            }
+            return response;
+        })
+        .catch(e => {
+            throw new Error('Failed to request bilibili service', { cause: e });
+        });
+}
+
+function fetchSponsorBlock(ctx: Context, videoId: string, cid: string): Promise<number[][]> {
+    cid = cid !== '0' ? cid : '';
+    return ctx
+        .fetch({
+            method: 'get',
+            url: `https://bsbsb.top/api/skipSegments?videoID=${videoId}&cid=${cid}&category=sponsor`,
+            headers: {
+                origin: 'https://github.com/kokoryh/Sparkle/blob/master/release/surge/module/bilibili.sgmodule',
+                'x-ext-version': '1.0.0',
+            },
+            timeout: 3,
+        })
+        .then(({ status, body }) => {
+            ctx.debug(videoId, status, body);
+            if (status !== 200 || !body || body === '[]') {
+                return [];
+            }
+            return (JSON.parse(body) as SegmentItem[]).reduce((memo: number[][], { actionType, segment }) => {
+                if (actionType === 'skip' && segment[1] - segment[0] >= 8) {
+                    memo.push(segment);
+                }
+                return memo;
+            }, []);
+        })
+        .catch(e => {
+            ctx.error('Failed to request sponsor block service.', e);
+            return [];
+        });
 }
 
 export const handleDmSegMobileReply: Middleware = async (ctx, next) => {

@@ -13,8 +13,8 @@ const router = new Router({
     matchPath: (layer, ctx) => ctx.request.url.endsWith(layer.path as string),
 });
 
-router.add('v1.DM/DmSegMobile', handleDmSegMobileReq, parseGrpcResponse, handleDmSegMobileReply);
+router.add('v1.DM/DmSegMobile', withArgument, handleDmSegMobileReq, parseGrpcResponse, handleDmSegMobileReply);
 router.add('viewunite.v1.View/View', handleRequest, parseGrpcResponse, handleViewReply);
-router.add('v1.Reply/MainList', handleRequest, parseGrpcResponse, withArgument, handleMainListReply);
+router.add('v1.Reply/MainList', withArgument, handleRequest, parseGrpcResponse, handleMainListReply);
 
 export default router;

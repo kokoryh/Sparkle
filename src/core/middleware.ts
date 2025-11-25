@@ -53,7 +53,8 @@ export const parseHtmlResponse: Middleware = async (ctx, next) => {
     ctx.response.body = `<!DOCTYPE HTML>${(ctx.state.message as Document).documentElement.outerHTML}`;
 };
 
-export const createArgument: (argument: object) => Middleware = argument => (ctx, next) => {
-    ctx.createArgument(argument);
+export const initArgument: (argument: object) => Middleware = argument => (ctx, next) => {
+    ctx.initArgument(argument);
+    ctx.debug('Argument:', ctx.argument);
     return next();
 };
