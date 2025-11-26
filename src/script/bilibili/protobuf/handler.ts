@@ -32,8 +32,7 @@ import { SearchAllResponse } from '@proto/bilibili/polymer/app/search/v1/search'
 import { Context } from '@core/context';
 import { Middleware } from '@core/middleware';
 import { SegmentItem } from '@service/sponsor-block.service';
-import { getDevice } from '@utils/index';
-import { avToBv } from '@utils/bilibili';
+import { getDevice, toBvid } from '@utils/index';
 import { Argument } from './middleware';
 
 export const handleDynAllReply: Middleware = async (ctx, next) => {
@@ -199,10 +198,10 @@ function handleChronos(chronos: Chronos, ctx: Context): void {
 
 function getChronosMd5Map(): Record<string, string> {
     return {
-        universal: '9c65f59c76b1653b3605fa61b85c1436',
+        universal: '28be59e0d042a51875193734274ba75e',
         hd: '932002070dc1b51241198a074d2279fc',
         inter: '8c3feda2e92bf60e8a7aeade1a231586',
-        a18e503ae25c92c45f01b61eefd83ed1: '9c65f59c76b1653b3605fa61b85c1436', // universal 3.8.1
+        '283c5d2a225376e7c7f5a27f9db0bdd2': '28be59e0d042a51875193734274ba75e', // universal 3.8.2
         c29bd8f2b64a8f57f49c3622c0f763db: 'ecca73e42e160074e0caf4b3ddb54a52', // universal 3.6.4
         '8232ffb6ee43b687b5fe5add5b3e97de': 'feaca416bbc1174b8e935cf87ff8f0b5', // hd 3.6.3
         '325e7073ffc6fb5263682fecdcd1058f': '932002070dc1b51241198a074d2279fc', // hd 2.7.4
@@ -312,7 +311,7 @@ export const handleSearchAllResponse: Middleware = async (ctx, next) => {
 };
 
 export const handleRequest: Middleware = async (ctx, next) => {
-    const { headers, bodyBytes } = await fetchRequest(ctx);
+    const { headers, bodyBytes } = await fetchBilibili(ctx);
     Object.assign(ctx.response, { headers, bodyBytes });
     return next();
 };
@@ -323,9 +322,9 @@ export const handleDmSegMobileReq: Middleware = async (ctx, next) => {
     const message = DmSegMobileReq.fromBinary(data);
     if (message.type !== 1) return ctx.exit();
     const { pid, oid } = message;
-    const videoId = avToBv(pid);
+    const videoId = toBvid(pid);
     const [{ headers, bodyBytes }, segments] = await Promise.all([
-        fetchRequest(ctx),
+        fetchBilibili(ctx),
         fetchSponsorBlock(ctx, videoId, oid),
     ]);
     Object.assign(ctx.response, { headers, bodyBytes });
@@ -335,11 +334,23 @@ export const handleDmSegMobileReq: Middleware = async (ctx, next) => {
     }
 };
 
-function fetchRequest(ctx: Context) {
-    const { method, url, headers, bodyBytes } = ctx.request;
-    return ctx
-        .fetch({ method, url, headers, body: bodyBytes, timeout: 3 })
-        .then(response => {
+async function fetchBilibili(ctx: Context) {
+    const { method, url: sourceUrl, headers, bodyBytes } = ctx.request;
+    const url = new URL(sourceUrl);
+    const hosts = ['grpc.biliapi.net', 'app.bilibili.com'];
+    const startIndex = hosts.indexOf(url.hostname);
+
+    for (let i = startIndex; i < hosts.length; i++) {
+        url.hostname = hosts[i];
+        const targetUrl = url.toString();
+        try {
+            const response = await ctx.fetch({
+                method,
+                url: targetUrl,
+                headers,
+                body: bodyBytes,
+                timeout: 3,
+            });
             if (response.status !== 200) {
                 throw new Error(`Response status code is ${response.status}`);
             }
@@ -347,10 +358,12 @@ function fetchRequest(ctx: Context) {
                 throw new Error('Response body is empty');
             }
             return response;
-        })
-        .catch(e => {
-            throw new Error('Failed to request bilibili service', { cause: e });
-        });
+        } catch (e) {
+            ctx.info(`Failed to request ${targetUrl}.`, e);
+        }
+    }
+
+    throw new Error('All hosts failed');
 }
 
 function fetchSponsorBlock(ctx: Context, videoId: string, cid: string): Promise<number[][]> {
@@ -378,7 +391,7 @@ function fetchSponsorBlock(ctx: Context, videoId: string, cid: string): Promise<
             }, []);
         })
         .catch(e => {
-            ctx.error('Failed to request sponsor block service.', e);
+            ctx.info('Failed to request sponsor block service.', e);
             return [];
         });
 }

@@ -5,7 +5,7 @@
 
 // const data = 'FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf';
 
-export function avToBv(avid: string | number): string {
+export function toBvid(avid: string | number): string {
     const XOR_CODE = 23442827791579n;
     const MAX_AID = 1n << 51n;
     const BASE = 58n;
@@ -23,10 +23,11 @@ export function avToBv(avid: string | number): string {
     return bytes.join('');
 }
 
-export function bvToAv(bvid: string): number {
+export function toAvid(bvid: string): number {
     const XOR_CODE = 23442827791579n;
     const MASK_CODE = 2251799813685247n;
     const BASE = 58n;
+    const data = 'FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf';
     const bvidArr = Array.from(bvid);
     [bvidArr[3], bvidArr[9]] = [bvidArr[9], bvidArr[3]];
     [bvidArr[4], bvidArr[7]] = [bvidArr[7], bvidArr[4]];

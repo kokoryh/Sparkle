@@ -1,3 +1,6 @@
+export { toAvid, toBvid } from './bilibili';
+export { toArrayBuffer, toUint8Array } from './binary';
+
 export function createCaseInsensitiveDictionary<T extends object>(initial: T = {} as T): T & { [key: string]: any } {
     const target = Object.create(null);
     const normalize = (property: string | symbol) => {
@@ -32,12 +35,12 @@ export function createCaseInsensitiveDictionary<T extends object>(initial: T = {
     return new Proxy(target, proxyHandler);
 }
 
-export function stringify(value: any): string {
+export function toString(value: any): string {
     if (typeof value !== 'object' || value === null) {
         return String(value);
     }
     if (value instanceof Error && value.cause) {
-        return `${value.toString()} { [cause]: ${stringify(value.cause)} }`;
+        return `${value.toString()} { [cause]: ${toString(value.cause)} }`;
     }
     if (Array.isArray(value)) {
         return JSON.stringify(value);

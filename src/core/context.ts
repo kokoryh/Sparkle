@@ -11,8 +11,7 @@ import {
     FetchResponse,
     NotificationOptions,
 } from '@/types/context';
-import { stringify } from '@utils/index';
-import { toArrayBuffer, toUint8Array } from '@utils/binary';
+import { toString, toArrayBuffer, toUint8Array } from '@utils/index';
 
 export abstract class Context {
     static getInstance(): Context {
@@ -84,28 +83,28 @@ export abstract class Context {
         this.setVal(JSON.stringify(val), key);
     }
 
-    log(...logs: any[]): void {
-        console.log(logs.map(log => stringify(log)).join(' '));
+    log(...messages: any[]): void {
+        console.log(messages.map(msg => toString(msg)).join(' '));
     }
 
-    debug(...logs: any[]): void {
+    debug(...messages: any[]): void {
         if (this.logLevel > this.logLevels.debug) return;
-        this.log('[DEBUG]', ...logs);
+        this.log('[DEBUG]', ...messages);
     }
 
-    info(...logs: any[]): void {
+    info(...messages: any[]): void {
         if (this.logLevel > this.logLevels.info) return;
-        this.log('[INFO]', ...logs);
+        this.log('[INFO]', ...messages);
     }
 
-    warn(...logs: any[]): void {
+    warn(...messages: any[]): void {
         if (this.logLevel > this.logLevels.warn) return;
-        this.log('[WARN]', ...logs);
+        this.log('[WARN]', ...messages);
     }
 
-    error(...logs: any[]): void {
+    error(...messages: any[]): void {
         if (this.logLevel > this.logLevels.error) return;
-        this.log('[ERROR]', ...logs);
+        this.log('[ERROR]', ...messages);
     }
 
     exit(): void {
