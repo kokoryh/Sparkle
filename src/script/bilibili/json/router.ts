@@ -53,11 +53,11 @@ router.add('/feed/index/story', ctx => {
     if (Array.isArray(data.items)) {
         data.items = data.items.reduce((memo: StoryItem[], item: StoryItem) => {
             if (!item.ad_info && item.card_goto && !excludeTypes.includes(item.card_goto)) {
-                delete item.story_cart_icon;
-                delete item.free_flow_toast;
-                delete item.image_infos;
-                delete item.course_info;
-                delete item.game_info;
+                item.story_cart_icon = undefined;
+                item.free_flow_toast = undefined;
+                item.image_infos = undefined;
+                item.course_info = undefined;
+                item.game_info = undefined;
                 memo.push(item);
             }
             return memo;
@@ -79,11 +79,11 @@ router.add(['/account/mine', '/account/mine/ipad'], withArgument, withI18n, ctx 
     }
     data.vip = getVIPData();
     data.vip_type = 2;
-    delete data.answer;
-    delete data.live_tip;
-    delete data.vip_section;
-    delete data.vip_section_v2;
-    delete data.modular_vip_section;
+    data.answer = undefined;
+    data.live_tip = undefined;
+    data.vip_section = undefined;
+    data.vip_section_v2 = undefined;
+    data.modular_vip_section = undefined;
 });
 
 router.add('/account/myinfo', ctx => {

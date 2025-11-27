@@ -38,7 +38,7 @@ import { Argument } from './middleware';
 export const handleDynAllReply: Middleware = async (ctx, next) => {
     const { displayUpList } = ctx.argument as Argument;
     const message = DynAllReply.fromBinary(ctx.response.bodyBytes);
-    delete message.topicList;
+    message.topicList = undefined;
     if (message.dynamicList) {
         const excludeTypes = [DynamicType.AD, DynamicType.LIVE_RCMD];
         message.dynamicList.list = message.dynamicList.list.filter(item => !excludeTypes.includes(item.cardType));
@@ -53,7 +53,7 @@ function handleUpList(message: DynAllReply, displayUpList: string): void {
         return;
     }
     if (displayUpList === 'hide' || !message.upList?.showLiveNum) {
-        delete message.upList;
+        message.upList = undefined;
         return;
     }
     const { list, listSecond } = message.upList;
@@ -88,7 +88,7 @@ export const handleModeStatusReply: Middleware = async (ctx, next) => {
 
 export const handlePlayViewUniteReply: Middleware = async (ctx, next) => {
     const message = PlayViewUniteReply.fromBinary(ctx.response.bodyBytes);
-    delete message.viewInfo?.promptBar;
+    message.viewInfo && (message.viewInfo.promptBar = undefined);
     if (message.playArcConf?.arcConfs) {
         Object.values(message.playArcConf.arcConfs).forEach(item => {
             if (item.isSupport && item.disabled) {
@@ -134,8 +134,8 @@ export const handlePopularReply: Middleware = async (ctx, next) => {
 export const handleTFInfoReply: Middleware = async (ctx, next) => {
     const message = TFInfoReply.fromBinary(ctx.response.bodyBytes);
     if (message.tipsId !== '0') {
-        delete message.tfToast;
-        delete message.tfPanelCustomized;
+        message.tfToast = undefined;
+        message.tfPanelCustomized = undefined;
     }
     ctx.response.bodyBytes = TFInfoReply.toBinary(message);
     return next();
@@ -143,10 +143,10 @@ export const handleTFInfoReply: Middleware = async (ctx, next) => {
 
 export const handleIpadViewReply: Middleware = async (ctx, next) => {
     const message = IpadViewReply.fromBinary(ctx.response.bodyBytes);
-    delete message.label;
-    delete message.cmIpad;
-    delete message.cmConfig;
-    delete message.reqUser?.elecPlusBtn;
+    message.label = undefined;
+    message.cmIpad = undefined;
+    message.cmConfig = undefined;
+    message.reqUser && (message.reqUser.elecPlusBtn = undefined);
     message.cms.length = 0;
     message.specialCellNew.length = 0;
     message.relates = message.relates.filter(item => !item.cm.length);
@@ -157,7 +157,7 @@ export const handleIpadViewReply: Middleware = async (ctx, next) => {
 export const handleIpadViewProgressReply: Middleware = async (ctx, next) => {
     const { sponsorBlock } = ctx.argument as Argument;
     const message = IpadViewProgressReply.fromBinary(ctx.response.bodyBytes);
-    delete message.videoGuide;
+    message.videoGuide = undefined;
     if (isSponserBlockEnabled(sponsorBlock) && message.chronos) {
         handleChronos(message.chronos, ctx);
     }
@@ -168,7 +168,7 @@ export const handleIpadViewProgressReply: Middleware = async (ctx, next) => {
 export const handleViewProgressReply: Middleware = async (ctx, next) => {
     const { sponsorBlock } = ctx.argument as Argument;
     const message = ViewProgressReply.fromBinary(ctx.response.bodyBytes);
-    delete message.dm;
+    message.dm = undefined;
     if (isSponserBlockEnabled(sponsorBlock) && message.chronos) {
         handleChronos(message.chronos, ctx);
     }
@@ -193,7 +193,7 @@ function handleChronos(chronos: Chronos, ctx: Context): void {
     }
     chronos.md5 = processedMd5;
     chronos.file = `https://raw.githubusercontent.com/kokoryh/chronos/refs/heads/master/${processedMd5}.zip`;
-    delete chronos.sign;
+    chronos.sign = undefined;
 }
 
 function getChronosMd5Map(): Record<string, string> {
@@ -229,8 +229,8 @@ export const handleRelatesFeedReply: Middleware = async (ctx, next) => {
 
 export const handleViewReply: Middleware = async (ctx, next) => {
     const message = ViewReply.fromBinary(ctx.response.bodyBytes);
-    delete message.cm;
-    delete message.reqUser?.elecPlusBtn;
+    message.cm = undefined;
+    message.reqUser && (message.reqUser.elecPlusBtn = undefined);
     const excludeTypes = [ModuleType.ACTIVITY, ModuleType.PAY_BAR, ModuleType.SPECIALTAG, ModuleType.MERCHANDISE];
     message.tab?.tabModule.forEach(tabModule => {
         if (tabModule.tab.oneofKind !== 'introduction') return;
@@ -239,7 +239,7 @@ export const handleViewReply: Middleware = async (ctx, next) => {
                 return modules;
             }
             if (module.type === ModuleType.UGC_HEADLINE && module.data.oneofKind === 'headLine') {
-                delete module.data.headLine.label;
+                module.data.headLine.label = undefined;
             } else if (module.type === ModuleType.RELATED_RECOMMEND && module.data.oneofKind === 'relates') {
                 module.data.relates.cards = handleRelateCard(module.data.relates.cards);
             }
@@ -266,7 +266,7 @@ function handleRelateCard(cards: RelateCard[]): RelateCard[] {
 
 export const handleDmViewReply: Middleware = async (ctx, next) => {
     const message = DmViewReply.fromBinary(ctx.response.bodyBytes);
-    delete message.qoe;
+    message.qoe = undefined;
     message.activityMeta.length = 0;
     if (message.command?.commandDms.length) {
         message.command.commandDms.length = 0;
@@ -278,7 +278,7 @@ export const handleDmViewReply: Middleware = async (ctx, next) => {
 export const handleMainListReply: Middleware = async (ctx, next) => {
     const { purifyComment } = ctx.argument as Argument;
     const message = MainListReply.fromBinary(ctx.response.bodyBytes);
-    delete message.cm;
+    message.cm = undefined;
     message.subjectTopCards = message.subjectTopCards.filter(item => item.type !== Type.CM);
     if (purifyComment) {
         const excludePattern = /https:\/\/b23\.tv\/(cm|mall)/;
@@ -294,7 +294,7 @@ export const handleMainListReply: Middleware = async (ctx, next) => {
 
 export const handleIpadPlayViewReply: Middleware = async (ctx, next) => {
     const message = IpadPlayViewReply.fromBinary(ctx.response.bodyBytes);
-    delete message.viewInfo?.tryWatchPromptBar;
+    message.viewInfo && (message.viewInfo.tryWatchPromptBar = undefined);
     if (message.playExtConf?.castTips) {
         message.playExtConf.castTips = { code: 0, message: '' };
     }
@@ -312,7 +312,8 @@ export const handleSearchAllResponse: Middleware = async (ctx, next) => {
 
 export const handleRequest: Middleware = async (ctx, next) => {
     const { headers, bodyBytes } = await fetchBilibili(ctx);
-    Object.assign(ctx.response, { headers, bodyBytes });
+    ctx.response.headers = headers;
+    ctx.response.bodyBytes = bodyBytes;
     return next();
 };
 
@@ -327,7 +328,8 @@ export const handleDmSegMobileReq: Middleware = async (ctx, next) => {
         fetchBilibili(ctx),
         fetchSponsorBlock(ctx, videoId, oid),
     ]);
-    Object.assign(ctx.response, { headers, bodyBytes });
+    ctx.response.headers = headers;
+    ctx.response.bodyBytes = bodyBytes;
     if (segments.length) {
         ctx.state.segments = segments;
         return next();
@@ -376,7 +378,7 @@ function fetchSponsorBlock(ctx: Context, videoId: string, cid: string): Promise<
                 origin: 'https://github.com/kokoryh/Sparkle/blob/master/release/surge/module/bilibili.sgmodule',
                 'x-ext-version': '1.0.0',
             },
-            timeout: 3,
+            timeout: 5,
         })
         .then(({ status, body }) => {
             ctx.debug(videoId, status, body);
