@@ -1,10 +1,10 @@
-import { Router } from '@core/router';
+import { matchPathSuffix, Router } from '@core/router';
 import { getLayoutData, getSectionData, getCreatorHubData, getVIPData } from './data';
 import { Layout, Splash, FeedIndex, GotoType, FeedIndexStory, StoryItem, AccountMine, AccountInfo } from './interface';
 import { withI18n, interceptor, withArgument, Argument } from './middleware';
 
 const router = new Router({
-    matchPath: (layer, ctx) => ctx.path.endsWith(layer.path as string),
+    matchPath: matchPathSuffix,
 });
 
 router.add('/show/tab/v2', withI18n, ctx => {

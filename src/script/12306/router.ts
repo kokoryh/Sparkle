@@ -1,8 +1,8 @@
-import { Router } from '@core/router';
+import { matchUrlSuffix, Router } from '@core/router';
 import { doneFakeResponse } from '@core/middleware';
 
 const router = new Router({
-    matchPath: (layer, ctx) => ctx.request.url.endsWith(layer.path as string),
+    matchPath: matchUrlSuffix,
 });
 
 router.add('/getAdList', doneFakeResponse, ctx => {

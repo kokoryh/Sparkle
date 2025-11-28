@@ -5,17 +5,25 @@ import { Middleware } from './middleware';
 
 type Path = string | RegExp;
 
+type PathMatcher = (layer: Layer, ctx: Context) => boolean;
+
 interface Options {
-    matchPath?: (layer: Layer, ctx: Context) => boolean;
+    matchPath?: PathMatcher;
 }
+
+export const matchExactPath: PathMatcher = (layer, ctx) => ctx.path === layer.path;
+
+export const matchUrlSuffix: PathMatcher = (layer, ctx) => ctx.request.url.endsWith(layer.path as string);
+
+export const matchPathSuffix: PathMatcher = (layer, ctx) => ctx.path.endsWith(layer.path as string);
 
 export class Router {
     private stack: Layer[] = [];
 
-    private matchPath: (layer: Layer, ctx: Context) => boolean;
+    private matchPath: PathMatcher;
 
     constructor(opts: Options = {}) {
-        this.matchPath = opts.matchPath || ((layer, ctx) => layer.path === ctx.path);
+        this.matchPath = opts.matchPath || matchExactPath;
     }
 
     use(...middleware: Middleware[]): this {

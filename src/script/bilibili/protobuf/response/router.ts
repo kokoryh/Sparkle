@@ -1,4 +1,4 @@
-import { Router } from '@core/router';
+import { matchUrlSuffix, Router } from '@core/router';
 import {
     handleDynAllReply,
     handleDefaultWordsReply,
@@ -20,7 +20,7 @@ import {
 import { withArgument } from '../middleware';
 
 const router = new Router({
-    matchPath: (layer, ctx) => ctx.request.url.endsWith(layer.path as string),
+    matchPath: matchUrlSuffix,
 });
 
 router.add('v2.Dynamic/DynAll', withArgument, handleDynAllReply);

@@ -1,4 +1,4 @@
-import { Router } from '@core/router';
+import { matchUrlSuffix, Router } from '@core/router';
 import { parseGrpcResponse } from '@core/middleware';
 import {
     handleDmSegMobileReq,
@@ -9,7 +9,7 @@ import {
 } from '../handler';
 
 const router = new Router({
-    matchPath: (layer, ctx) => ctx.request.url.endsWith(layer.path as string),
+    matchPath: matchUrlSuffix,
 });
 
 router.add('v1.DM/DmSegMobile', handleDmSegMobileReq, parseGrpcResponse, handleDmSegMobileReply);
