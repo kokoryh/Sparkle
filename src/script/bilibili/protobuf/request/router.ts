@@ -6,6 +6,10 @@ import {
     handleRequest,
     handleViewReply,
     handleMainListReply,
+    handleDefaultWordsReq,
+    handleModeStatusReq,
+    handleTFInfoReq,
+    handleViewEndPageReq,
 } from '../handler';
 
 const router = new Router({
@@ -15,5 +19,10 @@ const router = new Router({
 router.add('v1.DM/DmSegMobile', handleDmSegMobileReq, parseGrpcResponse, handleDmSegMobileReply);
 router.add('viewunite.v1.View/View', handleRequest, parseGrpcResponse, handleViewReply);
 router.add('v1.Reply/MainList', handleRequest, parseGrpcResponse, handleMainListReply);
+
+// router.add('v1.Search/DefaultWords', handleDefaultWordsReq);
+// router.add('v1.Teenagers/ModeStatus', handleModeStatusReq);
+// router.add('view.v1.View/TFInfo', handleTFInfoReq);
+// router.add('viewunite.v1.View/ViewEndPage', handleViewEndPageReq);
 
 export default router;

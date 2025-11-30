@@ -300,30 +300,21 @@ export class QuantumultXContext extends Context {
         return $prefs.setValueForKey(val, key);
     }
 
-    fetch(request: FetchRequest): Promise<FetchResponse> {
-        const fetchRequest: QuantumultX.FetchRequest = {
+    fetch(fetchRequest: FetchRequest): Promise<FetchResponse> {
+        const request: QuantumultX.FetchRequest = {
             url: '',
             method: 'GET',
         };
-        for (const [key, value] of Object.entries(request)) {
+        for (const [key, value] of Object.entries(fetchRequest)) {
             if (key === 'body' && value instanceof Uint8Array) {
-                fetchRequest.bodyBytes = toArrayBuffer(value);
+                request.bodyBytes = toArrayBuffer(value);
             } else if (key === 'method') {
-                fetchRequest.method = (value as string).toUpperCase();
+                request.method = (value as string).toUpperCase();
             } else {
-                fetchRequest[key] = value;
+                request[key] = value;
             }
         }
-        return new Promise((resolve, reject) => {
-            $task.fetch(fetchRequest).then(
-                response => {
-                    resolve(this.createResponse(response));
-                },
-                error => {
-                    reject(error);
-                }
-            );
-        });
+        return $task.fetch(request).then(response => this.createResponse(response));
     }
 
     notify(title = '', subtitle = '', message = '', options: NotificationOptions = {}): void {
