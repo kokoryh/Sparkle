@@ -1,6 +1,6 @@
 import { matchPathSuffix, Router } from '@core/router';
 import { getLayoutData, getSectionData, getCreatorHubData, getVIPData } from './data';
-import { Layout, Splash, FeedIndex, GotoType, FeedIndexStory, StoryItem, AccountMine, AccountInfo } from './interface';
+import { Layout, Splash, FeedIndex, CardType, GotoType, FeedIndexStory, AccountMine, AccountInfo } from './interface';
 import { withI18n, interceptor, withArgument, Argument } from './middleware';
 
 const router = new Router({
@@ -30,12 +30,8 @@ router.add(['/splash/list', '/splash/show', '/splash/event/list2'], interceptor,
 
 router.add('/feed/index', ctx => {
     const { data } = ctx.state.message as FeedIndex;
-    const excludeTypes = [
-        'small_cover_v2', // ios double column
-        'large_cover_single_v9', // ios single column
-        'large_cover_v1', // ipad
-    ];
     if (Array.isArray(data.items)) {
+        const excludeTypes = [CardType.SMALL_COVER_V2, CardType.LARGE_COVER_SINGLE_V9, CardType.LARGE_COVER_V1];
         data.items = data.items.filter(item => {
             return (
                 !item.banner_item && // remove banner
@@ -49,25 +45,25 @@ router.add('/feed/index', ctx => {
 
 router.add('/feed/index/story', ctx => {
     const { data } = ctx.state.message as FeedIndexStory;
-    const excludeTypes = [GotoType.VERTICAL_AD_AV, GotoType.VERTICAL_AD_LIVE, GotoType.VERTICAL_AD_PICTURE];
     if (Array.isArray(data.items)) {
-        data.items = data.items.reduce((memo: StoryItem[], item: StoryItem) => {
+        const excludeTypes = [GotoType.VERTICAL_AD_AV, GotoType.VERTICAL_AD_LIVE, GotoType.VERTICAL_AD_PICTURE];
+        data.items = data.items.filter(item => {
             if (!item.ad_info && item.card_goto && !excludeTypes.includes(item.card_goto)) {
                 item.story_cart_icon = undefined;
                 item.free_flow_toast = undefined;
                 item.image_infos = undefined;
                 item.course_info = undefined;
                 item.game_info = undefined;
-                memo.push(item);
+                return true;
             }
-            return memo;
+            return false;
         }, []);
     }
 });
 
 router.add(['/account/mine', '/account/mine/ipad'], withArgument, withI18n, ctx => {
-    const { data } = ctx.state.message as AccountMine;
     const { showCreatorHub } = ctx.argument as Argument;
+    const { data } = ctx.state.message as AccountMine;
     const i18n = ctx.state.i18n;
     for (const [key, value] of Object.entries(getSectionData(i18n))) {
         if (data[key]) {

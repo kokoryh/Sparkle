@@ -14,6 +14,6 @@ export const withI18n: Middleware = async (ctx, next) => {
 };
 
 export const interceptor: Middleware = (ctx, next) => {
-    if (ctx.state.message.code !== 0) ctx.exit();
+    if (ctx.state.message.code !== 0) return ctx.exit();
     return next();
 };

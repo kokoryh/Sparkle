@@ -1,4 +1,4 @@
-import { Context } from '@core/context';
+import { ctx } from '@core/context';
 import { FetchResponse } from '@/types/context';
 
 export interface SegmentItem {
@@ -13,7 +13,7 @@ export interface SegmentItem {
     description: string;
 }
 
-export function getSkipSegments(ctx: Context, videoId: string, cid = ''): Promise<FetchResponse> {
+export function getSkipSegments(videoId: string, cid = ''): Promise<FetchResponse> {
     cid = cid !== '0' ? cid : '';
     return ctx.fetch({
         method: 'get',
@@ -22,6 +22,6 @@ export function getSkipSegments(ctx: Context, videoId: string, cid = ''): Promis
             origin: 'https://github.com/kokoryh/Sparkle/blob/master/release/surge/module/bilibili.sgmodule',
             'x-ext-version': '1.0.0',
         },
-        timeout: 3,
+        timeout: 5,
     });
 }

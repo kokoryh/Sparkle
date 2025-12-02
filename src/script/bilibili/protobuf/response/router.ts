@@ -1,4 +1,5 @@
 import { matchUrlSuffix, Router } from '@core/router';
+import { handleDefaultWordsReply, handleModeStatusReply, handleTFInfoReply } from '../deprecated-handler';
 import {
     handleDynAllReply,
     handlePlayViewUniteReply,
@@ -13,9 +14,6 @@ import {
     handleMainListReply,
     handleIpadPlayViewReply,
     handleSearchAllResponse,
-    handleDefaultWordsReply,
-    handleModeStatusReply,
-    handleTFInfoReply,
 } from '../handler';
 import { withArgument } from '../middleware';
 

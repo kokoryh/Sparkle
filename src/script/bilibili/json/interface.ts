@@ -32,7 +32,7 @@ export interface FeedIndex {
             banner_item: unknown[];
             ad_info: unknown;
             card_goto: GotoType;
-            card_type: string;
+            card_type: CardType;
         }[];
     };
 }
@@ -59,6 +59,12 @@ export enum GotoType {
     VERTICAL_AD_AV = 'vertical_ad_av',
     VERTICAL_AD_PICTURE = 'vertical_ad_picture',
     VERTICAL_AD_LIVE = 'vertical_ad_live',
+}
+
+export enum CardType {
+    SMALL_COVER_V2 = 'small_cover_v2', // ios double column
+    LARGE_COVER_SINGLE_V9 = 'large_cover_single_v9', // ios single column
+    LARGE_COVER_V1 = 'large_cover_v1', // ipad
 }
 
 export interface FeedIndexStory {

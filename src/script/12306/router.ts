@@ -15,6 +15,7 @@ router.add('/getAdList', doneFakeResponse, ctx => {
         }
         return '{"code":"00","message":"0"}';
     };
+
     const message = JSON.parse(ctx.request.body);
     ctx.response.body = getResponseBody(message.placementNo);
 });
@@ -22,7 +23,7 @@ router.add('/getAdList', doneFakeResponse, ctx => {
 router.add('/mgw.htm', ctx => {
     const excludeTypes = ['com.cars.otsmobile.newHomePageBussData'];
     const headers = ctx.request.headers;
-    const operationType = headers['operation-type'] ?? headers['Operation-Type'];
+    const operationType = headers['operation-type'] || headers['Operation-Type'];
     excludeTypes.includes(operationType) ? ctx.abort() : ctx.exit();
 });
 

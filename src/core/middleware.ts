@@ -1,4 +1,6 @@
+import { ungzip } from '@utils/index';
 import { Context } from './context';
+import { Logger } from './logger';
 
 export type Next = () => Promise<void>;
 
@@ -33,7 +35,7 @@ export const parseJsonResponse: Middleware = async (ctx, next) => {
 
 export const parseGrpcResponse: Middleware = async (ctx, next) => {
     let body = ctx.response.bodyBytes;
-    ctx.response.bodyBytes = body[0] ? ctx.ungzip(body.subarray(5)) : body.subarray(5);
+    ctx.response.bodyBytes = body[0] ? ungzip(body.subarray(5)) : body.subarray(5);
     await next();
     body = ctx.response.bodyBytes;
     const length = body.length;
@@ -55,6 +57,7 @@ export const parseHtmlResponse: Middleware = async (ctx, next) => {
 
 export const initArgument: (argument: object) => Middleware = argument => (ctx, next) => {
     ctx.initArgument(argument);
-    ctx.debug('Argument:', ctx.argument);
+    Logger.setLevel(String(ctx.argument.logLevel));
+    Logger.debug('Argument', ctx.argument);
     return next();
 };

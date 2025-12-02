@@ -1,12 +1,9 @@
 import { DynAllReply, DynamicType } from '@proto/bilibili/app/dynamic/v2/dynamic';
-import { DefaultWordsReply } from '@proto/bilibili/app/interface/v1/search';
-import { ModeStatusReply } from '@proto/bilibili/app/interface/v1/teenagers';
 import { PlayViewUniteReply } from '@proto/bilibili/app/playerunite/v1/player';
 import { PlayViewReply } from '@proto/bilibili/app/playurl/v1/playurl';
 import { PopularReply } from '@proto/bilibili/app/show/popular/v1/popular';
 import {
     Chronos,
-    TFInfoReply,
     ViewReply as IpadViewReply,
     ViewProgressReply as IpadViewProgressReply,
 } from '@proto/bilibili/app/view/v1/view';
@@ -30,9 +27,10 @@ import { MainListReply, Type } from '@proto/bilibili/main/community/reply/v1/rep
 import { PlayViewReply as IpadPlayViewReply } from '@proto/bilibili/pgc/gateway/player/v2/playurl.js';
 import { SearchAllResponse } from '@proto/bilibili/polymer/app/search/v1/search';
 import { Context } from '@core/context';
+import { Logger } from '@core/logger';
 import { Middleware } from '@core/middleware';
-import { SegmentItem } from '@service/sponsor-block.service';
-import { getDevice, toBvid } from '@utils/index';
+import { getSkipSegments, SegmentItem } from '@service/sponsor-block.service';
+import { getDevice, toBvid, ungzip } from '@utils/index';
 import { Argument } from './middleware';
 
 export const handleDynAllReply: Middleware = async (ctx, next) => {
@@ -128,7 +126,7 @@ export const handleIpadViewProgressReply: Middleware = async (ctx, next) => {
     const message = IpadViewProgressReply.fromBinary(ctx.response.bodyBytes);
     message.videoGuide = undefined;
     if (isSponserBlockEnabled(sponsorBlock) && message.chronos) {
-        handleChronos(message.chronos, ctx);
+        handleChronos(message.chronos, ctx.request.headers);
     }
     ctx.response.bodyBytes = IpadViewProgressReply.toBinary(message);
     return next();
@@ -139,7 +137,7 @@ export const handleViewProgressReply: Middleware = async (ctx, next) => {
     const message = ViewProgressReply.fromBinary(ctx.response.bodyBytes);
     message.dm = undefined;
     if (isSponserBlockEnabled(sponsorBlock) && message.chronos) {
-        handleChronos(message.chronos, ctx);
+        handleChronos(message.chronos, ctx.request.headers);
     }
     ctx.response.bodyBytes = ViewProgressReply.toBinary(message);
     return next();
@@ -149,12 +147,12 @@ function isSponserBlockEnabled(value: string | boolean): boolean {
     return Boolean(value && value !== '#');
 }
 
-function handleChronos(chronos: Chronos, ctx: Context): void {
+function handleChronos(chronos: Chronos, headers: Record<string, string>): void {
     const chronosMd5Map = getChronosMd5Map();
     let processedMd5 = chronosMd5Map[chronos.md5];
     if (!processedMd5) {
-        processedMd5 = chronosMd5Map[getEdition(ctx.request.headers)];
-        ctx.warn(
+        processedMd5 = chronosMd5Map[getEdition(headers)];
+        Logger.warn(
             `MD5 mismatch detected. Received: ${chronos.md5}; File: ${chronos.file}.`,
             'Please update the app or script to the latest version.',
             'If you are already using the latest version, please contact the author for adjustments.'
@@ -203,17 +201,16 @@ export const handleViewReply: Middleware = async (ctx, next) => {
     const excludeTypes = [ModuleType.ACTIVITY, ModuleType.PAY_BAR, ModuleType.SPECIALTAG, ModuleType.MERCHANDISE];
     message.tab?.tabModule.forEach(tabModule => {
         if (tabModule.tab.oneofKind !== 'introduction') return;
-        tabModule.tab.introduction.modules = tabModule.tab.introduction.modules.reduce((modules: Module[], module) => {
+        tabModule.tab.introduction.modules = tabModule.tab.introduction.modules.filter(module => {
             if (excludeTypes.includes(module.type)) {
-                return modules;
+                return false;
             }
             if (module.type === ModuleType.UGC_HEADLINE && module.data.oneofKind === 'headLine') {
                 module.data.headLine.label = undefined;
             } else if (module.type === ModuleType.RELATED_RECOMMEND && module.data.oneofKind === 'relates') {
                 module.data.relates.cards = handleRelateCard(module.data.relates.cards);
             }
-            modules.push(module);
-            return modules;
+            return true;
         }, []);
     });
     ctx.response.bodyBytes = ViewReply.toBinary(message);
@@ -288,15 +285,12 @@ export const handleRequest: Middleware = async (ctx, next) => {
 
 export const handleDmSegMobileReq: Middleware = async (ctx, next) => {
     let body = ctx.request.bodyBytes;
-    let data = body[0] ? ctx.ungzip(body.subarray(5)) : body.subarray(5);
+    let data = body[0] ? ungzip(body.subarray(5)) : body.subarray(5);
     const message = DmSegMobileReq.fromBinary(data);
     if (message.type !== 1) return ctx.exit();
     const { pid, oid } = message;
     const videoId = toBvid(pid);
-    const [{ headers, bodyBytes }, segments] = await Promise.all([
-        fetchBilibili(ctx),
-        fetchSponsorBlock(ctx, videoId, oid),
-    ]);
+    const [{ headers, bodyBytes }, segments] = await Promise.all([fetchBilibili(ctx), fetchSponsorBlock(videoId, oid)]);
     ctx.response.headers = headers;
     ctx.response.bodyBytes = bodyBytes;
     if (segments.length) {
@@ -313,44 +307,25 @@ async function fetchBilibili(ctx: Context) {
 
     for (let i = startIndex; i < hosts.length; i++) {
         url.hostname = hosts[i];
-        const targetUrl = url.toString();
+        const request = { method, url: url.toString(), headers, body: bodyBytes, timeout: 3 };
         try {
-            const response = await ctx.fetch({
-                method,
-                url: targetUrl,
-                headers,
-                body: bodyBytes,
-                timeout: 3,
-            });
-            if (response.status !== 200) {
-                throw new Error(`Response status code is ${response.status}`);
-            }
-            if (!response.bodyBytes) {
-                throw new Error('Response body is empty');
+            const response = await ctx.fetch(request);
+            if (response.status !== 200 || !response.bodyBytes) {
+                throw new Error(`Invalid response: ${JSON.stringify(response)}`);
             }
             return response;
         } catch (e) {
-            ctx.info(`Failed to request ${targetUrl}.`, e);
+            Logger.info(e, request.method, request.url);
         }
     }
 
     throw new Error('All hosts failed.');
 }
 
-function fetchSponsorBlock(ctx: Context, videoId: string, cid: string): Promise<number[][]> {
-    cid = cid !== '0' ? cid : '';
-    return ctx
-        .fetch({
-            method: 'get',
-            url: `https://bsbsb.top/api/skipSegments?videoID=${videoId}&cid=${cid}&category=sponsor`,
-            headers: {
-                origin: 'https://github.com/kokoryh/Sparkle/blob/master/release/surge/module/bilibili.sgmodule',
-                'x-ext-version': '1.0.0',
-            },
-            timeout: 5,
-        })
+function fetchSponsorBlock(videoId: string, cid: string): Promise<number[][]> {
+    return getSkipSegments(videoId, cid)
         .then(({ status, body }) => {
-            ctx.debug(videoId, status, body);
+            Logger.debug(videoId, status, body);
             if (status !== 200 || !body || body === '[]') {
                 return [];
             }
@@ -362,7 +337,7 @@ function fetchSponsorBlock(ctx: Context, videoId: string, cid: string): Promise<
             }, []);
         })
         .catch(e => {
-            ctx.info('Failed to request sponsor block service.', e);
+            Logger.info('Failed to request sponsor block service.', e);
             return [];
         });
 }
@@ -403,56 +378,3 @@ function getAirborneDanmaku(segments: number[][]): DanmakuElem[] {
         };
     });
 }
-
-export const handleDefaultWordsReq: Middleware = async (ctx, next) => {
-    ctx.response.bodyBytes = new Uint8Array([
-        0, 0, 0, 0, 41, 26, 29, 230, 144, 156, 231, 180, 162, 232, 167, 134, 233, 162, 145, 227, 128, 129, 231, 149,
-        170, 229, 137, 167, 230, 136, 150, 117, 112, 228, 184, 187, 34, 0, 40, 1, 58, 0, 66, 0, 74, 0,
-    ]);
-    return next();
-};
-
-export const handleDefaultWordsReply: Middleware = async (ctx, next) => {
-    const message = DefaultWordsReply.fromBinary(ctx.response.bodyBytes);
-    message.show = '搜索视频、番剧或up主';
-    message.word = '';
-    message.goto = '';
-    message.value = '';
-    message.uri = '';
-    ctx.response.bodyBytes = DefaultWordsReply.toBinary(message);
-    return next();
-};
-
-export const handleModeStatusReq: Middleware = async (ctx, next) => {
-    ctx.response.bodyBytes = new Uint8Array([
-        0, 0, 0, 0, 19, 10, 17, 8, 2, 18, 9, 116, 101, 101, 110, 97, 103, 101, 114, 115, 32, 2, 42, 0,
-    ]);
-    return next();
-};
-
-export const handleModeStatusReply: Middleware = async (ctx, next) => {
-    const message = ModeStatusReply.fromBinary(ctx.response.bodyBytes);
-    const teenagersModel = message.userModels.find(item => item.mode === 'teenagers');
-    if (teenagersModel?.policy?.interval && teenagersModel.policy.interval !== '0') {
-        teenagersModel.policy.interval = '0';
-    }
-    ctx.response.bodyBytes = ModeStatusReply.toBinary(message);
-    return next();
-};
-
-export const handleTFInfoReq: Middleware = async (ctx, next) => {
-    ctx.response.bodyBytes = new Uint8Array([0, 0, 0, 0, 0]);
-    return next();
-};
-
-export const handleTFInfoReply: Middleware = async (ctx, next) => {
-    const message = TFInfoReply.fromBinary(ctx.response.bodyBytes);
-    if (message.tipsId !== '0') {
-        message.tfToast = undefined;
-        message.tfPanelCustomized = undefined;
-    }
-    ctx.response.bodyBytes = TFInfoReply.toBinary(message);
-    return next();
-};
-
-export const handleViewEndPageReq = handleTFInfoReq;

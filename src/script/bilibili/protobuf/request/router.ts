@@ -1,15 +1,17 @@
 import { matchUrlSuffix, Router } from '@core/router';
 import { parseGrpcResponse } from '@core/middleware';
 import {
+    handleDefaultWordsReq,
+    handleModeStatusReq,
+    handleTFInfoReq,
+    handleViewEndPageReq,
+} from '../deprecated-handler';
+import {
     handleDmSegMobileReq,
     handleDmSegMobileReply,
     handleRequest,
     handleViewReply,
     handleMainListReply,
-    handleDefaultWordsReq,
-    handleModeStatusReq,
-    handleTFInfoReq,
-    handleViewEndPageReq,
 } from '../handler';
 
 const router = new Router({

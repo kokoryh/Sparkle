@@ -1,4 +1,3 @@
-import { gunzipSync } from 'fflate';
 import * as Surge from '@/types/surge';
 import * as Loon from '@/types/loon';
 import * as QuantumultX from '@/types/quantumult-x';
@@ -11,38 +10,33 @@ import {
     FetchResponse,
     NotificationOptions,
 } from '@/types/context';
-import { toString, toArrayBuffer, toUint8Array } from '@utils/index';
+import { toArrayBuffer, toUint8Array } from '@utils/index';
+import { Logger } from './logger';
 
 export abstract class Context {
     static getInstance(): Context {
         if (!Context.instance) {
-            let className = 'Surge';
-            if (typeof $loon !== 'undefined') {
-                className = 'Loon';
-            } else if (typeof $task !== 'undefined') {
-                throw new Error('QuantumultX is not supported');
-            }
-            Context.instance = Context.classNames[className]();
+            Context.instance = Context.createInstance();
         }
         return Context.instance;
     }
-    static classNames = {
-        Surge: () => new SurgeContext(),
-        Loon: () => new LoonContext(),
-    };
+    private static createInstance(): Context {
+        if (typeof $loon !== 'undefined') return new LoonContext();
+        if (typeof $task !== 'undefined') throw new Error('QuantumultX is not supported');
+        return new SurgeContext();
+    }
     private static instance: Context;
 
     readonly request: HttpRequest;
     readonly response: HttpResponse;
-    readonly argument: object = Object.create(null);
+    readonly argument: Record<string, any> = Object.create(null);
     readonly state: Record<string, any> = Object.create(null);
-    protected logLevels = { debug: 1, info: 2, warn: 3, error: 4, off: 5 };
-    protected logLevel = this.logLevels.error;
-    private _url: URL | undefined;
+
+    #url: URL | undefined;
 
     get url(): URL {
-        if (!this._url) this._url = new URL(this.request.url);
-        return this._url;
+        if (!this.#url) this.#url = new URL(this.request.url);
+        return this.#url;
     }
 
     get path() {
@@ -68,8 +62,6 @@ export abstract class Context {
 
     abstract notify(title: string, subtitle: string, content: string, options?: NotificationOptions): void;
 
-    abstract ungzip(data: Uint8Array): Uint8Array;
-
     abstract done(result: HttpRequestDone | HttpResponseDone): void;
 
     abstract abort(): void;
@@ -81,30 +73,6 @@ export abstract class Context {
 
     setJSON(val: object, key: string): void {
         this.setVal(JSON.stringify(val), key);
-    }
-
-    log(...messages: any[]): void {
-        console.log(messages.map(msg => toString(msg)).join(' '));
-    }
-
-    debug(...messages: any[]): void {
-        if (this.logLevel > this.logLevels.debug) return;
-        this.log('[DEBUG]', ...messages);
-    }
-
-    info(...messages: any[]): void {
-        if (this.logLevel > this.logLevels.info) return;
-        this.log('[INFO]', ...messages);
-    }
-
-    warn(...messages: any[]): void {
-        if (this.logLevel > this.logLevels.warn) return;
-        this.log('[WARN]', ...messages);
-    }
-
-    error(...messages: any[]): void {
-        if (this.logLevel > this.logLevels.error) return;
-        this.log('[ERROR]', ...messages);
     }
 
     exit(): void {
@@ -146,11 +114,7 @@ export class SurgeContext extends Context {
             try {
                 Object.assign(this.argument, JSON.parse($argument));
             } catch (e) {
-                console.log(e);
-            }
-
-            if ('logLevel' in this.argument) {
-                this.logLevel = Number(this.argument.logLevel) ?? this.logLevels.error;
+                Logger.log(e);
             }
         }
     }
@@ -200,10 +164,6 @@ export class SurgeContext extends Context {
         $notification.post(title, subtitle, content, opts);
     }
 
-    ungzip(data: Uint8Array): Uint8Array {
-        return $utils.ungzip(data);
-    }
-
     done(result: HttpRequestDone | HttpResponseDone): void {
         ($done as Surge.Done)({ ...result });
     }
@@ -219,10 +179,6 @@ export class LoonContext extends SurgeContext {
 
         if (typeof $argument === 'object') {
             Object.assign(this.argument, $argument);
-
-            if ('logLevel' in this.argument) {
-                this.logLevel = this.logLevels[this.argument.logLevel as string] ?? this.logLevels.error;
-            }
         }
     }
 
@@ -327,12 +283,8 @@ export class QuantumultXContext extends Context {
         $notify(title, subtitle, message, opts);
     }
 
-    ungzip(data: Uint8Array): Uint8Array {
-        return gunzipSync(data);
-    }
-
     done(result: HttpRequestDone | HttpResponseDone): void {
-        const source = Object.assign({}, (result as HttpRequestDone).response ?? result);
+        const source = Object.assign({}, (result as HttpRequestDone).response || result);
         const target: QuantumultX.HttpRequestDone | QuantumultX.HttpResponseDone = {};
         for (const [key, value] of Object.entries(source)) {
             if (key === 'statusCode') {
@@ -350,3 +302,5 @@ export class QuantumultXContext extends Context {
         $done();
     }
 }
+
+export const ctx = Context.getInstance();
