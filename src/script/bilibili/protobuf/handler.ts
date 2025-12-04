@@ -8,7 +8,6 @@ import {
     ViewProgressReply as IpadViewProgressReply,
 } from '@proto/bilibili/app/view/v1/view';
 import {
-    Module,
     ModuleType,
     RelateCardType,
     RelatesFeedReply,
@@ -168,6 +167,7 @@ function getChronosMd5Map(): Record<string, string> {
         universal: '28be59e0d042a51875193734274ba75e',
         hd: '932002070dc1b51241198a074d2279fc',
         inter: '8c3feda2e92bf60e8a7aeade1a231586',
+        '8caec81b8488f4613a2314bac1a510c2': '28be59e0d042a51875193734274ba75e',
         '283c5d2a225376e7c7f5a27f9db0bdd2': '28be59e0d042a51875193734274ba75e', // universal 3.8.2
         c29bd8f2b64a8f57f49c3622c0f763db: 'ecca73e42e160074e0caf4b3ddb54a52', // universal 3.6.4
         '8232ffb6ee43b687b5fe5add5b3e97de': 'feaca416bbc1174b8e935cf87ff8f0b5', // hd 3.6.3
@@ -315,7 +315,7 @@ async function fetchBilibili(ctx: Context) {
             }
             return response;
         } catch (e) {
-            Logger.info(e, request.method, request.url);
+            Logger.info('[Bilibili]', e, request.method, request.url);
         }
     }
 
@@ -325,7 +325,7 @@ async function fetchBilibili(ctx: Context) {
 function fetchSponsorBlock(videoId: string, cid: string): Promise<number[][]> {
     return getSkipSegments(videoId, cid)
         .then(({ status, body }) => {
-            Logger.debug(videoId, status, body);
+            Logger.debug('[SponsorBlock]', videoId, status, body);
             if (status !== 200 || !body || body === '[]') {
                 return [];
             }
@@ -337,7 +337,7 @@ function fetchSponsorBlock(videoId: string, cid: string): Promise<number[][]> {
             }, []);
         })
         .catch(e => {
-            Logger.info('Failed to request sponsor block service.', e);
+            Logger.info('[SponsorBlock]', e);
             return [];
         });
 }

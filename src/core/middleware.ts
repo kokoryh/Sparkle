@@ -58,6 +58,6 @@ export const parseHtmlResponse: Middleware = async (ctx, next) => {
 export const initArgument: (argument: object) => Middleware = argument => (ctx, next) => {
     ctx.initArgument(argument);
     Logger.setLevel(String(ctx.argument.logLevel));
-    Logger.debug('Argument', ctx.argument);
+    Logger.debug('[Argument]', ctx.argument);
     return next();
 };
