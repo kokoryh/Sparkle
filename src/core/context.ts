@@ -29,8 +29,8 @@ export abstract class Context {
 
     readonly request: HttpRequest;
     readonly response: HttpResponse;
-    readonly argument: Record<string, any> = Object.create(null);
-    readonly state: Record<string, any> = Object.create(null);
+    readonly argument: Record<string, any> = {};
+    readonly state: Record<string, any> = {};
 
     #url: URL | undefined;
 
