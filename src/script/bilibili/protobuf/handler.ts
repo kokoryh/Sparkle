@@ -32,7 +32,7 @@ import { getSkipSegments, SegmentItem } from '@service/sponsor-block.service';
 import { getDevice, toBvid, ungzip } from '@utils/index';
 import { Argument } from './middleware';
 
-export const handleDynAllReply: Middleware = async (ctx, next) => {
+export const handleDynAllReply: Middleware = (ctx, next) => {
     const { displayUpList } = ctx.argument as Argument;
     const message = DynAllReply.fromBinary(ctx.response.bodyBytes);
     message.topicList = undefined;
@@ -62,7 +62,7 @@ function handleUpList(message: DynAllReply, displayUpList: string): void {
     }
 }
 
-export const handlePlayViewUniteReply: Middleware = async (ctx, next) => {
+export const handlePlayViewUniteReply: Middleware = (ctx, next) => {
     const message = PlayViewUniteReply.fromBinary(ctx.response.bodyBytes);
     message.viewInfo && (message.viewInfo.promptBar = undefined);
     if (message.playArcConf?.arcConfs) {
@@ -78,7 +78,7 @@ export const handlePlayViewUniteReply: Middleware = async (ctx, next) => {
     return next();
 };
 
-export const handlePlayViewReply: Middleware = async (ctx, next) => {
+export const handlePlayViewReply: Middleware = (ctx, next) => {
     const message = PlayViewReply.fromBinary(ctx.response.bodyBytes);
     const { backgroundPlayConf, castConf } = message.playArc || {};
     [backgroundPlayConf, castConf].forEach(arcConf => {
@@ -93,7 +93,7 @@ export const handlePlayViewReply: Middleware = async (ctx, next) => {
     return next();
 };
 
-export const handlePopularReply: Middleware = async (ctx, next) => {
+export const handlePopularReply: Middleware = (ctx, next) => {
     const message = PopularReply.fromBinary(ctx.response.bodyBytes);
     const excludeTypes = ['rcmdOneItem', 'smallCoverV5Ad', 'topicList'];
     message.items = message.items.filter(item => {
@@ -107,7 +107,7 @@ export const handlePopularReply: Middleware = async (ctx, next) => {
     return next();
 };
 
-export const handleIpadViewReply: Middleware = async (ctx, next) => {
+export const handleIpadViewReply: Middleware = (ctx, next) => {
     const message = IpadViewReply.fromBinary(ctx.response.bodyBytes);
     message.label = undefined;
     message.cmIpad = undefined;
@@ -120,7 +120,7 @@ export const handleIpadViewReply: Middleware = async (ctx, next) => {
     return next();
 };
 
-export const handleIpadViewProgressReply: Middleware = async (ctx, next) => {
+export const handleIpadViewProgressReply: Middleware = (ctx, next) => {
     const { sponsorBlock } = ctx.argument as Argument;
     const message = IpadViewProgressReply.fromBinary(ctx.response.bodyBytes);
     message.videoGuide = undefined;
@@ -131,7 +131,7 @@ export const handleIpadViewProgressReply: Middleware = async (ctx, next) => {
     return next();
 };
 
-export const handleViewProgressReply: Middleware = async (ctx, next) => {
+export const handleViewProgressReply: Middleware = (ctx, next) => {
     const { sponsorBlock } = ctx.argument as Argument;
     const message = ViewProgressReply.fromBinary(ctx.response.bodyBytes);
     message.dm = undefined;
@@ -167,7 +167,7 @@ function getChronosMd5Map(): Record<string, string> {
         universal: '28be59e0d042a51875193734274ba75e',
         hd: '932002070dc1b51241198a074d2279fc',
         inter: '8c3feda2e92bf60e8a7aeade1a231586',
-        '8caec81b8488f4613a2314bac1a510c2': '28be59e0d042a51875193734274ba75e',
+        '19e2c057465d8948f8c0e0a543558647': '28be59e0d042a51875193734274ba75e',
         '283c5d2a225376e7c7f5a27f9db0bdd2': '28be59e0d042a51875193734274ba75e', // universal 3.8.2
         c29bd8f2b64a8f57f49c3622c0f763db: 'ecca73e42e160074e0caf4b3ddb54a52', // universal 3.6.4
         '8232ffb6ee43b687b5fe5add5b3e97de': 'feaca416bbc1174b8e935cf87ff8f0b5', // hd 3.6.3
@@ -187,14 +187,14 @@ function getEdition(headers: Record<string, string>): string {
     return edition;
 }
 
-export const handleRelatesFeedReply: Middleware = async (ctx, next) => {
+export const handleRelatesFeedReply: Middleware = (ctx, next) => {
     const message = RelatesFeedReply.fromBinary(ctx.response.bodyBytes);
     message.relates = handleRelateCard(message.relates);
     ctx.response.bodyBytes = RelatesFeedReply.toBinary(message);
     return next();
 };
 
-export const handleViewReply: Middleware = async (ctx, next) => {
+export const handleViewReply: Middleware = (ctx, next) => {
     const message = ViewReply.fromBinary(ctx.response.bodyBytes);
     message.cm = undefined;
     message.reqUser && (message.reqUser.elecPlusBtn = undefined);
@@ -230,7 +230,7 @@ function handleRelateCard(cards: RelateCard[]): RelateCard[] {
     });
 }
 
-export const handleDmViewReply: Middleware = async (ctx, next) => {
+export const handleDmViewReply: Middleware = (ctx, next) => {
     const message = DmViewReply.fromBinary(ctx.response.bodyBytes);
     message.qoe = undefined;
     message.activityMeta.length = 0;
@@ -241,7 +241,7 @@ export const handleDmViewReply: Middleware = async (ctx, next) => {
     return next();
 };
 
-export const handleMainListReply: Middleware = async (ctx, next) => {
+export const handleMainListReply: Middleware = (ctx, next) => {
     const { purifyComment } = ctx.argument as Argument;
     const message = MainListReply.fromBinary(ctx.response.bodyBytes);
     message.cm = undefined;
@@ -258,7 +258,7 @@ export const handleMainListReply: Middleware = async (ctx, next) => {
     return next();
 };
 
-export const handleIpadPlayViewReply: Middleware = async (ctx, next) => {
+export const handleIpadPlayViewReply: Middleware = (ctx, next) => {
     const message = IpadPlayViewReply.fromBinary(ctx.response.bodyBytes);
     message.viewInfo && (message.viewInfo.tryWatchPromptBar = undefined);
     if (message.playExtConf?.castTips) {
@@ -268,7 +268,7 @@ export const handleIpadPlayViewReply: Middleware = async (ctx, next) => {
     return next();
 };
 
-export const handleSearchAllResponse: Middleware = async (ctx, next) => {
+export const handleSearchAllResponse: Middleware = (ctx, next) => {
     const message = SearchAllResponse.fromBinary(ctx.response.bodyBytes);
     const excludePattern = /_ad_?/;
     message.item = message.item.filter(item => !excludePattern.test(item.linktype));
@@ -342,14 +342,14 @@ function fetchSponsorBlock(videoId: string, cid: string): Promise<number[][]> {
         });
 }
 
-export const handleDmSegMobileReply: Middleware = async (ctx, next) => {
+export const handleDmSegMobileReply: Middleware = (ctx, next) => {
     const message = DmSegMobileReply.fromBinary(ctx.response.bodyBytes);
-    message.elems.push(...getAirborneDanmaku(ctx.state.segments));
+    message.elems.push(...generateAirborneDanmaku(ctx.state.segments));
     ctx.response.bodyBytes = DmSegMobileReply.toBinary(message);
     return next();
 };
 
-function getAirborneDanmaku(segments: number[][]): DanmakuElem[] {
+function generateAirborneDanmaku(segments: number[][]): DanmakuElem[] {
     const offset = 2000;
     return segments.map((segment, index) => {
         const id = String(index + 1);
