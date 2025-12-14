@@ -13,7 +13,7 @@ export class Application {
 
     run(): void {
         compose(this.middleware)(ctx)
-            .catch(e => Logger.error(e, ctx.request.method, ctx.request.url))
+            .catch(e => Logger.error(e, ctx))
             .finally(() => ctx.exit());
     }
 }

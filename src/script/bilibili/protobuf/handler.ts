@@ -302,58 +302,76 @@ export const handleDmSegMobileReq: Middleware = async (ctx, next) => {
     }
 };
 
-async function fetchBilibili(ctx: Context, maxRetrys?: number) {
+async function fetchBilibili(ctx: Context, maxRetries = 2) {
     const { method, url: sourceUrl, headers, bodyBytes } = ctx.request;
     const url = new URL(sourceUrl);
     const hosts = ['grpc.biliapi.net', 'app.bilibili.com'];
+
     const startIndex = hosts.indexOf(url.hostname);
-    const endIndex = typeof maxRetrys === 'number' ? startIndex + maxRetrys : hosts.length;
+    const endIndex = Math.min(startIndex + maxRetries, hosts.length);
 
     for (let i = startIndex; i < endIndex; i++) {
         url.hostname = hosts[i];
         const request = { method, url: url.toString(), headers, body: bodyBytes, timeout: 3 };
         try {
             const response = await ctx.fetch(request);
-            if (response.status !== 200 || !response.bodyBytes) {
-                throw new Error(`Invalid response: ${JSON.stringify(response)}`);
+
+            if (response.status === 200 && response.bodyBytes) {
+                return response;
             }
-            return response;
+
+            Logger.info('[Bilibili] Invalid response', {
+                method: request.method,
+                url: request.url,
+                status: response.status,
+                headers: response.headers,
+                body: response.bodyBytes,
+            });
         } catch (e) {
-            Logger.info('[Bilibili]', e, request.method, request.url);
+            Logger.info('[Bilibili]', e, {
+                method: request.method,
+                url: request.url,
+            });
         }
     }
 
-    throw new Error('All hosts failed.');
+    throw new Error('All hosts failed');
 }
 
-function fetchSponsorBlock(videoId: string, cid: string): Promise<number[][]> {
-    return getSkipSegments(videoId, cid)
-        .then(({ status, body }) => {
-            Logger.debug('[SponsorBlock]', videoId, status, body);
-            if (status !== 200 || !body || body === '[]') {
-                return [];
-            }
-            return (JSON.parse(body) as SegmentItem[]).reduce((memo: number[][], { actionType, segment }) => {
-                if (actionType === 'skip' && segment[1] - segment[0] >= 8) {
-                    memo.push(segment);
-                }
-                return memo;
-            }, []);
-        })
-        .catch(e => {
-            Logger.info('[SponsorBlock]', e);
+async function fetchSponsorBlock(videoId: string, cid: string): Promise<number[][]> {
+    try {
+        const { status, body } = await getSkipSegments(videoId, cid);
+
+        Logger.debug('[SponsorBlock]', { videoId, status, body });
+
+        if (status !== 200 || !body || body === '[]') {
             return [];
-        });
+        }
+
+        return parseSegments(body);
+    } catch (e) {
+        Logger.info('[SponsorBlock]', e);
+        return [];
+    }
+}
+
+function parseSegments(body: string): number[][] {
+    return (JSON.parse(body) as SegmentItem[]).reduce((memo: number[][], { actionType, segment }) => {
+        if (actionType === 'skip' && segment[1] - segment[0] >= 8) {
+            memo.push(segment);
+        }
+        return memo;
+    }, []);
 }
 
 export const handleDmSegMobileReply: Middleware = (ctx, next) => {
     const message = DmSegMobileReply.fromBinary(ctx.response.bodyBytes);
-    message.elems.push(...generateAirborneDanmaku(ctx.state.segments));
+    message.elems.push(...createAirborneDanmaku(ctx.state.segments));
     ctx.response.bodyBytes = DmSegMobileReply.toBinary(message);
     return next();
 };
 
-function generateAirborneDanmaku(segments: number[][]): DanmakuElem[] {
+function createAirborneDanmaku(segments: number[][]): DanmakuElem[] {
     const offset = 2000;
     return segments.map((segment, index) => {
         const id = String(index + 1);

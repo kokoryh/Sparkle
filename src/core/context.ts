@@ -78,6 +78,11 @@ export abstract class Context {
     exit(): void {
         $done({});
     }
+
+    toString(): string {
+        const { method, url } = this.request;
+        return JSON.stringify({ method, url });
+    }
 }
 
 export class SurgeContext extends Context {
