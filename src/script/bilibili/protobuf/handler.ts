@@ -290,7 +290,10 @@ export const handleDmSegMobileReq: Middleware = async (ctx, next) => {
     if (message.type !== 1) return ctx.exit();
     const { pid, oid } = message;
     const videoId = toBvid(pid);
-    const [{ headers, bodyBytes }, segments] = await Promise.all([fetchBilibili(ctx), fetchSponsorBlock(videoId, oid)]);
+    const [{ headers, bodyBytes }, segments] = await Promise.all([
+        fetchBilibili(ctx, 1),
+        fetchSponsorBlock(videoId, oid),
+    ]);
     ctx.response.headers = headers;
     ctx.response.bodyBytes = bodyBytes;
     if (segments.length) {
@@ -299,13 +302,14 @@ export const handleDmSegMobileReq: Middleware = async (ctx, next) => {
     }
 };
 
-async function fetchBilibili(ctx: Context) {
+async function fetchBilibili(ctx: Context, maxRetrys?: number) {
     const { method, url: sourceUrl, headers, bodyBytes } = ctx.request;
     const url = new URL(sourceUrl);
     const hosts = ['grpc.biliapi.net', 'app.bilibili.com'];
     const startIndex = hosts.indexOf(url.hostname);
+    const endIndex = typeof maxRetrys === 'number' ? startIndex + maxRetrys : hosts.length;
 
-    for (let i = startIndex; i < hosts.length; i++) {
+    for (let i = startIndex; i < endIndex; i++) {
         url.hostname = hosts[i];
         const request = { method, url: url.toString(), headers, body: bodyBytes, timeout: 3 };
         try {

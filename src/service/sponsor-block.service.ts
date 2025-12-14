@@ -22,6 +22,6 @@ export function getSkipSegments(videoId: string, cid = ''): Promise<FetchRespons
             origin: 'https://github.com/kokoryh/Sparkle/blob/master/release/surge/module/bilibili.sgmodule',
             'x-ext-version': '1.0.0',
         },
-        timeout: 5,
+        timeout: 3, // no more than 3 seconds
     });
 }
