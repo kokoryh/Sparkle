@@ -5,6 +5,6 @@
         "christian-kohler.npm-intellisense",
         "christian-kohler.path-intellisense",
         "esbenp.prettier-vscode",
-        "zxh404.vscode-proto3"
+        "drblury.protobuf-vsc"
     ]
 }

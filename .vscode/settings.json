@@ -3,9 +3,6 @@
     "editor.formatOnSave": true,
     "javascript.suggest.paths": false,
     "typescript.suggest.paths": false,
-    "protoc": {
-        "options": ["--proto_path=${workspaceRoot}/proto"]
-    },
     "eslint.run": "onSave",
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"
@@ -13,5 +10,9 @@
     "code-runner.runInTerminal": true,
     "code-runner.executorMap": {
         "typescript": "tsx"
-    }
+    },
+    "protobuf.formatOnSave": true,
+    "protobuf.indentSize": 4,
+    "protobuf.formatter.alignFields": false,
+    "protobuf.diagnostics.documentationComments": false
 }
