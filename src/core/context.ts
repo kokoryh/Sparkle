@@ -43,6 +43,10 @@ export abstract class Context {
         return this.url.pathname;
     }
 
+    get method() {
+        return this.request.method;
+    }
+
     constructor() {
         this.request = this.createRequest(typeof $request !== 'undefined' ? $request : null);
         this.response = this.createResponse(typeof $response !== 'undefined' ? $response : null);

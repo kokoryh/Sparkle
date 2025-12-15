@@ -7,12 +7,12 @@ const router = new Router({
     matchPath: matchPathSuffix,
 });
 
-router.add('/show/tab/v2', withI18n, ctx => {
+router.get('/show/tab/v2', withI18n, ctx => {
     const { data } = ctx.state.message as Layout;
     Object.assign(data, getLayoutData(ctx.state.i18n));
 });
 
-router.add(['/splash/list', '/splash/show', '/splash/event/list2'], interceptor, ctx => {
+router.get(['/splash/list', '/splash/show', '/splash/event/list2'], interceptor, ctx => {
     const { data } = ctx.state.message as Splash;
     if (data.min_interval) {
         data.min_interval = 864000;
@@ -28,7 +28,7 @@ router.add(['/splash/list', '/splash/show', '/splash/event/list2'], interceptor,
     }
 });
 
-router.add('/feed/index', ctx => {
+router.get('/feed/index', ctx => {
     const { data } = ctx.state.message as FeedIndex;
     if (Array.isArray(data.items)) {
         const excludeTypes = [CardType.SMALL_COVER_V2, CardType.LARGE_COVER_SINGLE_V9, CardType.LARGE_COVER_V1];
@@ -43,7 +43,7 @@ router.add('/feed/index', ctx => {
     }
 });
 
-router.add('/feed/index/story', ctx => {
+router.get('/feed/index/story', ctx => {
     const { data } = ctx.state.message as FeedIndexStory;
     if (Array.isArray(data.items)) {
         const excludeTypes = [GotoType.VERTICAL_AD_AV, GotoType.VERTICAL_AD_LIVE, GotoType.VERTICAL_AD_PICTURE];
@@ -61,7 +61,7 @@ router.add('/feed/index/story', ctx => {
     }
 });
 
-router.add(['/account/mine', '/account/mine/ipad'], withArgument, withI18n, ctx => {
+router.get(['/account/mine', '/account/mine/ipad'], withArgument, withI18n, ctx => {
     const { showCreatorHub } = ctx.argument as Argument;
     const { data } = ctx.state.message as AccountMine;
     const i18n = ctx.state.i18n;
@@ -82,7 +82,7 @@ router.add(['/account/mine', '/account/mine/ipad'], withArgument, withI18n, ctx 
     data.modular_vip_section = undefined;
 });
 
-router.add('/account/myinfo', ctx => {
+router.get('/account/myinfo', ctx => {
     const { data } = ctx.state.message as AccountInfo;
     data.vip = getVIPData();
 });
