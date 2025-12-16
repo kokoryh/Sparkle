@@ -61,3 +61,8 @@ export const initArgument: (argument: object) => Middleware = argument => (ctx, 
     Logger.debug('[Argument]', ctx.argument);
     return next();
 };
+
+export const routeNotMatched: Middleware = async (ctx, next) => {
+    await next();
+    if (!ctx.state.route) throw new Error('Unexpected request');
+};

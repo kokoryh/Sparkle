@@ -85,7 +85,8 @@ export abstract class Context {
 
     toString(): string {
         const { method, url } = this.request;
-        return JSON.stringify({ method, url });
+        const { status, body } = this.response;
+        return JSON.stringify({ method, url, status, body });
     }
 }
 

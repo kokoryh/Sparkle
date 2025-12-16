@@ -50,6 +50,8 @@ export class Router {
 
             if (!matched.route) return next();
 
+            ctx.state.route = true;
+
             const layerChain = matched.pathAndMethod.flatMap(layer => layer.stack);
 
             return compose(layerChain)(ctx, next);

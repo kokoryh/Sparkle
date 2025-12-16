@@ -42,8 +42,8 @@ export function toString(value: any): string {
     if (typeof value !== 'object' || value === null) {
         return String(value);
     }
-    if (value instanceof Error && value.cause) {
-        return `${value.toString()} { [cause]: ${toString(value.cause)} }`;
+    if (value instanceof Error) {
+        return `${value.toString()} ${JSON.stringify({ stack: value.stack })}`;
     }
     if (Array.isArray(value)) {
         return JSON.stringify(value);

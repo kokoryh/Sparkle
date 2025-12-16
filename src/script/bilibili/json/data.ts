@@ -1,5 +1,5 @@
 import { I18n } from '../locale';
-import { VIP } from './interface';
+import { VIP } from './types';
 
 export const getLayoutData = (i18n: I18n) => ({
     tab: [
