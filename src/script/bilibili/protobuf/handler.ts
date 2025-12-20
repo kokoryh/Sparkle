@@ -166,11 +166,12 @@ function handleChronos(chronos: Chronos, headers: Record<string, string>): void 
 function getChronosMd5Map(): Record<string, string> {
     return {
         universal: '28be59e0d042a51875193734274ba75e',
-        hd: '932002070dc1b51241198a074d2279fc',
+        hd: 'f993a054969a4f6ae6b20a65f1292e47',
         inter: '8c3feda2e92bf60e8a7aeade1a231586',
         '1a44fa48fc4054996b3316d50d7ffbae': '28be59e0d042a51875193734274ba75e',
         '283c5d2a225376e7c7f5a27f9db0bdd2': '28be59e0d042a51875193734274ba75e', // universal 3.8.2
         c29bd8f2b64a8f57f49c3622c0f763db: 'ecca73e42e160074e0caf4b3ddb54a52', // universal 3.6.4
+        c218977c14e5dfdafd51edf3ae49ed02: 'f993a054969a4f6ae6b20a65f1292e47', // hd 3.8.7
         '8232ffb6ee43b687b5fe5add5b3e97de': 'feaca416bbc1174b8e935cf87ff8f0b5', // hd 3.6.3
         '325e7073ffc6fb5263682fecdcd1058f': '932002070dc1b51241198a074d2279fc', // hd 2.7.4
         '3a14beddd23328eaddfe9f0eb048d713': '8c3feda2e92bf60e8a7aeade1a231586', // inter 2.7.3
