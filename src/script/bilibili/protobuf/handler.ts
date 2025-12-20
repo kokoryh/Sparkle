@@ -28,6 +28,7 @@ import { SearchAllResponse } from '@proto/bilibili/polymer/app/search/v1/search'
 import { Context } from '@core/context';
 import { Logger } from '@core/logger';
 import { Middleware } from '@core/middleware';
+import { exit } from '@core/process';
 import { getSkipSegments, SegmentItem } from '@service/sponsor-block.service';
 import { getDevice, toBvid, ungzip } from '@utils/index';
 import { Argument } from './middleware';
@@ -167,7 +168,7 @@ function getChronosMd5Map(): Record<string, string> {
         universal: '28be59e0d042a51875193734274ba75e',
         hd: '932002070dc1b51241198a074d2279fc',
         inter: '8c3feda2e92bf60e8a7aeade1a231586',
-        '19e2c057465d8948f8c0e0a543558647': '28be59e0d042a51875193734274ba75e',
+        '1a44fa48fc4054996b3316d50d7ffbae': '28be59e0d042a51875193734274ba75e',
         '283c5d2a225376e7c7f5a27f9db0bdd2': '28be59e0d042a51875193734274ba75e', // universal 3.8.2
         c29bd8f2b64a8f57f49c3622c0f763db: 'ecca73e42e160074e0caf4b3ddb54a52', // universal 3.6.4
         '8232ffb6ee43b687b5fe5add5b3e97de': 'feaca416bbc1174b8e935cf87ff8f0b5', // hd 3.6.3
@@ -287,7 +288,7 @@ export const handleDmSegMobileReq: Middleware = async (ctx, next) => {
     let body = ctx.request.bodyBytes;
     let data = body[0] ? ungzip(body.subarray(5)) : body.subarray(5);
     const message = DmSegMobileReq.fromBinary(data);
-    if (message.type !== 1) return ctx.exit();
+    if (message.type !== 1) exit();
     const { pid, oid } = message;
     const videoId = toBvid(pid);
     const [{ headers, bodyBytes }, segments] = await Promise.all([
@@ -335,7 +336,12 @@ async function fetchBilibili(ctx: Context, maxRetries = 2) {
         }
     }
 
-    throw new Error('All hosts failed');
+    Logger.error('[Bilibili] All hosts failed', {
+        method: ctx.method,
+        url: ctx.request.url,
+    });
+
+    exit(1);
 }
 
 async function fetchSponsorBlock(videoId: string, cid: string): Promise<number[][]> {
@@ -351,6 +357,7 @@ async function fetchSponsorBlock(videoId: string, cid: string): Promise<number[]
         return parseSegments(body);
     } catch (e) {
         Logger.info('[SponsorBlock]', e);
+
         return [];
     }
 }

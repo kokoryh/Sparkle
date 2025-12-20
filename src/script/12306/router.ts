@@ -1,5 +1,6 @@
 import { matchUrlSuffix, Router } from '@core/router';
 import { doneFakeResponse } from '@core/middleware';
+import { abort, exit } from '@core/process';
 
 const router = new Router({
     matchPath: matchUrlSuffix,
@@ -24,7 +25,7 @@ router.post('/mgw.htm', ctx => {
     const excludeTypes = ['com.cars.otsmobile.newHomePageBussData'];
     const headers = ctx.request.headers;
     const operationType = headers['operation-type'] || headers['Operation-Type'];
-    excludeTypes.includes(operationType) ? ctx.abort() : ctx.exit();
+    excludeTypes.includes(operationType) ? abort() : exit();
 });
 
 export default router;

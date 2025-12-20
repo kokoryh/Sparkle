@@ -1,4 +1,5 @@
 import { initArgument, Middleware } from '@core/middleware';
+import { exit } from '@core/process';
 import { getI18n } from '../locale';
 
 export interface Argument {
@@ -14,6 +15,6 @@ export const withI18n: Middleware = async (ctx, next) => {
 };
 
 export const interceptor: Middleware = (ctx, next) => {
-    if (ctx.state.message.code !== 0) return ctx.exit();
+    if (ctx.state.message.code !== 0) exit();
     return next();
 };
