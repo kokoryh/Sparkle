@@ -15,23 +15,23 @@ import {
     handleIpadPlayViewReply,
     handleSearchAllResponse,
 } from '../handler';
-import { withArgument } from '../middleware';
+import { initArgument } from '../middleware';
 
 const router = new Router({
     matchPath: matchUrlSuffix,
 });
 
-router.post('v2.Dynamic/DynAll', withArgument, handleDynAllReply);
+router.post('v2.Dynamic/DynAll', initArgument, handleDynAllReply);
 router.post('playerunite.v1.Player/PlayViewUnite', handlePlayViewUniteReply);
 router.post('playurl.v1.PlayURL/PlayView', handlePlayViewReply);
 router.post('v1.Popular/Index', handlePopularReply);
 router.post('view.v1.View/View', handleIpadViewReply);
-router.post('view.v1.View/ViewProgress', withArgument, handleIpadViewProgressReply);
-router.post('viewunite.v1.View/ViewProgress', withArgument, handleViewProgressReply);
+router.post('view.v1.View/ViewProgress', initArgument, handleIpadViewProgressReply);
+router.post('viewunite.v1.View/ViewProgress', initArgument, handleViewProgressReply);
 router.post('viewunite.v1.View/RelatesFeed', handleRelatesFeedReply);
 router.post('viewunite.v1.View/View', handleViewReply);
 router.post('v1.DM/DmView', handleDmViewReply);
-router.post('v1.Reply/MainList', withArgument, handleMainListReply);
+router.post('v1.Reply/MainList', initArgument, handleMainListReply);
 router.post('v2.PlayURL/PlayView', handleIpadPlayViewReply);
 router.post('v1.Search/SearchAll', handleSearchAllResponse);
 

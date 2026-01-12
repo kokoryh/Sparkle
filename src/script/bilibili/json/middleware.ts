@@ -1,4 +1,4 @@
-import { initArgument, Middleware } from '@core/middleware';
+import { createInitArgumentMiddleware, Middleware } from '@core/middleware';
 import { exit } from '@core/process';
 import { getI18n } from '../locale';
 
@@ -6,9 +6,9 @@ export interface Argument {
     showCreatorHub: boolean | number;
 }
 
-export const withArgument = initArgument({ showCreatorHub: false } as Argument);
+export const initArgument = createInitArgumentMiddleware({ showCreatorHub: false } as Argument);
 
-export const withI18n: Middleware = async (ctx, next) => {
+export const initI18n: Middleware = async (ctx, next) => {
     const locale = ctx.url.searchParams.get('s_locale') || '';
     ctx.state.i18n = (await getI18n(locale)()).default;
     return next();
