@@ -19,11 +19,20 @@ export interface LayoutItem {
 
 export interface Splash {
     data: {
+        list?: SplashListItem[];
         show?: unknown[];
         event_list?: unknown[];
+        max_time?: number;
         min_interval?: number;
         pull_interval?: number;
     };
+}
+
+export interface SplashListItem {
+    duration: number;
+    begin_time: number;
+    end_time: number;
+    enable_pre_download: boolean;
 }
 
 export interface FeedIndex {

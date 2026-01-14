@@ -3,10 +3,21 @@ import { getLayoutData, getSectionData, getCreatorHubData, getVIPData } from './
 import { Layout, Splash, FeedIndex, CardType, GotoType, FeedIndexStory, AccountMine, AccountInfo } from './types';
 import { Argument } from './middleware';
 
+function patchValue(target: Record<string, any> | Record<string, any>[], patch: Record<string, any>): void {
+    const keys = Object.keys(patch);
+    for (const obj of Array.isArray(target) ? target : [target]) {
+        for (const key of keys) {
+            if (key in obj) {
+                obj[key] = patch[key];
+            }
+        }
+    }
+}
+
 export const handleLayout: Middleware = (ctx, next) => {
     const { data } = ctx.state.message as Layout;
 
-    Object.assign(data, getLayoutData(ctx.state.i18n));
+    patchValue(data, getLayoutData(ctx.state.i18n));
 
     return next();
 };
@@ -14,17 +25,23 @@ export const handleLayout: Middleware = (ctx, next) => {
 export const handleSplash: Middleware = (ctx, next) => {
     const { data } = ctx.state.message as Splash;
 
-    if (data.min_interval) {
-        data.min_interval = 864000;
-    }
-    if (data.pull_interval) {
-        data.pull_interval = 864000;
-    }
-    if (data.show) {
-        data.show.length = 0;
-    }
-    if (data.event_list) {
-        data.event_list.length = 0;
+    patchValue(data, {
+        account: undefined,
+        event_list: undefined,
+        preload: undefined,
+        show: undefined,
+        max_time: 0,
+        min_interval: 31536000,
+        pull_interval: 31536000,
+    });
+
+    if (Array.isArray(data.list)) {
+        patchValue(data.list, {
+            duration: 0,
+            begin_time: 2524579200,
+            end_time: 2524665599,
+            enable_pre_download: false,
+        });
     }
 
     return next();
@@ -74,14 +91,12 @@ export const handleAccountMine: Middleware = (ctx, next) => {
     const { data } = ctx.state.message as AccountMine;
     const { i18n } = ctx.state;
 
-    for (const [key, value] of Object.entries(getSectionData(i18n))) {
-        if (data[key]) {
-            data[key] = value;
-        }
-    }
+    patchValue(data, getSectionData(i18n));
+
     if (showCreatorHub && data.sections_v2) {
         data.sections_v2.splice(1, 0, getCreatorHubData(i18n));
     }
+
     data.vip = getVIPData();
     data.vip_type = 2;
     data.answer = undefined;
