@@ -11,3 +11,8 @@ export const initArgument: Middleware = createInitArgumentMiddleware({
     purifyComment: true,
     sponsorBlock: true,
 } as Argument);
+
+export const setResponseHeaders: Middleware = async (ctx, next) => {
+    await next();
+    ctx.response.headers = { ...ctx.response.headers, 'grpc-status': '0' };
+};
