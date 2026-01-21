@@ -1,0 +1,12 @@
+#!name=哔哩哔哩兼容性增强
+#!desc=临时解决方案，Loon修复MitM问题后即可删除
+#!openUrl=https://apps.apple.com/app/id736536022
+#!tag=Enhancement
+#!system=iOS,iPadOS
+#!system_version=15
+#!loon_version=3.3.2(877)
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/Bilibili.png
+#!date=2026-01-21
+
+[Rewrite]
+^https:\/\/grpc\.biliapi\.net\/ response-header-add grpc-status 0
