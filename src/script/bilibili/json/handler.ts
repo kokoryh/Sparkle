@@ -7,7 +7,7 @@ function patchValue(target: Record<string, any> | Record<string, any>[], patch: 
     const keys = Object.keys(patch);
     for (const obj of Array.isArray(target) ? target : [target]) {
         for (const key of keys) {
-            if (key in obj) {
+            if (Object.hasOwn(obj, key)) {
                 obj[key] = patch[key];
             }
         }

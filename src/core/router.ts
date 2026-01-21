@@ -84,8 +84,8 @@ export class Router {
 
     private register(path: Path | Path[], methods: string[], middleware: Middleware[]): this {
         if (Array.isArray(path)) {
-            for (const p of path) {
-                this.stack.push(new Layer(p, methods, middleware));
+            for (const singlePath of path) {
+                this.stack.push(new Layer(singlePath, methods, middleware));
             }
         } else {
             this.stack.push(new Layer(path, methods, middleware));
