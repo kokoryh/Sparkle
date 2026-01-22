@@ -1,5 +1,5 @@
 import { Application } from '@core/application';
-import { doneResponse, parseGrpcResponse, routeNotMatched } from '@core/middleware';
+import { doneResponse, parseGrpcResponse } from '@core/middleware';
 import { initArgument, handleResponseHeaders } from '../middleware';
 import router from './router';
 
@@ -10,6 +10,6 @@ app.use(doneResponse)
     .use(handleResponseHeaders)
     .use(parseGrpcResponse)
     .use(router.routes())
-    .use(routeNotMatched);
+    .use(router.routeNotMatched());
 
 export default app;

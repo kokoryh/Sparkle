@@ -58,6 +58,14 @@ export class Router {
         };
     }
 
+    routeNotMatched(): Middleware {
+        return (ctx, next) => {
+            return next().then(() => {
+                if (!ctx.state.route) throw new Error('Unexpected request');
+            });
+        };
+    }
+
     private match(ctx: Context): Matched {
         const matched: Matched = {
             path: [],

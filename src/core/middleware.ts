@@ -6,19 +6,22 @@ export type Next = () => Promise<void>;
 
 export type Middleware = (ctx: Context, next: Next) => void | Promise<void>;
 
-export const doneRequest: Middleware = async (ctx, next) => {
-    await next();
-    ctx.done(ctx.request);
+export const doneRequest: Middleware = (ctx, next) => {
+    return next().then(() => {
+        ctx.done(ctx.request);
+    });
 };
 
-export const doneResponse: Middleware = async (ctx, next) => {
-    await next();
-    ctx.done(ctx.response);
+export const doneResponse: Middleware = (ctx, next) => {
+    return next().then(() => {
+        ctx.done(ctx.response);
+    });
 };
 
-export const doneFakeResponse: Middleware = async (ctx, next) => {
-    await next();
-    ctx.done({ response: ctx.response });
+export const doneFakeResponse: Middleware = (ctx, next) => {
+    return next().then(() => {
+        ctx.done({ response: ctx.response });
+    });
 };
 
 export const parseJsonRequest: Middleware = async (ctx, next) => {
@@ -60,9 +63,4 @@ export const createInitArgumentMiddleware: (argument: object) => Middleware = ar
     Logger.setLevel(String(ctx.argument.logLevel));
     Logger.debug('[Argument]', ctx.argument);
     return next();
-};
-
-export const routeNotMatched: Middleware = async (ctx, next) => {
-    await next();
-    if (!ctx.state.route) throw new Error('Unexpected request');
 };

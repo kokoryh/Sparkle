@@ -1,9 +1,8 @@
 import { Application } from '@core/application';
-import { routeNotMatched } from '@core/middleware';
 import router from './router';
 
 const app = new Application();
 
-app.use(router.routes()).use(routeNotMatched);
+app.use(router.routes()).use(router.routeNotMatched());
 
 export default app;
