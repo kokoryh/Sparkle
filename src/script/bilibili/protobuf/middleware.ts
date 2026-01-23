@@ -5,27 +5,30 @@ export interface Argument {
     displayUpList: 'auto' | 'show' | 'hide';
     purifyComment: boolean | number;
     sponsorBlock: boolean | string;
-    enhancedCompatibility: boolean;
 }
 
 export const initArgument: Middleware = createInitArgumentMiddleware({
     displayUpList: 'show',
     purifyComment: true,
     sponsorBlock: true,
-    enhancedCompatibility: false,
 } as Argument);
 
 export const handleResponseHeaders: Middleware = (ctx, next) => {
     return next().then(() => {
         const engineType = ctx.request.headers['x-bili-moss-engine-type'];
-        if (engineType === '1' || ctx.argument.enhancedCompatibility) {
-            const headers = ctx.response.headers;
-            if (!Object.hasOwn(headers, 'grpc-status')) {
-                ctx.response.headers = { ...headers, 'grpc-status': '0' };
-            }
+
+        if (engineType === undefined) {
+            return;
         }
-        if (typeof engineType === 'string' && engineType !== '1') {
+
+        if (engineType !== '1') {
             Logger.error(`x-bili-moss-engine-type: ${engineType}`);
+            return;
+        }
+
+        const responseHeaders = ctx.response.headers;
+        if (!Object.hasOwn(responseHeaders, 'grpc-status')) {
+            ctx.response.headers = { ...responseHeaders, 'grpc-status': '0' };
         }
     });
 };
