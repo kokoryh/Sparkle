@@ -6,7 +6,7 @@ export interface Argument {
     showCreatorHub: boolean | number;
 }
 
-export const initArgument = createInitArgumentMiddleware({ showCreatorHub: false } as Argument);
+export const initArgument = createInitArgumentMiddleware<Argument>({ showCreatorHub: false });
 
 export const initI18n: Middleware = async (ctx, next) => {
     const locale = ctx.url.searchParams.get('s_locale') || '';

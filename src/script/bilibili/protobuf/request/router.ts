@@ -27,4 +27,4 @@ router.post('v1.Reply/MainList', handleRequest, parseGrpcResponse, handleMainLis
 // router.post('view.v1.View/TFInfo', handleTFInfoReq);
 // router.post('viewunite.v1.View/ViewEndPage', handleViewEndPageReq);
 
-export default router;
+export { router };

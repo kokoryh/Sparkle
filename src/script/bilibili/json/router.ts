@@ -20,4 +20,4 @@ router.get('/feed/index/story', handleFeedIndexStory);
 router.get(['/account/mine', '/account/mine/ipad'], initArgument, initI18n, handleAccountMine);
 router.get('/account/myinfo', handleAccountMyInfo);
 
-export default router;
+export { router };

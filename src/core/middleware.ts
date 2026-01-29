@@ -58,7 +58,7 @@ export const parseHtmlResponse: Middleware = async (ctx, next) => {
     ctx.response.body = `<!DOCTYPE HTML>${(ctx.state.message as Document).documentElement.outerHTML}`;
 };
 
-export const createInitArgumentMiddleware: (argument: object) => Middleware = argument => (ctx, next) => {
+export const createInitArgumentMiddleware: <T extends object>(argument: T) => Middleware = argument => (ctx, next) => {
     ctx.initArgument(argument);
     Logger.setLevel(String(ctx.argument.logLevel));
     Logger.debug('[Argument]', ctx.argument);

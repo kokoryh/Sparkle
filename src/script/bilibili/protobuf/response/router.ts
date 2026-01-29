@@ -39,4 +39,4 @@ router.post('v1.Search/SearchAll', handleSearchAllResponse);
 // router.post('v1.Teenagers/ModeStatus', handleModeStatusReply);
 // router.post('view.v1.View/TFInfo', handleTFInfoReply);
 
-export default router;
+export { router };

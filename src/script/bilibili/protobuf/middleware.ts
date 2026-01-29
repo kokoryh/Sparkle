@@ -7,11 +7,11 @@ export interface Argument {
     sponsorBlock: boolean | string;
 }
 
-export const initArgument: Middleware = createInitArgumentMiddleware({
+export const initArgument: Middleware = createInitArgumentMiddleware<Argument>({
     displayUpList: 'show',
     purifyComment: true,
     sponsorBlock: true,
-} as Argument);
+});
 
 export const handleResponseHeaders: Middleware = (ctx, next) => {
     return next().then(() => {

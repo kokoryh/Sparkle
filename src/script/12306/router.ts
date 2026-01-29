@@ -28,4 +28,4 @@ router.post('/mgw.htm', ctx => {
     excludeTypes.includes(operationType) ? abort() : exit();
 });
 
-export default router;
+export { router };
