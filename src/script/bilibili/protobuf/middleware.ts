@@ -15,6 +15,10 @@ export const initArgument: Middleware = createInitArgumentMiddleware<Argument>({
 
 export const handleResponseHeaders: Middleware = (ctx, next) => {
     return next().then(() => {
+        if (ctx.response.h2_trailers !== undefined) {
+            return;
+        }
+
         const engineType = ctx.request.headers['x-bili-moss-engine-type'];
 
         if (engineType === undefined) {

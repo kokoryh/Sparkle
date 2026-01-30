@@ -279,9 +279,10 @@ export const handleSearchAllResponse: Middleware = (ctx, next) => {
 };
 
 export const handleRequest: Middleware = async (ctx, next) => {
-    const { headers, bodyBytes } = await fetchBilibili(ctx);
+    const { headers, bodyBytes, h2_trailers } = await fetchBilibili(ctx);
     ctx.response.headers = headers;
     ctx.response.bodyBytes = bodyBytes;
+    ctx.response.h2_trailers = h2_trailers;
     return next();
 };
 
@@ -292,12 +293,13 @@ export const handleDmSegMobileReq: Middleware = async (ctx, next) => {
     if (message.type !== 1) exit();
     const { pid, oid } = message;
     const videoId = toBvid(pid);
-    const [{ headers, bodyBytes }, segments] = await Promise.all([
+    const [{ headers, bodyBytes, h2_trailers }, segments] = await Promise.all([
         fetchBilibili(ctx, 1),
         fetchSponsorBlock(videoId, oid),
     ]);
     ctx.response.headers = headers;
     ctx.response.bodyBytes = bodyBytes;
+    ctx.response.h2_trailers = h2_trailers;
     if (segments.length) {
         ctx.state.segments = segments;
         return next();

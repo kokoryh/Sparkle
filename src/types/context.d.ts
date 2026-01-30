@@ -8,6 +8,7 @@ export interface HttpRequest extends Common.HttpRequest {
 export interface HttpResponse extends Common.HttpResponse {
     body: string;
     bodyBytes: Uint8Array;
+    h2_trailers: Common.HttpTrailers;
 }
 
 export interface HttpRequestDone extends Common.HttpRequestDone {
