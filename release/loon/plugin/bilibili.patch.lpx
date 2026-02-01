@@ -1,5 +1,5 @@
 #!name=哔哩哔哩兼容性增强
-#!desc=临时解决方案，Loon修复MitM问题后即可删除
+#!desc=临时解决方案，Loon修复MitM问题后即可删除。\n如果你正在使用Loon TF最新版(930)，请删除本插件。
 #!openUrl=https://apps.apple.com/app/id736536022
 #!tag=Enhancement
 #!system=iOS,iPadOS
