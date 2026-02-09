@@ -1,12 +1,13 @@
 #!name=哔哩哔哩增强
-#!desc=拜托，没有广告的哔哩哔哩真的超酷的\n\nSurge模块: https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/release/surge/module/bilibili.sgmodule
+#!desc=拜托，没有广告的哔哩哔哩真的超酷的
 #!openUrl=https://apps.apple.com/app/id736536022
+#!homepage=https://github.com/kokoryh/Sparkle/blob/master/src/script/bilibili/README.md
 #!tag=Enhancement
 #!system=iOS,iPadOS
 #!system_version=15
-#!loon_version=3.3.2(877)
+#!loon_version=3.3.8(932)
 #!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/Bilibili.png
-#!date=2026-01-21
+#!date=2026-02-09
 
 [Argument]
 displayUpList=select,"show","hide","auto",tag=[动态]中[最常访问]的显示方式
