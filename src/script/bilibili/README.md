@@ -16,7 +16,7 @@
 
 - **开启空降助手后不显示弹幕**
 
-  Mitm中添加主机名 `-raw.githubusercontent.com` 后重试
+  MitM添加主机名 `-raw.githubusercontent.com` 后重试
 
 - **是否支持Script Hub？**
 
