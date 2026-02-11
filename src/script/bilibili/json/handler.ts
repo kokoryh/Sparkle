@@ -1,6 +1,19 @@
 import { Middleware } from '@core/middleware';
 import { getLayoutData, getSectionData, getCreatorHubData, getVIPData } from './data';
-import { Layout, Splash, FeedIndex, CardType, GotoType, FeedIndexStory, AccountMine, AccountInfo } from './types';
+import {
+    Layout,
+    Splash,
+    FeedIndex,
+    CardType,
+    GotoType,
+    FeedIndexStory,
+    AccountMine,
+    AccountInfo,
+    LiveRoomInfo,
+    LiveCardType,
+    LiveFeedInfo,
+    LiveUserInfo,
+} from './types';
 import { Argument } from './middleware';
 
 function patchValue(target: Record<string, any> | Record<string, any>[], patch: Record<string, any>): void {
@@ -115,3 +128,62 @@ export const handleAccountMyInfo: Middleware = (ctx, next) => {
 
     return next();
 };
+
+export const handleLiveFeedInfo: Middleware = (ctx, next) => {
+    const { data } = ctx.state.message as LiveFeedInfo;
+
+    if (Array.isArray(data.card_list)) {
+        const excludeTypes = [LiveCardType.BANNER_V2, LiveCardType.ACTIVITY_CARD_V1];
+        data.card_list = data.card_list.filter(item => !excludeTypes.includes(item.card_type));
+    }
+
+    return next();
+};
+
+export const handleLiveRoomInfo: Middleware = (ctx, next) => {
+    const { data } = ctx.state.message as LiveRoomInfo;
+
+    data.activity_banner_info = null;
+    data.big_card_info = null;
+    data.show_reserve_status = false;
+    data.reserve_info && (data.reserve_info.show_reserve_status = false);
+    data.shopping_info && (data.shopping_info.is_show = 0);
+
+    if (data.function_card) {
+        handleFunctionCard(data.function_card);
+    }
+
+    if (data.new_tab_info) {
+        const newTabInfo = data.new_tab_info;
+        if (Array.isArray(newTabInfo.outer_list)) {
+            newTabInfo.outer_list = newTabInfo.outer_list.filter(item => item.biz_id !== 33);
+        }
+
+        if (Array.isArray(newTabInfo.candidate_list) && Array.isArray(newTabInfo.v2_outer_list)) {
+            const excludeBizIds = [33, 36, 162, 186];
+            newTabInfo.candidate_list = newTabInfo.candidate_list.filter(item => !excludeBizIds.includes(item.biz_id));
+            newTabInfo.v2_outer_list.forEach(item => {
+                item.indices = item.indices.filter(id => !excludeBizIds.includes(id));
+            });
+        }
+    }
+
+    return next();
+};
+
+export const handleLiveUserInfo: Middleware = (ctx, next) => {
+    const { data } = ctx.state.message as LiveUserInfo;
+
+    data.play_together_info = undefined;
+    data.play_together_info_v2 = undefined;
+
+    if (data.function_card) {
+        handleFunctionCard(data.function_card);
+    }
+
+    return next();
+};
+
+function handleFunctionCard(functionCard: Record<string, unknown>) {
+    Object.keys(functionCard).forEach(key => (functionCard[key] = null));
+}

@@ -147,3 +147,50 @@ export interface VIP {
         img_label_uri_hant_static: string;
     };
 }
+
+export interface LiveFeedInfo {
+    data: {
+        card_list: { card_type: LiveCardType }[];
+    };
+}
+
+export enum LiveCardType {
+    BANNER_V2 = 'banner_v2',
+    ACTIVITY_CARD_V1 = 'activity_card_v1',
+}
+
+export interface LiveRoomInfo {
+    data: {
+        skin_info: {
+            id: number;
+            skin_config: string;
+            start_time: number;
+            end_time: number;
+            current_time: number;
+            only_local: boolean;
+        };
+        activity_banner_info: unknown;
+        big_card_info: unknown;
+        show_reserve_status: boolean;
+        reserve_info: {
+            show_reserve_status: boolean;
+        };
+        shopping_info: {
+            is_show: number;
+        };
+        function_card: Record<string, unknown>;
+        new_tab_info: {
+            outer_list: { biz_id: number }[];
+            candidate_list: { biz_id: number }[];
+            v2_outer_list: { indices: number[] }[];
+        };
+    };
+}
+
+export interface LiveUserInfo {
+    data: {
+        play_together_info: unknown;
+        play_together_info_v2: unknown;
+        function_card: Record<string, unknown>;
+    };
+}
