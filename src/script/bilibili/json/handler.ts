@@ -168,6 +168,10 @@ export const handleLiveRoomInfo: Middleware = (ctx, next) => {
         }
     }
 
+    if (data.room_info.short_id === 255) {
+        data.room_info.app_background = 'https://i0.hdslb.com/bfs/new_dyn/2dd8a4aa9fde3587b1a716957a07337013999324.png';
+    }
+
     return next();
 };
 

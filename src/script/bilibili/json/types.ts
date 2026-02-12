@@ -161,13 +161,9 @@ export enum LiveCardType {
 
 export interface LiveRoomInfo {
     data: {
-        skin_info: {
-            id: number;
-            skin_config: string;
-            start_time: number;
-            end_time: number;
-            current_time: number;
-            only_local: boolean;
+        room_info: {
+            short_id: number;
+            app_background: string;
         };
         activity_banner_info: unknown;
         big_card_info: unknown;

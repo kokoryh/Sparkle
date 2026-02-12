@@ -3,7 +3,10 @@ import { ctx } from './context';
 export class ExitError extends Error {
     readonly name = 'Exit';
 
-    constructor(readonly code: number, message = `Process exited with code ${code}`) {
+    constructor(
+        readonly code: number,
+        message = `Process exited with code ${code}`
+    ) {
         super(message);
     }
 
