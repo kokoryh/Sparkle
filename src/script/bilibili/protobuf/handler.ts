@@ -250,10 +250,15 @@ export const handleMainListReply: Middleware = (ctx, next) => {
     message.subjectTopCards = message.subjectTopCards.filter(item => item.type !== Type.CM);
     if (purifyComment) {
         const excludePattern = /https:\/\/b23\.tv\/(cm|mall)/;
+        const excludeKeywords = /转转|妙界|神气小鹿/;
         message.topReplies = message.topReplies.filter(reply => {
             const urls = reply.content?.urls || {};
             const message = reply.content?.message || '';
-            return !Object.keys(urls).some(url => excludePattern.test(url)) && !excludePattern.test(message);
+            return (
+                !Object.keys(urls).some(url => excludePattern.test(url)) &&
+                !excludePattern.test(message) &&
+                !excludeKeywords.test(message)
+            );
         });
     }
     ctx.response.bodyBytes = MainListReply.toBinary(message);
