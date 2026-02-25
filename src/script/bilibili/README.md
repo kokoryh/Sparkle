@@ -14,9 +14,9 @@
 
 ## 常见问题
 
-- **开启空降助手后不显示弹幕**
+- **不显示弹幕**
 
-  MitM添加主机名 `-raw.githubusercontent.com` 后重试
+  关闭空降助手，或者更新哔哩哔哩APP，MitM添加主机名 `-raw.githubusercontent.com` 后重试
 
 - **是否支持Script Hub？**
 
