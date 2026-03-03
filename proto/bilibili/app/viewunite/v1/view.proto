@@ -48,6 +48,7 @@ enum ModuleType {
     PAY_BAR = 29;
     SPECIALTAG = 37;
     MERCHANDISE = 55;
+    VIDEO_MENTIONS = 63;
 }
 
 message Headline {

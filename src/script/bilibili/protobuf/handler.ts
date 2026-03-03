@@ -200,7 +200,13 @@ export const handleViewReply: Middleware = (ctx, next) => {
     const message = ViewReply.fromBinary(ctx.response.bodyBytes);
     message.cm = undefined;
     message.reqUser && (message.reqUser.elecPlusBtn = undefined);
-    const excludeTypes = [ModuleType.ACTIVITY, ModuleType.PAY_BAR, ModuleType.SPECIALTAG, ModuleType.MERCHANDISE];
+    const excludeTypes = [
+        ModuleType.ACTIVITY,
+        ModuleType.PAY_BAR,
+        ModuleType.SPECIALTAG,
+        ModuleType.MERCHANDISE,
+        ModuleType.VIDEO_MENTIONS,
+    ];
     message.tab?.tabModule.forEach(tabModule => {
         if (tabModule.tab.oneofKind !== 'introduction') return;
         tabModule.tab.introduction.modules = tabModule.tab.introduction.modules.filter(module => {
