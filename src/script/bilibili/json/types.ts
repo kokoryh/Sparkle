@@ -164,8 +164,8 @@ export interface LiveRoomInfo {
         room_info: {
             short_id: number;
             app_background: string;
+            background_render_type: number;
         };
-        activity_banner_info: unknown;
         big_card_info: unknown;
         show_reserve_status: boolean;
         reserve_info: {
@@ -174,6 +174,7 @@ export interface LiveRoomInfo {
         shopping_info: {
             is_show: number;
         };
+        activity_banner_info: Record<string, unknown>;
         function_card: Record<string, unknown>;
         new_tab_info: {
             outer_list: { biz_id: number }[];

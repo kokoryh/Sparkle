@@ -143,14 +143,17 @@ export const handleLiveFeedInfo: Middleware = (ctx, next) => {
 export const handleLiveRoomInfo: Middleware = (ctx, next) => {
     const { data } = ctx.state.message as LiveRoomInfo;
 
-    data.activity_banner_info = null;
     data.big_card_info = null;
     data.show_reserve_status = false;
     data.reserve_info && (data.reserve_info.show_reserve_status = false);
     data.shopping_info && (data.shopping_info.is_show = 0);
 
+    if (data.activity_banner_info) {
+        setAllValuesToNull(data.activity_banner_info);
+    }
+
     if (data.function_card) {
-        handleFunctionCard(data.function_card);
+        setAllValuesToNull(data.function_card);
     }
 
     if (data.new_tab_info) {
@@ -169,6 +172,7 @@ export const handleLiveRoomInfo: Middleware = (ctx, next) => {
     }
 
     if (data.room_info.short_id === 255) {
+        data.room_info.background_render_type = 0;
         data.room_info.app_background = 'https://i0.hdslb.com/bfs/new_dyn/2dd8a4aa9fde3587b1a716957a07337013999324.png';
     }
 
@@ -182,12 +186,12 @@ export const handleLiveUserInfo: Middleware = (ctx, next) => {
     data.play_together_info_v2 = undefined;
 
     if (data.function_card) {
-        handleFunctionCard(data.function_card);
+        setAllValuesToNull(data.function_card);
     }
 
     return next();
 };
 
-function handleFunctionCard(functionCard: Record<string, unknown>) {
+function setAllValuesToNull(functionCard: Record<string, unknown>) {
     Object.keys(functionCard).forEach(key => (functionCard[key] = null));
 }
