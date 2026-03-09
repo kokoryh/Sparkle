@@ -255,15 +255,15 @@ export const handleMainListReply: Middleware = (ctx, next) => {
     message.cm = undefined;
     message.subjectTopCards = message.subjectTopCards.filter(item => item.type !== Type.CM);
     if (purifyComment) {
-        const excludePattern = /https:\/\/b23\.tv\/(cm|mall)/;
-        const excludeKeywords = /转转|妙界|神气小鹿/;
+        const excludeLinkPattern = /https:\/\/b23\.tv\/(?:cm|mall)/;
+        const excludeKeywordPattern = /淘宝|某宝|天猫|京东|狗东|拼多多|饿了么|美团|转转|妙界|神气小鹿/;
         message.topReplies = message.topReplies.filter(reply => {
             const urls = reply.content?.urls || {};
             const message = reply.content?.message || '';
             return (
-                !Object.keys(urls).some(url => excludePattern.test(url)) &&
-                !excludePattern.test(message) &&
-                !excludeKeywords.test(message)
+                !Object.keys(urls).some(url => excludeLinkPattern.test(url)) &&
+                !excludeLinkPattern.test(message) &&
+                !excludeKeywordPattern.test(message)
             );
         });
     }
