@@ -168,6 +168,7 @@ function getChronosMd5Map(): Record<string, string> {
         universal: '21950f4b5de5ff3dd36ef36f0ef851e4',
         hd: 'f993a054969a4f6ae6b20a65f1292e47',
         inter: '8c3feda2e92bf60e8a7aeade1a231586',
+        cfdcda0b1ed4a456f933215678698d6e: '21950f4b5de5ff3dd36ef36f0ef851e4', // universal 3.6.4
         c29bd8f2b64a8f57f49c3622c0f763db: 'ecca73e42e160074e0caf4b3ddb54a52', // universal 3.6.4
         c218977c14e5dfdafd51edf3ae49ed02: 'f993a054969a4f6ae6b20a65f1292e47', // hd 3.8.7
         '8232ffb6ee43b687b5fe5add5b3e97de': 'feaca416bbc1174b8e935cf87ff8f0b5', // hd 3.6.3
