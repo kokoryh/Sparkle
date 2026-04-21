@@ -19,7 +19,7 @@ AND,((DOMAIN-SUFFIX,chat.bilibili.com), (OR,((DOMAIN-KEYWORD,stun), (DOMAIN-KEYW
 ^https:\/\/line3-h5-mobile-api\.biligame\.com\/game\/live\/large_card_material\? header="content-type: application/json" data-type=text data="{"code":0,"message":"success"}"
 ^https:\/\/grpc\.biliapi\.net\/bilibili\.app\.interface\.v1\.Teenagers\/ModeStatus$ header="content-type: application/grpc|grpc-status: 0" data-type=base64 data="AAAAABMKEQgCEgl0ZWVuYWdlcnMgAioA"
 ^https:\/\/grpc\.biliapi\.net\/bilibili\.app\.interface\.v1\.Search\/DefaultWords$ header="content-type: application/grpc|grpc-status: 0" data-type=base64 data="AAAAACEaHeaQnOe0ouinhumikeOAgeeVquWJp+aIlnVw5Li7KAE="
-^https:\/\/grpc\.biliapi\.net\/bilibili\.app\.(?:view\.v1\.View\/TFInfo|viewunite\.v1\.View\/ViewEndPage)$ header="content-type: application/grpc|grpc-status: 0" data-type=base64 data="AAAAAAA="
+^https:\/\/grpc\.biliapi\.net\/bilibili\.app\.(?:view\.v1\.View\/TFInfo|viewunite\.v1\.View\/(?:PlayPause|ViewEndPage))$ header="content-type: application/grpc|grpc-status: 0" data-type=base64 data="AAAAAAA="
 
 [Body Rewrite]
 http-response-jq ^https:\/\/api\.bilibili\.com\/x\/pd-proxy\/tracker\? '.data[][]?="stun.chat.bilibili.com:3478"'
