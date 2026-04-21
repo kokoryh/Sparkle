@@ -16,7 +16,7 @@
 
 - **不显示弹幕**
 
-  关闭空降助手，或者更新哔哩哔哩APP，MitM添加主机名 `-raw.githubusercontent.com` 后重试
+  更新哔哩哔哩APP，MitM添加主机名 `-raw.githubusercontent.com` 后重试
 
 - **是否支持Script Hub？**
 
