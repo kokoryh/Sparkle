@@ -252,7 +252,8 @@ export const handleMainListReply: Middleware = (ctx, next) => {
     const { purifyComment } = ctx.argument as Argument;
     const message = MainListReply.fromBinary(ctx.response.bodyBytes);
     message.cm = undefined;
-    message.subjectTopCards = message.subjectTopCards.filter(item => item.type !== Type.CM);
+    const excludeTypes = [Type.CM, Type.OPERATION];
+    message.subjectTopCards = message.subjectTopCards.filter(item => !excludeTypes.includes(item.type));
     if (purifyComment) {
         const excludeLinkPattern = /https:\/\/b23\.tv\/(?:cm|mall)/;
         const excludeKeywordPattern = /淘宝|某宝|天猫|京东|狗东|拼多多|饿了么|美团|转转|妙界|神气小鹿/;
