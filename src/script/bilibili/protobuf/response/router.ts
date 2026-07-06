@@ -14,6 +14,7 @@ import {
     handleMainListReply,
     handleIpadPlayViewReply,
     handleSearchAllResponse,
+    handleIpadRelatesFeedReply,
 } from '../handler';
 import { initArgument } from '../middleware';
 
@@ -27,6 +28,7 @@ router.post('playurl.v1.PlayURL/PlayView', handlePlayViewReply);
 router.post('v1.Popular/Index', handlePopularReply);
 router.post('view.v1.View/View', handleIpadViewReply);
 router.post('view.v1.View/ViewProgress', initArgument, handleIpadViewProgressReply);
+router.post('view.v1.View/RelatesFeed', handleIpadRelatesFeedReply);
 router.post('viewunite.v1.View/ViewProgress', initArgument, handleViewProgressReply);
 router.post('viewunite.v1.View/RelatesFeed', handleRelatesFeedReply);
 router.post('viewunite.v1.View/View', handleViewReply);

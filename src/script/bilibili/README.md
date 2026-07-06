@@ -16,7 +16,7 @@
 
 - **不显示弹幕**
 
-  更新哔哩哔哩APP，MitM添加主机名 `-raw.githubusercontent.com` 后重试
+  卸载重装最新商店版哔哩哔哩APP，MitM添加主机名 `-raw.githubusercontent.com` 后重试
 
 - **是否支持Script Hub？**
 

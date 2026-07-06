@@ -6,6 +6,7 @@ import {
     Chronos,
     ViewReply as IpadViewReply,
     ViewProgressReply as IpadViewProgressReply,
+    RelatesFeedReply as IpadRelatesFeedReply,
 } from '@proto/bilibili/app/view/v1/view';
 import {
     ModuleType,
@@ -129,6 +130,13 @@ export const handleIpadViewProgressReply: Middleware = (ctx, next) => {
         handleChronos(message.chronos, ctx.request.headers);
     }
     ctx.response.bodyBytes = IpadViewProgressReply.toBinary(message);
+    return next();
+};
+
+export const handleIpadRelatesFeedReply: Middleware = (ctx, next) => {
+    const message = IpadRelatesFeedReply.fromBinary(ctx.response.bodyBytes);
+    message.list = message.list.filter(item => !item.cm.length);
+    ctx.response.bodyBytes = IpadRelatesFeedReply.toBinary(message);
     return next();
 };
 

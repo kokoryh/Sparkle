@@ -36,3 +36,7 @@ message TFInfoReply {
     optional bytes tf_toast = 2;
     optional bytes tf_panel_customized = 3;
 }
+
+message RelatesFeedReply {
+    repeated Relate list = 1;
+}
