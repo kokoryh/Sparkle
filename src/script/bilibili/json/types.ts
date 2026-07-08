@@ -52,7 +52,7 @@ export enum GotoType {
     LIVE = 'live',
     BANGUMI = 'bangumi',
     BANGUMI_RCMD = 'bangumi_rcmd',
-    ARTICAL_S = 'article_s',
+    ARTICLE_S = 'article_s',
     BANNER = 'banner',
     TEXT = 'text',
     PGC = 'pgc',

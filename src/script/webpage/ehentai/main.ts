@@ -1,10 +1,11 @@
-import { $ } from '@core/env';
-import { EHentaiHandler } from './handler';
+import { Application } from '@core/application';
+import { doneResponse, Middleware, parseHTMLResponse } from '@core/middleware';
+import { handleHTMLMessage, HTMLState } from '../handler';
 
-try {
-    new EHentaiHandler().process().done();
-} catch (e) {
-    $.error(e, $.request.url);
-} finally {
-    $.exit();
-}
+const setHTMLState: Middleware = (ctx, next) => {
+    const state = ctx.state as HTMLState;
+    state.injectScript = '{{ @template/script.js }}';
+    return next();
+};
+
+new Application().use(doneResponse).use(parseHTMLResponse).use(setHTMLState).use(handleHTMLMessage).run();

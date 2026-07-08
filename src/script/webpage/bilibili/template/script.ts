@@ -47,17 +47,19 @@ function needToBeHidden(item: TreeItem): boolean {
     return [jumpAddress, ...links].some(url => url && !new URL(url).hostname.includes('bilibili'));
 }
 
-function traversalTree(treeItems: TreeItem[], path: string[] = []): void {
-    for (const item of treeItems) {
-        const flag = canBeHidden(item.name);
+function traversal(treeItems: TreeItem[], path: string[] = []): void {
+    for (const treeItem of treeItems) {
+        const flag = canBeHidden(treeItem.name);
         if (flag) {
-            path.push(item.uuid);
+            path.push(treeItem.uuid);
         }
-        if (needToBeHidden(item)) {
-            path.forEach(p => uuids.add(p));
+        if (needToBeHidden(treeItem)) {
+            path.forEach(uuid => uuids.add(uuid));
         }
-        if (item.slots?.length) {
-            traversalSlot(item.slots, path);
+        for (const slotItem of treeItem.slots ?? []) {
+            if (slotItem.children?.length) {
+                traversal(slotItem.children, path);
+            }
         }
         if (flag) {
             path.pop();
@@ -65,25 +67,18 @@ function traversalTree(treeItems: TreeItem[], path: string[] = []): void {
     }
 }
 
-function traversalSlot(slotItems: SlotItem[], path: string[] = []): void {
-    for (const item of slotItems) {
-        if (item.children?.length) {
-            traversalTree(item.children, path);
-        }
-    }
-}
-
-function renderStyle(uuids: string[]): string {
-    return uuids.map(id => `#${id}{display:none!important}`).join('');
+function buildStyleContent(uuids: Iterable<string>): string {
+    return Array.from(uuids, uuid => `#${uuid}{display:none!important}`).join('');
 }
 
 function run(): void {
     const layerTree = (window as any).__BILIACT_EVAPAGEDATA__?.layerTree;
     if (!layerTree) return;
-    traversalTree(layerTree);
+    traversal(layerTree);
+    if (!uuids.size) return;
     const styleElement = document.createElement('style');
-    styleElement.textContent = renderStyle(Array.from(uuids));
-    document.head.append(styleElement);
+    styleElement.textContent = buildStyleContent(uuids);
+    document.head.appendChild(styleElement);
 }
 
 run();

@@ -52,7 +52,7 @@ export const parseGrpcResponse: Middleware = async (ctx, next) => {
     ctx.response.bodyBytes = result;
 };
 
-export const parseHtmlResponse: Middleware = async (ctx, next) => {
+export const parseHTMLResponse: Middleware = async (ctx, next) => {
     ctx.state.message = new DOMParser().parseFromString(ctx.response.body, 'text/html');
     await next();
     ctx.response.body = `<!DOCTYPE HTML>${(ctx.state.message as Document).documentElement.outerHTML}`;

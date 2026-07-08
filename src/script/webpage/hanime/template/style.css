@@ -7,8 +7,7 @@
 a[href*='.labsda.com'] {
     display: none !important;
 }
-a[href^="https://go.rmhfrtnd.com/"]
-{
+a[href^='https://go.rmhfrtnd.com/'] {
     display: none !important;
 }
 div[style*='width: 310px; height: 282px;'] {
@@ -27,5 +26,11 @@ div:has(> .scaled-juicyads) {
     display: none !important;
 }
 .scaled-juicyads {
+    display: none !important;
+}
+.horizontal-row > span:has(.stat-item) {
+    display: none !important;
+}
+.home-rows-videos-wrapper > a:not([href^='https://hanime1.me/']) {
     display: none !important;
 }
