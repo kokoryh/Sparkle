@@ -4,8 +4,7 @@
 .lg\:hidden {
     display: none !important;
 }
-a[href*="//bit.ly/"]
-{
+a[href*='//bit.ly/'] {
     display: none !important;
 }
 div[x-init*="#genki-counter'"] {

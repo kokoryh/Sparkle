@@ -1,10 +1,14 @@
-import { ungzip } from '@utils/index';
+import { ungzip } from '@/utils';
+import { DefaultState, DefaultArgument, HTMLState } from '@/types/context';
 import { Context } from './context';
 import { Logger } from './logger';
 
 export type Next = () => Promise<void>;
 
-export type Middleware = (ctx: Context, next: Next) => void | Promise<void>;
+export type Middleware<StateT = DefaultState, ArgumentT = DefaultArgument> = (
+    ctx: Context<StateT, ArgumentT>,
+    next: Next
+) => void | Promise<void>;
 
 export const doneRequest: Middleware = (ctx, next) => {
     return next().then(() => {
@@ -24,19 +28,19 @@ export const doneFakeResponse: Middleware = (ctx, next) => {
     });
 };
 
-export const parseJsonRequest: Middleware = async (ctx, next) => {
+export const parseJSONRequest: Middleware = async (ctx, next) => {
     ctx.state.message = JSON.parse(ctx.request.body);
     await next();
     ctx.request.body = JSON.stringify(ctx.state.message);
 };
 
-export const parseJsonResponse: Middleware = async (ctx, next) => {
+export const parseJSONResponse: Middleware = async (ctx, next) => {
     ctx.state.message = JSON.parse(ctx.response.body);
     await next();
     ctx.response.body = JSON.stringify(ctx.state.message);
 };
 
-export const parseGrpcResponse: Middleware = async (ctx, next) => {
+export const parseGRPCResponse: Middleware = async (ctx, next) => {
     let body = ctx.response.bodyBytes;
     ctx.response.bodyBytes = body[0] ? ungzip(body.subarray(5)) : body.subarray(5);
     await next();
@@ -52,10 +56,10 @@ export const parseGrpcResponse: Middleware = async (ctx, next) => {
     ctx.response.bodyBytes = result;
 };
 
-export const parseHTMLResponse: Middleware = async (ctx, next) => {
+export const parseHTMLResponse: Middleware<HTMLState> = async (ctx, next) => {
     ctx.state.message = new DOMParser().parseFromString(ctx.response.body, 'text/html');
     await next();
-    ctx.response.body = `<!DOCTYPE HTML>${(ctx.state.message as Document).documentElement.outerHTML}`;
+    ctx.response.body = `<!DOCTYPE HTML>${ctx.state.message.documentElement.outerHTML}`;
 };
 
 export const createInitArgumentMiddleware: <T extends object>(argument: T) => Middleware = argument => (ctx, next) => {

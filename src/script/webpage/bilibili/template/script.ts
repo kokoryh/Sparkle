@@ -1,3 +1,9 @@
+interface BiliWindow {
+    __BILIACT_EVAPAGEDATA__?: {
+        layerTree: TreeItem[];
+    };
+}
+
 interface TreeItem {
     expand: boolean;
     label: string;
@@ -72,7 +78,7 @@ function buildStyleContent(uuids: Iterable<string>): string {
 }
 
 function run(): void {
-    const layerTree = (window as any).__BILIACT_EVAPAGEDATA__?.layerTree;
+    const layerTree = (window as unknown as BiliWindow).__BILIACT_EVAPAGEDATA__?.layerTree;
     if (!layerTree) return;
     traversal(layerTree);
     if (!uuids.size) return;

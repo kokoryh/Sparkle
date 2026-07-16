@@ -28,14 +28,13 @@ import { PlayViewReply as IpadPlayViewReply } from '@proto/bilibili/pgc/gateway/
 import { SearchAllResponse } from '@proto/bilibili/polymer/app/search/v1/search';
 import { Context } from '@core/context';
 import { Logger } from '@core/logger';
-import { Middleware } from '@core/middleware';
 import { exit } from '@core/process';
 import { getSkipSegments, SegmentItem } from '@service/sponsor-block.service';
-import { getDevice, toBvid, ungzip } from '@utils/index';
-import { Argument } from './middleware';
+import { getDevice, toBvid, ungzip } from '@/utils';
+import { Middleware } from './middleware';
 
 export const handleDynAllReply: Middleware = (ctx, next) => {
-    const { displayUpList } = ctx.argument as Argument;
+    const { displayUpList } = ctx.argument;
     const message = DynAllReply.fromBinary(ctx.response.bodyBytes);
     message.topicList = undefined;
     if (message.dynamicList) {
@@ -66,7 +65,7 @@ function handleUpList(message: DynAllReply, displayUpList: string): void {
 
 export const handlePlayViewUniteReply: Middleware = (ctx, next) => {
     const message = PlayViewUniteReply.fromBinary(ctx.response.bodyBytes);
-    message.viewInfo && (message.viewInfo.promptBar = undefined);
+    if (message.viewInfo) message.viewInfo.promptBar = undefined;
     if (message.playArcConf?.arcConfs) {
         Object.values(message.playArcConf.arcConfs).forEach(item => {
             if (item.isSupport && item.disabled) {
@@ -114,7 +113,7 @@ export const handleIpadViewReply: Middleware = (ctx, next) => {
     message.label = undefined;
     message.cmIpad = undefined;
     message.cmConfig = undefined;
-    message.reqUser && (message.reqUser.elecPlusBtn = undefined);
+    if (message.reqUser) message.reqUser.elecPlusBtn = undefined;
     message.cms.length = 0;
     message.specialCellNew.length = 0;
     message.relates = message.relates.filter(item => !item.cm.length);
@@ -123,10 +122,10 @@ export const handleIpadViewReply: Middleware = (ctx, next) => {
 };
 
 export const handleIpadViewProgressReply: Middleware = (ctx, next) => {
-    const { sponsorBlock } = ctx.argument as Argument;
+    const { sponsorBlock } = ctx.argument;
     const message = IpadViewProgressReply.fromBinary(ctx.response.bodyBytes);
     message.videoGuide = undefined;
-    if (isSponserBlockEnabled(sponsorBlock) && message.chronos) {
+    if (isSponsorBlockEnabled(sponsorBlock) && message.chronos) {
         handleChronos(message.chronos, ctx.request.headers);
     }
     ctx.response.bodyBytes = IpadViewProgressReply.toBinary(message);
@@ -141,17 +140,17 @@ export const handleIpadRelatesFeedReply: Middleware = (ctx, next) => {
 };
 
 export const handleViewProgressReply: Middleware = (ctx, next) => {
-    const { sponsorBlock } = ctx.argument as Argument;
+    const { sponsorBlock } = ctx.argument;
     const message = ViewProgressReply.fromBinary(ctx.response.bodyBytes);
     message.dm = undefined;
-    if (isSponserBlockEnabled(sponsorBlock) && message.chronos) {
+    if (isSponsorBlockEnabled(sponsorBlock) && message.chronos) {
         handleChronos(message.chronos, ctx.request.headers);
     }
     ctx.response.bodyBytes = ViewProgressReply.toBinary(message);
     return next();
 };
 
-function isSponserBlockEnabled(value: string | boolean): boolean {
+function isSponsorBlockEnabled(value: string | boolean): boolean {
     return Boolean(value && value !== '#');
 }
 
@@ -206,7 +205,7 @@ export const handleRelatesFeedReply: Middleware = (ctx, next) => {
 export const handleViewReply: Middleware = (ctx, next) => {
     const message = ViewReply.fromBinary(ctx.response.bodyBytes);
     message.cm = undefined;
-    message.reqUser && (message.reqUser.elecPlusBtn = undefined);
+    if (message.reqUser) message.reqUser.elecPlusBtn = undefined;
     const excludeTypes = [
         ModuleType.ACTIVITY,
         ModuleType.PAY_BAR,
@@ -257,7 +256,7 @@ export const handleDmViewReply: Middleware = (ctx, next) => {
 };
 
 export const handleMainListReply: Middleware = (ctx, next) => {
-    const { purifyComment } = ctx.argument as Argument;
+    const { purifyComment } = ctx.argument;
     const message = MainListReply.fromBinary(ctx.response.bodyBytes);
     message.cm = undefined;
     const excludeTypes = [Type.CM, Type.OPERATION];
@@ -281,7 +280,7 @@ export const handleMainListReply: Middleware = (ctx, next) => {
 
 export const handleIpadPlayViewReply: Middleware = (ctx, next) => {
     const message = IpadPlayViewReply.fromBinary(ctx.response.bodyBytes);
-    message.viewInfo && (message.viewInfo.tryWatchPromptBar = undefined);
+    if (message.viewInfo) message.viewInfo.tryWatchPromptBar = undefined;
     if (message.playExtConf?.castTips) {
         message.playExtConf.castTips = { code: 0, message: '' };
     }
@@ -306,8 +305,8 @@ export const handleRequest: Middleware = async (ctx, next) => {
 };
 
 export const handleDmSegMobileReq: Middleware = async (ctx, next) => {
-    let body = ctx.request.bodyBytes;
-    let data = body[0] ? ungzip(body.subarray(5)) : body.subarray(5);
+    const body = ctx.request.bodyBytes;
+    const data = body[0] ? ungzip(body.subarray(5)) : body.subarray(5);
     const message = DmSegMobileReq.fromBinary(data);
     if (message.type !== 1) exit();
     const { pid, oid } = message;

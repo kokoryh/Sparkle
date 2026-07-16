@@ -15,9 +15,7 @@
             "@utils/*": ["src/utils/*"],
             "@/*": ["src/*"]
         },
-        "strict": true,
-        "noImplicitAny": false,
-        "alwaysStrict": false
+        "strict": true
     },
     "include": ["src/**/*"]
 }

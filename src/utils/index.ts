@@ -1,10 +1,12 @@
-import { gunzipSync } from 'fflate';
+// import { gunzipSync } from 'fflate';
 
 export { assert } from './assert';
 export { toAvid, toBvid } from './bilibili';
-export { toArrayBuffer, toUint8Array } from './binary';
+export { toArrayBuffer, toUint8Array, isUint8Array } from './binary';
 
-export function createCaseInsensitiveDictionary<T extends object>(initial: T = {} as T): T & { [key: string]: any } {
+export function createCaseInsensitiveDictionary<T extends object>(
+    initial: T = {} as T
+): T & { [key: string]: unknown } {
     const target = Object.create(null);
     const normalize = (property: string | symbol) => {
         return typeof property === 'string' ? property.toLowerCase() : property;
@@ -38,7 +40,7 @@ export function createCaseInsensitiveDictionary<T extends object>(initial: T = {
     return new Proxy(target, proxyHandler);
 }
 
-export function toString(value: any): string {
+export function toString(value: unknown): string {
     if (typeof value !== 'object' || value === null) {
         return String(value);
     }

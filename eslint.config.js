@@ -7,11 +7,18 @@ export default tseslint.config(
     tseslint.configs.recommended,
     globalIgnores(['dist', 'src/proto']),
     {
+        languageOptions: {
+            globals: {
+                window: 'readonly',
+                document: 'readonly',
+            },
+        },
         rules: {
-            '@typesccript-eslint/no-empty-object-type': [
+            '@typescript-eslint/no-empty-object-type': [
                 'error',
                 {
                     allowInterfaces: 'with-single-extends',
+                    allowObjectTypes: 'always',
                 },
             ],
         },

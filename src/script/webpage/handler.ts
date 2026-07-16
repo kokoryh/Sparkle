@@ -1,14 +1,10 @@
-import { Middleware } from '@core/middleware';
+import { Middleware as DefaultMiddleware } from '@core/middleware';
+import { HTMLState } from '@/types/context';
 
-export interface HTMLState {
-    message: Document;
-    injectScript?: string;
-    injectStyle?: string;
-    nodeFilters?: Array<{ selector: string; predicate: (element: HTMLElement) => boolean }>;
-}
+export type Middleware = DefaultMiddleware<HTMLState>;
 
 export const handleHTMLMessage: Middleware = (ctx, next) => {
-    const { message, nodeFilters, injectScript, injectStyle } = ctx.state as HTMLState;
+    const { message, nodeFilters, injectScript, injectStyle } = ctx.state;
 
     if (nodeFilters) {
         nodeFilters.forEach(({ selector, predicate }) => {

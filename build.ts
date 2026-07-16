@@ -58,7 +58,9 @@ async function buildEntry(entryPath: string) {
             console.log(`[CACHED] Unchanged: ${relativePath} (hash: ${builtContentHash.slice(0, 8)}...)`);
             return false;
         }
-    } catch {}
+    } catch (err) {
+        console.error(err);
+    }
     await fs.writeFile(outPath, builtContent);
     console.log(`[BUILT] Built: ${relativePath} (hash: ${builtContentHash.slice(0, 8)})`);
     return true;
@@ -117,8 +119,8 @@ async function runBuild() {
                 `Changed: ${changedCount}/${entryFiles.length} | ` +
                 `Skipped: ${entryFiles.length - changedCount}`
         );
-    } catch (err: any) {
-        console.error(`[ERROR] Build failed: ${err.toString()}`);
+    } catch (err: unknown) {
+        console.error(`[ERROR] Build failed: ${String(err)}`);
         process.exit(1);
     }
 }

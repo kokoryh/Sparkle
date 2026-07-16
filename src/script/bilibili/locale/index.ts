@@ -7,5 +7,5 @@ export function getI18n(locale: string): () => Promise<{ default: I18n }> {
         en: () => import('./lang/en'),
         ja: () => import('./lang/ja'),
     };
-    return langs[locale] || langs['zh-Hans_CN'];
+    return langs[locale as keyof typeof langs] || langs['zh-Hans_CN'];
 }

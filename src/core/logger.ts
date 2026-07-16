@@ -1,4 +1,4 @@
-import { toString } from '@utils/index';
+import { toString } from '@/utils';
 import { ExitError } from './process';
 
 export enum LogLevel {
@@ -13,29 +13,29 @@ export class Logger {
     private static level = LogLevel.ERROR;
 
     static setLevel(level: string): void {
-        this.level = Number(level) || LogLevel[level.toUpperCase()] || LogLevel.ERROR;
+        this.level = Number(level) || LogLevel[level.toUpperCase() as keyof typeof LogLevel] || LogLevel.ERROR;
     }
 
-    static log(...messages: any[]): void {
+    static log(...messages: unknown[]): void {
         console.log(messages.map(msg => toString(msg)).join(' '));
     }
 
-    static debug(...messages: any[]): void {
+    static debug(...messages: unknown[]): void {
         if (this.level > LogLevel.DEBUG) return;
         this.log('[DEBUG]', ...messages);
     }
 
-    static info(...messages: any[]): void {
+    static info(...messages: unknown[]): void {
         if (this.level > LogLevel.INFO) return;
         this.log('[INFO]', ...messages);
     }
 
-    static warn(...messages: any[]): void {
+    static warn(...messages: unknown[]): void {
         if (this.level > LogLevel.WARN) return;
         this.log('[WARN]', ...messages);
     }
 
-    static error(...messages: any[]): void {
+    static error(...messages: unknown[]): void {
         if (this.level > LogLevel.ERROR) return;
 
         const firstMessage = messages[0];

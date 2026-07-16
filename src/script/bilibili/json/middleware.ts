@@ -1,10 +1,17 @@
-import { createInitArgumentMiddleware, Middleware } from '@core/middleware';
+import { createInitArgumentMiddleware, Middleware as DefaultMiddleware } from '@core/middleware';
 import { exit } from '@core/process';
-import { getI18n } from '../locale';
+import { getI18n, I18n } from '../locale';
 
 export interface Argument {
     showCreatorHub: boolean | number;
 }
+
+export interface State<T> {
+    message: T;
+    i18n: I18n;
+}
+
+export type Middleware<T = { code: number }> = DefaultMiddleware<State<T>, Argument>;
 
 export const initArgument = createInitArgumentMiddleware<Argument>({ showCreatorHub: false });
 

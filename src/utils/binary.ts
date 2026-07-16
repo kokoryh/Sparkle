@@ -5,3 +5,7 @@ export function toUint8Array(data: ArrayBuffer): Uint8Array {
 export function toArrayBuffer(data: Uint8Array): ArrayBuffer {
     return data.buffer.slice(data.byteOffset, data.byteLength + data.byteOffset) as ArrayBuffer;
 }
+
+export function isUint8Array(value: unknown): value is Uint8Array {
+    return value instanceof Uint8Array;
+}

@@ -9,11 +9,13 @@ import {
     FetchRequest,
     FetchResponse,
     NotificationOptions,
+    DefaultState,
+    DefaultArgument,
 } from '@/types/context';
-import { toArrayBuffer, toUint8Array } from '@utils/index';
+import { toArrayBuffer, toUint8Array, isUint8Array } from '@/utils';
 import { Logger } from './logger';
 
-export abstract class Context {
+export abstract class Context<StateT = DefaultState, ArgumentT = DefaultArgument> {
     static getInstance(): Context {
         if (!Context.instance) {
             Context.instance = Context.createInstance();
@@ -29,8 +31,8 @@ export abstract class Context {
 
     readonly request: HttpRequest;
     readonly response: HttpResponse;
-    readonly argument: Record<string, any> = {};
-    readonly state: Record<string, any> = {};
+    readonly state: StateT = {} as StateT;
+    readonly argument: ArgumentT = {} as ArgumentT;
 
     #url: URL | undefined;
 
@@ -140,11 +142,11 @@ export class SurgeContext extends Context {
     fetch(request: FetchRequest): Promise<FetchResponse> {
         const { method, body, timeout = 5, ...rest } = request;
         return new Promise((resolve, reject) => {
-            $httpClient[method.toLowerCase()](
+            $httpClient[method.toLowerCase() as keyof typeof $httpClient](
                 {
                     ...rest,
                     body,
-                    'binary-mode': body instanceof Uint8Array,
+                    'binary-mode': isUint8Array(body),
                     timeout,
                 },
                 (error: unknown, response: Surge.FetchResponse, data: Surge.HttpBody) => {
@@ -277,7 +279,7 @@ export class QuantumultXContext extends Context {
             } else if (key === 'method') {
                 request.method = (value as string).toUpperCase();
             } else {
-                request[key] = value;
+                request[key as keyof QuantumultX.FetchRequest] = value;
             }
         }
         return $task.fetch(request).then(response => this.createResponse(response));
@@ -302,7 +304,7 @@ export class QuantumultXContext extends Context {
             } else if (key === 'body' && value instanceof Uint8Array) {
                 target.bodyBytes = toArrayBuffer(value);
             } else {
-                target[key] = value;
+                (target as Record<string, unknown>)[key] = value;
             }
         }
         $done(target);

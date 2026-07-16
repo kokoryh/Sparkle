@@ -1,9 +1,10 @@
 import { Application } from '@core/application';
-import { doneResponse, Middleware, parseHTMLResponse } from '@core/middleware';
-import { handleHTMLMessage, HTMLState } from '../handler';
+import { doneResponse, parseHTMLResponse } from '@core/middleware';
+import { HTMLState } from '@/types/context';
+import { handleHTMLMessage, Middleware } from '../handler';
 
 const setHTMLState: Middleware = (ctx, next) => {
-    const state = ctx.state as HTMLState;
+    const state = ctx.state;
 
     state.injectScript = '{{ @template/script.js }}';
 

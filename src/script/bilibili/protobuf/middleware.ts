@@ -1,11 +1,14 @@
 import { Logger } from '@core/logger';
-import { createInitArgumentMiddleware, Middleware } from '@core/middleware';
+import { createInitArgumentMiddleware, Middleware as DefaultMiddleware } from '@core/middleware';
+import { DefaultState } from '@/types/context';
 
 export interface Argument {
     displayUpList: 'auto' | 'show' | 'hide';
     purifyComment: boolean | number;
     sponsorBlock: boolean | string;
 }
+
+export type Middleware = DefaultMiddleware<DefaultState, Argument>;
 
 export const initArgument: Middleware = createInitArgumentMiddleware<Argument>({
     displayUpList: 'show',

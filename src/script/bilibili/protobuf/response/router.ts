@@ -1,5 +1,5 @@
 import { matchUrlSuffix, Router } from '@core/router';
-import { handleDefaultWordsReply, handleModeStatusReply, handleTFInfoReply } from '../deprecated-handler';
+import { initArgument } from '../middleware';
 import {
     handleDynAllReply,
     handlePlayViewUniteReply,
@@ -16,7 +16,7 @@ import {
     handleSearchAllResponse,
     handleIpadRelatesFeedReply,
 } from '../handler';
-import { initArgument } from '../middleware';
+// import { handleDefaultWordsReply, handleModeStatusReply, handleTFInfoReply } from '../deprecated-handler';
 
 const router = new Router({
     matchPath: matchUrlSuffix,

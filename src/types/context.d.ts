@@ -1,5 +1,20 @@
 import * as Common from './common';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DefaultStateExtends = any;
+export interface DefaultState extends DefaultStateExtends {}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DefaultArgumentExtends = any;
+export interface DefaultArgument extends DefaultArgumentExtends {}
+
+export interface HTMLState {
+    message: Document;
+    injectScript?: string;
+    injectStyle?: string;
+    nodeFilters?: Array<{ selector: string; predicate: (element: HTMLElement) => boolean }>;
+}
+
 export interface HttpRequest extends Common.HttpRequest {
     body: string;
     bodyBytes: Uint8Array;
