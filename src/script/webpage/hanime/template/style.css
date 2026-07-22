@@ -34,3 +34,12 @@ div:has(> .scaled-juicyads) {
 .home-rows-videos-wrapper > a:not([href^='https://hanime1.me/']) {
     display: none !important;
 }
+.related-video-width:has(> a:not([href^='https://hanime1.me/'])) {
+    display: none !important;
+}
+.desktop-grid-item:has(> .pure-grid-card) {
+    display: none !important;
+}
+.sidebar-ad-grid {
+    display: none !important;
+}
