@@ -1,4 +1,4 @@
-import { ctx } from '@core/context';
+import { Context } from '@core/context';
 import { FetchResponse } from '@/types/context';
 
 export interface SegmentItem {
@@ -13,7 +13,7 @@ export interface SegmentItem {
     description: string;
 }
 
-export function getSkipSegments(videoId: string, cid = ''): Promise<FetchResponse> {
+export function getSkipSegments(ctx: Context, videoId: string, cid = ''): Promise<FetchResponse> {
     cid = cid !== '0' ? cid : '';
     return ctx.fetch({
         method: 'get',

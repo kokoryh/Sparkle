@@ -24,7 +24,7 @@ import {
     DmViewReply,
 } from '@proto/bilibili/community/service/dm/v1/dm';
 import { MainListReply, Type } from '@proto/bilibili/main/community/reply/v1/reply';
-import { PlayViewReply as IpadPlayViewReply } from '@proto/bilibili/pgc/gateway/player/v2/playurl.js';
+import { PlayViewReply as IpadPlayViewReply } from '@proto/bilibili/pgc/gateway/player/v2/playurl';
 import { SearchAllResponse } from '@proto/bilibili/polymer/app/search/v1/search';
 import { Context } from '@core/context';
 import { Logger } from '@core/logger';
@@ -313,7 +313,7 @@ export const handleDmSegMobileReq: Middleware = async (ctx, next) => {
     const videoId = toBvid(pid);
     const [{ headers, bodyBytes, h2_trailers }, segments] = await Promise.all([
         fetchBilibili(ctx, 1),
-        fetchSponsorBlock(videoId, oid),
+        fetchSponsorBlock(ctx, videoId, oid),
     ]);
     ctx.response.headers = headers;
     ctx.response.bodyBytes = bodyBytes;
@@ -365,9 +365,9 @@ async function fetchBilibili(ctx: Context, maxRetries = 2) {
     exit(1);
 }
 
-async function fetchSponsorBlock(videoId: string, cid: string): Promise<number[][]> {
+async function fetchSponsorBlock(ctx: Context, videoId: string, cid: string): Promise<number[][]> {
     try {
-        const { status, body } = await getSkipSegments(videoId, cid);
+        const { status, body } = await getSkipSegments(ctx, videoId, cid);
 
         Logger.debug('[SponsorBlock]', { videoId, status, body });
 
