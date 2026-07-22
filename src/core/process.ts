@@ -1,5 +1,3 @@
-import { ctx } from './context';
-
 export class ExitError extends Error {
     readonly name = 'Exit';
 
@@ -15,11 +13,14 @@ export class ExitError extends Error {
     }
 }
 
+export class AbortError extends Error {
+    readonly name = 'Abort';
+}
+
 export function exit(code = 0): never {
     throw new ExitError(code);
 }
 
 export function abort(): never {
-    ctx.abort();
-    throw new ExitError(0);
+    throw new AbortError();
 }

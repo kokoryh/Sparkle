@@ -1,6 +1,5 @@
 import { compose } from './compose';
-import { ctx } from './context';
-import { Logger } from './logger';
+import { Context } from './context';
 import { Middleware } from './middleware';
 
 export class Application {
@@ -12,8 +11,9 @@ export class Application {
     }
 
     run(): void {
+        const ctx = Context.createInstance();
         compose(this.middleware)(ctx)
-            .catch(e => Logger.error(e, ctx))
+            .catch(err => ctx.onerror(err))
             .finally(() => ctx.exit());
     }
 }

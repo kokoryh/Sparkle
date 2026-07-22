@@ -1,5 +1,4 @@
 import { toString } from '@/utils';
-import { ExitError } from './process';
 
 export enum LogLevel {
     DEBUG = 1,
@@ -37,15 +36,6 @@ export class Logger {
 
     static error(...messages: unknown[]): void {
         if (this.level > LogLevel.ERROR) return;
-
-        const firstMessage = messages[0];
-        if (firstMessage instanceof ExitError) {
-            if (firstMessage.code !== 0) {
-                this.error(firstMessage.toString());
-            }
-            return;
-        }
-
         this.log('[ERROR]', ...messages);
     }
 }

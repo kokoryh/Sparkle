@@ -14,20 +14,14 @@ import {
 } from '@/types/context';
 import { toArrayBuffer, toUint8Array, isUint8Array } from '@/utils';
 import { Logger } from './logger';
+import { AbortError, ExitError } from './process';
 
 export abstract class Context<StateT = DefaultState, ArgumentT = DefaultArgument> {
-    static getInstance(): Context {
-        if (!Context.instance) {
-            Context.instance = Context.createInstance();
-        }
-        return Context.instance;
-    }
-    private static createInstance(): Context {
+    static createInstance(): Context {
         if (typeof $loon !== 'undefined') return new LoonContext();
         if (typeof $task !== 'undefined') throw new Error('QuantumultX is not supported');
         return new SurgeContext();
     }
-    private static instance: Context;
 
     readonly request: HttpRequest;
     readonly response: HttpResponse;
@@ -83,6 +77,16 @@ export abstract class Context<StateT = DefaultState, ArgumentT = DefaultArgument
 
     exit(): void {
         $done({});
+    }
+
+    onerror(err: unknown): void {
+        if (err instanceof AbortError) {
+            this.abort();
+        } else if (err instanceof ExitError) {
+            if (err.code !== 0) Logger.error(err.toString());
+        } else {
+            Logger.error(err, this.toString());
+        }
     }
 
     toString(): string {
@@ -314,5 +318,3 @@ export class QuantumultXContext extends Context {
         $done();
     }
 }
-
-export const ctx = Context.getInstance();
