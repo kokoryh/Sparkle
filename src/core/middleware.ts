@@ -1,5 +1,5 @@
 import { ungzip } from '@/utils';
-import { DefaultState, DefaultArgument, HTMLState } from '@/types/context';
+import { DefaultState, DefaultArgument } from '@/types/context';
 import { Context } from './context';
 import { Logger } from './logger';
 
@@ -12,19 +12,19 @@ export type Middleware<StateT = DefaultState, ArgumentT = DefaultArgument> = (
 
 export const doneRequest: Middleware = (ctx, next) => {
     return next().then(() => {
-        ctx.done(ctx.request);
+        ctx.type = 'request';
     });
 };
 
 export const doneResponse: Middleware = (ctx, next) => {
     return next().then(() => {
-        ctx.done(ctx.response);
+        ctx.type = 'response';
     });
 };
 
 export const doneFakeResponse: Middleware = (ctx, next) => {
     return next().then(() => {
-        ctx.done({ response: ctx.response });
+        ctx.type = 'fakeResponse';
     });
 };
 
@@ -56,7 +56,7 @@ export const parseGRPCResponse: Middleware = async (ctx, next) => {
     ctx.response.bodyBytes = result;
 };
 
-export const parseHTMLResponse: Middleware<HTMLState> = async (ctx, next) => {
+export const parseHTMLResponse: Middleware<{ message: Document }> = async (ctx, next) => {
     ctx.state.message = new DOMParser().parseFromString(ctx.response.body, 'text/html');
     await next();
     ctx.response.body = `<!DOCTYPE HTML>${ctx.state.message.documentElement.outerHTML}`;

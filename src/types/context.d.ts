@@ -8,13 +8,6 @@ export interface DefaultState extends DefaultStateExtends {}
 type DefaultArgumentExtends = any;
 export interface DefaultArgument extends DefaultArgumentExtends {}
 
-export interface HTMLState {
-    message: Document;
-    injectScript?: string;
-    injectStyle?: string;
-    nodeFilters?: Array<{ selector: string; predicate: (element: HTMLElement) => boolean }>;
-}
-
 export interface HttpRequest extends Common.HttpRequest {
     body: string;
     bodyBytes: Uint8Array;

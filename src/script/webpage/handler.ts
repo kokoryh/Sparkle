@@ -1,5 +1,11 @@
 import { Middleware as DefaultMiddleware } from '@core/middleware';
-import { HTMLState } from '@/types/context';
+
+export interface HTMLState {
+    message: Document;
+    injectScript?: string;
+    injectStyle?: string;
+    nodeFilters?: Array<{ selector: string; predicate: (element: HTMLElement) => boolean }>;
+}
 
 export type Middleware = DefaultMiddleware<HTMLState>;
 

@@ -14,6 +14,6 @@ export class Application {
         const ctx = Context.createInstance();
         compose(this.middleware)(ctx)
             .catch(err => ctx.onerror(err))
-            .finally(() => ctx.exit());
+            .finally(() => ctx.finish());
     }
 }

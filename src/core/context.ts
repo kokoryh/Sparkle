@@ -28,6 +28,8 @@ export abstract class Context<StateT = DefaultState, ArgumentT = DefaultArgument
     readonly state: StateT = {} as StateT;
     readonly argument: ArgumentT = {} as ArgumentT;
 
+    type: 'request' | 'response' | 'fakeResponse' | 'abort' | 'exit' = 'exit';
+
     #url: URL | undefined;
 
     get url(): URL {
@@ -79,14 +81,34 @@ export abstract class Context<StateT = DefaultState, ArgumentT = DefaultArgument
         $done({});
     }
 
+    finish(): void {
+        if (this.type === 'request') {
+            this.done(this.request);
+        } else if (this.type === 'response') {
+            this.done(this.response);
+        } else if (this.type === 'fakeResponse') {
+            this.done({ response: this.response });
+        } else if (this.type === 'abort') {
+            this.abort();
+        } else {
+            this.exit();
+        }
+    }
+
     onerror(err: unknown): void {
         if (err instanceof AbortError) {
-            this.abort();
-        } else if (err instanceof ExitError) {
-            if (err.code !== 0) Logger.error(err.toString());
-        } else {
-            Logger.error(err, this.toString());
+            this.type = 'abort';
+            return;
         }
+
+        this.type = 'exit';
+
+        if (err instanceof ExitError) {
+            if (err.code !== 0) Logger.error(err.toString());
+            return;
+        }
+
+        Logger.error(err, this.toString());
     }
 
     toString(): string {
