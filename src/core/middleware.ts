@@ -5,26 +5,26 @@ import { Logger } from './logger';
 
 export type Next = () => Promise<void>;
 
-export type Middleware<StateT = DefaultState, ArgumentT = DefaultArgument> = (
+export type Middleware<StateT extends DefaultState = DefaultState, ArgumentT = DefaultArgument> = (
     ctx: Context<StateT, ArgumentT>,
     next: Next
 ) => void | Promise<void>;
 
 export const doneRequest: Middleware = (ctx, next) => {
     return next().then(() => {
-        ctx.type = 'request';
+        ctx.state.type = 'request';
     });
 };
 
 export const doneResponse: Middleware = (ctx, next) => {
     return next().then(() => {
-        ctx.type = 'response';
+        ctx.state.type = 'response';
     });
 };
 
 export const doneFakeResponse: Middleware = (ctx, next) => {
     return next().then(() => {
-        ctx.type = 'fakeResponse';
+        ctx.state.type = 'fakeResponse';
     });
 };
 

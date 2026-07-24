@@ -16,7 +16,7 @@ import { toArrayBuffer, toUint8Array, isUint8Array } from '@/utils';
 import { Logger } from './logger';
 import { AbortError, ExitError } from './process';
 
-export abstract class Context<StateT = DefaultState, ArgumentT = DefaultArgument> {
+export abstract class Context<StateT extends DefaultState = DefaultState, ArgumentT = DefaultArgument> {
     static createInstance(): Context {
         if (typeof $loon !== 'undefined') return new LoonContext();
         if (typeof $task !== 'undefined') throw new Error('QuantumultX is not supported');
@@ -27,8 +27,6 @@ export abstract class Context<StateT = DefaultState, ArgumentT = DefaultArgument
     readonly response: HttpResponse;
     readonly state: StateT = {} as StateT;
     readonly argument: ArgumentT = {} as ArgumentT;
-
-    type: 'request' | 'response' | 'fakeResponse' | 'abort' | 'exit' = 'exit';
 
     #url: URL | undefined;
 
@@ -82,13 +80,14 @@ export abstract class Context<StateT = DefaultState, ArgumentT = DefaultArgument
     }
 
     finish(): void {
-        if (this.type === 'request') {
-            this.done(this.request);
-        } else if (this.type === 'response') {
+        const type = this.state.type;
+        if (type === 'response') {
             this.done(this.response);
-        } else if (this.type === 'fakeResponse') {
+        } else if (type === 'fakeResponse') {
             this.done({ response: this.response });
-        } else if (this.type === 'abort') {
+        } else if (type === 'request') {
+            this.done(this.request);
+        } else if (type === 'abort') {
             this.abort();
         } else {
             this.exit();
@@ -97,11 +96,11 @@ export abstract class Context<StateT = DefaultState, ArgumentT = DefaultArgument
 
     onerror(err: unknown): void {
         if (err instanceof AbortError) {
-            this.type = 'abort';
+            this.state.type = 'abort';
             return;
         }
 
-        this.type = 'exit';
+        this.state.type = 'exit';
 
         if (err instanceof ExitError) {
             if (err.code !== 0) Logger.error(err.toString());

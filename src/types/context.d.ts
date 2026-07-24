@@ -2,7 +2,11 @@ import * as Common from './common';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DefaultStateExtends = any;
-export interface DefaultState extends DefaultStateExtends {}
+export interface DefaultState extends DefaultStateExtends {
+    type?: 'request' | 'response' | 'fakeResponse' | 'abort' | 'exit';
+    route?: boolean;
+    message?: object;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DefaultArgumentExtends = any;
