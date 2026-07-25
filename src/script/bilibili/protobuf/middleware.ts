@@ -39,7 +39,3 @@ export const handleResponseHeaders: Middleware = (ctx, next) => {
         }
     });
 };
-
-export const handleError: Middleware = (ctx, next) => {
-    return next().catch(err => ctx.onerror(err));
-};

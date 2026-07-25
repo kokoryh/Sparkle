@@ -1,8 +1,8 @@
 {
     "editor.rulers": [80],
     "editor.formatOnSave": true,
-    "javascript.suggest.paths": false,
-    "typescript.suggest.paths": false,
+    "js/ts.suggest.paths": false,
+    "js/ts.tsdk.path": "node_modules/typescript/lib",
     "eslint.run": "onSave",
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"

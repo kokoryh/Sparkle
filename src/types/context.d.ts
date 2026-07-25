@@ -4,15 +4,18 @@ import * as Common from './common';
 type DefaultStateExtends = any;
 export interface DefaultState extends DefaultStateExtends {}
 
+export interface ContextState {
+    type?: 'request' | 'response' | 'fakeResponse' | 'abort' | 'exit';
+    route?: boolean;
+    message?: object;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DefaultArgumentExtends = any;
 export interface DefaultArgument extends DefaultArgumentExtends {}
 
-export interface HTMLState {
-    message: Document;
-    injectScript?: string;
-    injectStyle?: string;
-    nodeFilters?: Array<{ selector: string; predicate: (element: HTMLElement) => boolean }>;
+export interface ContextArgument {
+    logLevel?: string;
 }
 
 export interface HttpRequest extends Common.HttpRequest {

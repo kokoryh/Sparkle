@@ -9,8 +9,10 @@ import {
     FetchRequest,
     FetchResponse,
     NotificationOptions,
-    DefaultState,
+    ContextArgument,
+    ContextState,
     DefaultArgument,
+    DefaultState,
 } from '@/types/context';
 import { toArrayBuffer, toUint8Array, isUint8Array } from '@/utils';
 import { Logger } from './logger';
@@ -25,8 +27,8 @@ export abstract class Context<StateT = DefaultState, ArgumentT = DefaultArgument
 
     readonly request: HttpRequest;
     readonly response: HttpResponse;
-    readonly state: StateT = {} as StateT;
-    readonly argument: ArgumentT = {} as ArgumentT;
+    readonly state = {} as StateT & ContextState;
+    readonly argument = {} as ArgumentT & ContextArgument;
 
     #url: URL | undefined;
 
@@ -81,11 +83,32 @@ export abstract class Context<StateT = DefaultState, ArgumentT = DefaultArgument
 
     onerror(err: unknown): void {
         if (err instanceof AbortError) {
-            this.abort();
-        } else if (err instanceof ExitError) {
+            this.state.type = 'abort';
+            return;
+        }
+
+        this.state.type = 'exit';
+
+        if (err instanceof ExitError) {
             if (err.code !== 0) Logger.error(err.toString());
+            return;
+        }
+
+        Logger.error(err, this.toString());
+    }
+
+    end(): void {
+        const type = this.state.type;
+        if (type === 'response') {
+            this.done(this.response);
+        } else if (type === 'fakeResponse') {
+            this.done({ response: this.response });
+        } else if (type === 'request') {
+            this.done(this.request);
+        } else if (type === 'abort') {
+            this.abort();
         } else {
-            Logger.error(err, this.toString());
+            this.exit();
         }
     }
 
@@ -139,8 +162,8 @@ export class SurgeContext extends Context {
         return $persistentStore.read(key);
     }
 
-    setVal(val: string, key: string): boolean {
-        return $persistentStore.write(val, key);
+    setVal(val: string, key: string): void {
+        $persistentStore.write(val, key);
     }
 
     fetch(request: FetchRequest): Promise<FetchResponse> {
@@ -268,8 +291,8 @@ export class QuantumultXContext extends Context {
         return $prefs.valueForKey(key);
     }
 
-    setVal(val: string, key: string): boolean {
-        return $prefs.setValueForKey(val, key);
+    setVal(val: string, key: string): void {
+        $prefs.setValueForKey(val, key);
     }
 
     fetch(fetchRequest: FetchRequest): Promise<FetchResponse> {
