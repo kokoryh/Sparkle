@@ -48,6 +48,7 @@ function canBeHidden(type: string): boolean {
 }
 
 function needToBeHidden(item: TreeItem): boolean {
+    if (item.name === 'H5Slider') return true;
     const jumpAddress = item.props?.jumpAddress;
     const links = item.props?.list?.map(item => item.link) || [];
     return [jumpAddress, ...links].some(url => url && !new URL(url).hostname.includes('bilibili'));
