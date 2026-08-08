@@ -37,6 +37,9 @@ div:has(> .scaled-juicyads) {
 .related-video-width:has(> a:not([href^='https://hanime1.me/'])) {
     display: none !important;
 }
+.related-watch-wrap:has(> div > div > div > div > a:not([href^='https://hanime1.me/'])) {
+    display: none !important;
+}
 .desktop-grid-item:has(> .pure-grid-card) {
     display: none !important;
 }
