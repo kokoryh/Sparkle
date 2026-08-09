@@ -15,6 +15,7 @@ import {
     ViewReply,
     ViewProgressReply,
     RelateCard,
+    AIRelateAsyncReply,
 } from '@proto/bilibili/app/viewunite/v1/view';
 import {
     DanmakuElem,
@@ -243,6 +244,13 @@ function handleRelateCard(cards: RelateCard[]): RelateCard[] {
         return !excludeTypes.includes(card.relateCardType) && !card.cmStock.length && !card.basicInfo?.uniqueId;
     });
 }
+
+export const handleAIRelateAsyncReply: Middleware = (ctx, next) => {
+    const message = AIRelateAsyncReply.fromBinary(ctx.response.bodyBytes);
+    message.cm = undefined;
+    ctx.response.bodyBytes = AIRelateAsyncReply.toBinary(message);
+    return next();
+};
 
 export const handleDmViewReply: Middleware = (ctx, next) => {
     const message = DmViewReply.fromBinary(ctx.response.bodyBytes);

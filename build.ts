@@ -97,7 +97,7 @@ async function renderTemplate(basePath: string, sourceContent: string): Promise<
     }, sourceContent);
 }
 
-async function runBuild() {
+async function build() {
     console.log('[START] Starting build...');
     const startTime = Date.now();
     let changedCount = 0;
@@ -125,4 +125,4 @@ async function runBuild() {
     }
 }
 
-runBuild();
+build();

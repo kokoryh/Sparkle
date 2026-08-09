@@ -15,6 +15,7 @@ import {
     handleIpadPlayViewReply,
     handleSearchAllResponse,
     handleIpadRelatesFeedReply,
+    handleAIRelateAsyncReply,
 } from '../handler';
 // import { handleDefaultWordsReply, handleModeStatusReply, handleTFInfoReply } from '../deprecated-handler';
 
@@ -32,6 +33,7 @@ router.post('view.v1.View/RelatesFeed', handleIpadRelatesFeedReply);
 router.post('viewunite.v1.View/ViewProgress', initArgument, handleViewProgressReply);
 router.post('viewunite.v1.View/RelatesFeed', handleRelatesFeedReply);
 router.post('viewunite.v1.View/View', handleViewReply);
+router.post('viewunite.v1.View/AIRelateAsync', handleAIRelateAsyncReply);
 router.post('v1.DM/DmView', handleDmViewReply);
 router.post('v1.Reply/MainList', initArgument, handleMainListReply);
 router.post('v2.PlayURL/PlayView', handleIpadPlayViewReply);

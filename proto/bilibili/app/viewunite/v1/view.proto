@@ -93,3 +93,7 @@ message Chronos {
 message RelatesFeedReply {
     repeated RelateCard relates = 1;
 }
+
+message AIRelateAsyncReply {
+    optional bytes cm = 1;
+}
