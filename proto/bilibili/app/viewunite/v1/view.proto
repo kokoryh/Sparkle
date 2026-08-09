@@ -94,6 +94,11 @@ message RelatesFeedReply {
     repeated RelateCard relates = 1;
 }
 
+message AsyncModule {
+    repeated Module modules = 1;
+}
+
 message AIRelateAsyncReply {
     optional bytes cm = 1;
+    AsyncModule module = 2;
 }
