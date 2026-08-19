@@ -1,0 +1,12 @@
+#!name=MTProto
+#!desc=优化 Telegram 转圈问题
+#!category=Enhancement
+#!arguments=interface:127.0.0.1,port:5753,secret:dd0123456789abcdef0123456789abcdef,ipv6:false,dc-config-url:https://ruleset.skk.moe/Internal/mtproto-dc-config.json
+
+[MTProto]
+# tg://proxy?server={{{interface}}}&port={{{port}}}&secret={{{secret}}}
+interface = {{{interface}}}
+port = {{{port}}}
+secret = {{{secret}}}
+ipv6 = {{{ipv6}}}
+dc-config-url = {{{dc-config-url}}}
