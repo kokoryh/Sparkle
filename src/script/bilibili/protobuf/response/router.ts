@@ -7,15 +7,15 @@ import {
     handlePopularReply,
     handleIpadViewReply,
     handleIpadViewProgressReply,
+    handleIpadRelatesFeedReply,
     handleViewProgressReply,
     handleRelatesFeedReply,
     handleViewReply,
+    handleAIRelateAsyncReply,
     handleDmViewReply,
     handleMainListReply,
     handleIpadPlayViewReply,
     handleSearchAllResponse,
-    handleIpadRelatesFeedReply,
-    handleAIRelateAsyncReply,
 } from '../handler';
 // import { handleDefaultWordsReply, handleModeStatusReply, handleTFInfoReply } from '../deprecated-handler';
 

@@ -14,8 +14,8 @@ import {
     RelatesFeedReply,
     ViewReply,
     ViewProgressReply,
-    RelateCard,
     AIRelateAsyncReply,
+    RelateCard,
 } from '@proto/bilibili/app/viewunite/v1/view';
 import {
     DanmakuElem,
