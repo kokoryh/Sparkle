@@ -5,6 +5,7 @@ package bilibili.main.community.reply.v1;
 message MainListReply {
     optional bytes cm = 11;
     repeated ReplyInfo top_replies = 14;
+    repeated bytes mixed_cards = 27;
     repeated SubjectTopCard subject_top_cards = 28;
 }
 

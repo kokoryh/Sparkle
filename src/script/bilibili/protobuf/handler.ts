@@ -272,6 +272,7 @@ export const handleMainListReply: Middleware = (ctx, next) => {
     const { purifyComment } = ctx.argument;
     const message = MainListReply.fromBinary(ctx.response.bodyBytes);
     message.cm = undefined;
+    message.mixedCards.length = 0;
     const excludeTypes = [Type.CM, Type.OPERATION];
     message.subjectTopCards = message.subjectTopCards.filter(item => !excludeTypes.includes(item.type));
     if (purifyComment) {
