@@ -51,7 +51,9 @@ function needToBeHidden(item: TreeItem): boolean {
     if (item.name === 'H5Slider') return true;
     const jumpAddress = item.props?.jumpAddress;
     const links = item.props?.list?.map(item => item.link) || [];
-    return [jumpAddress, ...links].some(url => url && !new URL(url).hostname.includes('bilibili'));
+    return [jumpAddress, ...links].some(
+        url => url && !url.startsWith('bilibili') && !new URL(url).hostname.includes('bilibili')
+    );
 }
 
 function traversal(treeItems: TreeItem[], path: string[] = []): void {
