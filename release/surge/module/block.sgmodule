@@ -1,15 +1,11 @@
 #!name=Block
 #!desc=屏蔽特定协议 & 端口 & 域名
 #!category=Block
-#!arguments=STUN:PROTOCOL,Bilibili:DEST-PORT,通用域名:DOMAIN,系统更新:#
+#!arguments=STUN:PROTOCOL,通用域名:DOMAIN,系统更新:#
 #!arguments-desc=系统更新: DOMAIN
 
 [Rule]
 {{{STUN}}},STUN,REJECT
-
-{{{Bilibili}}},4480,REJECT-NO-DROP,pre-matching
-{{{Bilibili}}},4483,REJECT-NO-DROP,pre-matching
-{{{Bilibili}}},9102,REJECT-NO-DROP,pre-matching
 
 {{{通用域名}}},www.googleadservices.com,REJECT,pre-matching
 {{{通用域名}}},googleads.g.doubleclick.net,REJECT,pre-matching
