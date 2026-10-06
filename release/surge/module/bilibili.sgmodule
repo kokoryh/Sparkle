@@ -13,7 +13,6 @@ DOMAIN,app.biliapi.net,REJECT,pre-matching,extended-matching
 AND,((DOMAIN-SUFFIX,chat.bilibili.com), (OR,((DOMAIN-KEYWORD,stun), (DOMAIN-KEYWORD,tracker), (DOMAIN-KEYWORD,p2p)))),REJECT,pre-matching
 {{{屏蔽P2P}}},4480,REJECT-NO-DROP,pre-matching
 {{{屏蔽P2P}}},4483,REJECT-NO-DROP,pre-matching
-{{{屏蔽P2P}}},8082,REJECT-NO-DROP,pre-matching
 {{{屏蔽P2P}}},9102,REJECT-NO-DROP,pre-matching
 
 [Map Local]
