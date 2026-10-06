@@ -1,6 +1,5 @@
 {
     "recommendations": [
-        "xaver.clang-format",
         "dbaeumer.vscode-eslint",
         "christian-kohler.npm-intellisense",
         "christian-kohler.path-intellisense",
