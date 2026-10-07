@@ -174,13 +174,11 @@ function handleChronos(chronos: Chronos, headers: Record<string, string>): void 
 
 function getChronosMd5Map(): Record<string, string> {
     return {
-        universal: 'e5a968f1a5055bbe5c12e67b100a6dcb',
-        hd: 'f993a054969a4f6ae6b20a65f1292e47',
+        universal: '106d21a147f49e9d4ef86e2e8523474f',
+        hd: 'e5a968f1a5055bbe5c12e67b100a6dcb',
         inter: '8c3feda2e92bf60e8a7aeade1a231586',
-        '45b564f5ba1fdd3746406937059addd8': 'e5a968f1a5055bbe5c12e67b100a6dcb', // universal 3.8.20
-        c29bd8f2b64a8f57f49c3622c0f763db: 'ecca73e42e160074e0caf4b3ddb54a52', // universal 3.6.4
-        c218977c14e5dfdafd51edf3ae49ed02: 'f993a054969a4f6ae6b20a65f1292e47', // hd 3.8.7
-        '8232ffb6ee43b687b5fe5add5b3e97de': 'feaca416bbc1174b8e935cf87ff8f0b5', // hd 3.6.3
+        '5bca6725b04c018358e69be749f0ee11': '106d21a147f49e9d4ef86e2e8523474f', // universal 3.11.0
+        '45b564f5ba1fdd3746406937059addd8': 'e5a968f1a5055bbe5c12e67b100a6dcb', // hd 3.8.20
         '325e7073ffc6fb5263682fecdcd1058f': '932002070dc1b51241198a074d2279fc', // hd 2.7.4
         '3a14beddd23328eaddfe9f0eb048d713': '8c3feda2e92bf60e8a7aeade1a231586', // inter 2.7.3
     };
@@ -189,9 +187,9 @@ function getChronosMd5Map(): Record<string, string> {
 function getEdition(headers: Record<string, string>): string {
     const ua = headers['user-agent'] || headers['User-Agent'] || '';
     let edition = 'universal';
-    if (ua.startsWith('bili-hd')) {
+    if (ua.includes('bili-hd')) {
         edition = 'hd';
-    } else if (ua.startsWith('bili-inter')) {
+    } else if (ua.includes('bili-inter')) {
         edition = 'inter';
     }
     return edition;

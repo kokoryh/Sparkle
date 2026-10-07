@@ -1,4 +1,3 @@
-import { Logger } from '@core/logger';
 import { createInitArgumentMiddleware, Middleware as DefaultMiddleware } from '@core/middleware';
 import { DefaultState } from '@/types/context';
 
@@ -16,20 +15,13 @@ export const initArgument: Middleware = createInitArgumentMiddleware<Argument>({
     sponsorBlock: true,
 });
 
-export const handleResponseHeaders: Middleware = (ctx, next) => {
+export const fixResponseHeaders: Middleware = (ctx, next) => {
     return next().then(() => {
         if (ctx.response.h2_trailers !== undefined) {
             return;
         }
 
-        const engineType = ctx.request.headers['x-bili-moss-engine-type'];
-
-        if (engineType === undefined) {
-            return;
-        }
-
-        if (engineType !== '1') {
-            Logger.error(`x-bili-moss-engine-type: ${engineType}`);
+        if (ctx.request.headers['te'] !== 'trailers') {
             return;
         }
 
