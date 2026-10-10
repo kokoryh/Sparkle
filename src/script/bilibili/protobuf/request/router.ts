@@ -1,9 +1,9 @@
 import { matchUrlSuffix, Router } from '@core/router';
-import { parseGRPCResponse } from '@core/middleware';
+import { transformGrpcResponse } from '@core/middleware';
 import {
+    fetchUpstream,
     handleDmSegMobileReq,
     handleDmSegMobileReply,
-    handleRequest,
     handleViewReply,
     handleMainListReply,
 } from '../handler';
@@ -18,9 +18,9 @@ const router = new Router({
     matchPath: matchUrlSuffix,
 });
 
-router.post('v1.DM/DmSegMobile', handleDmSegMobileReq, parseGRPCResponse, handleDmSegMobileReply);
-router.post('viewunite.v1.View/View', handleRequest, parseGRPCResponse, handleViewReply);
-router.post('v1.Reply/MainList', handleRequest, parseGRPCResponse, handleMainListReply);
+router.post('v1.DM/DmSegMobile', handleDmSegMobileReq, transformGrpcResponse, handleDmSegMobileReply);
+router.post('viewunite.v1.View/View', fetchUpstream, transformGrpcResponse, handleViewReply);
+router.post('v1.Reply/MainList', fetchUpstream, transformGrpcResponse, handleMainListReply);
 
 // router.post('v1.Search/DefaultWords', handleDefaultWordsReq);
 // router.post('v1.Teenagers/ModeStatus', handleModeStatusReq);

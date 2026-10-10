@@ -58,7 +58,7 @@ export class Router {
         };
     }
 
-    routeNotMatched(): Middleware {
+    notFound(): Middleware {
         return (ctx, next) => {
             return next().then(() => {
                 if (!ctx.state.route) throw new Error('Unexpected request');

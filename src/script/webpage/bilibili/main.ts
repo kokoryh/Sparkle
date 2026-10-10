@@ -1,6 +1,6 @@
 import { Application } from '@core/application';
-import { doneResponse, parseHTMLResponse } from '@core/middleware';
-import { handleHTMLMessage } from '../handler';
-import { setHTMLState } from './middleware';
+import { doneResponse, transformHtmlResponse } from '@core/middleware';
+import { applyHtmlModifications } from '../handler';
+import { prepareHtmlState } from './middleware';
 
-new Application().use(doneResponse).use(parseHTMLResponse).use(setHTMLState).use(handleHTMLMessage).run();
+new Application().use(doneResponse).use(transformHtmlResponse).use(prepareHtmlState).use(applyHtmlModifications).run();

@@ -1,6 +1,6 @@
-import { HTMLState, Middleware } from '../handler';
+import { HtmlState, Middleware } from '../handler';
 
-export const setHTMLState: Middleware = (ctx, next) => {
+export const prepareHtmlState: Middleware = (ctx, next) => {
     const state = ctx.state;
 
     state.injectStyle = '{{ @template/style.css }}';
@@ -25,7 +25,7 @@ export const setHTMLState: Middleware = (ctx, next) => {
                 return /creative.*\/widgets\/v4\/Universal\?/.test(src);
             },
         },
-    ] as HTMLState['nodeFilters'];
+    ] as HtmlState['nodeFilters'];
 
     return next();
 };

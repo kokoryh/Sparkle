@@ -1,6 +1,6 @@
 import { Middleware } from '../handler';
 
-export const setHTMLState: Middleware = (ctx, next) => {
+export const prepareHtmlState: Middleware = (ctx, next) => {
     ctx.state.injectScript = '{{ @template/script.ts }}';
     return next();
 };

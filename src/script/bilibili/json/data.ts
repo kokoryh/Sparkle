@@ -325,7 +325,7 @@ export const getCreatorHubData = (i18n: I18n) => ({
 });
 
 export function getVIPData(): VIP {
-    const image = getVIPImage();
+    const image = getVIPImageUrl();
     return {
         status: 1,
         type: 2,
@@ -360,7 +360,7 @@ export function getVIPData(): VIP {
     };
 }
 
-function getVIPImage(): string {
+function getVIPImageUrl(): string {
     const date = new Date();
     const month = date.getMonth() + 1;
     const day = date.getDate();

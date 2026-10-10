@@ -1,4 +1,4 @@
-import { createInitArgumentMiddleware, Middleware as DefaultMiddleware } from '@core/middleware';
+import { setupArgumentFactory, Middleware as CoreMiddleware } from '@core/middleware';
 import { DefaultState } from '@/types/context';
 
 export interface Argument {
@@ -7,9 +7,9 @@ export interface Argument {
     sponsorBlock: boolean | string;
 }
 
-export type Middleware = DefaultMiddleware<DefaultState, Argument>;
+export type Middleware = CoreMiddleware<DefaultState, Argument>;
 
-export const initArgument: Middleware = createInitArgumentMiddleware<Argument>({
+export const setupArgument: Middleware = setupArgumentFactory<Argument>({
     displayUpList: 'show',
     purifyComment: true,
     sponsorBlock: true,

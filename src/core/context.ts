@@ -54,11 +54,11 @@ export abstract class Context<StateT = DefaultState, ArgumentT = DefaultArgument
 
     abstract createResponse(response: typeof $response | null): HttpResponse;
 
-    abstract initArgument(argument: object): void;
+    abstract setupArgument(argument: object): void;
 
     abstract getVal(key: string): string | null;
 
-    abstract setVal(val: string, key: string): void;
+    abstract setVal(key: string, value: string): void;
 
     abstract fetch(request: FetchRequest): Promise<FetchResponse>;
 
@@ -73,8 +73,8 @@ export abstract class Context<StateT = DefaultState, ArgumentT = DefaultArgument
         return val ? JSON.parse(val) : null;
     }
 
-    setJSON(val: object, key: string): void {
-        this.setVal(JSON.stringify(val), key);
+    setJSON(key: string, value: object): void {
+        this.setVal(key, JSON.stringify(value));
     }
 
     exit(): void {
@@ -146,7 +146,7 @@ export class SurgeContext extends Context {
         });
     }
 
-    initArgument(argument: object): void {
+    setupArgument(argument: object): void {
         Object.assign(this.argument, argument);
 
         if (typeof $argument === 'string') {
@@ -162,8 +162,8 @@ export class SurgeContext extends Context {
         return $persistentStore.read(key);
     }
 
-    setVal(val: string, key: string): void {
-        $persistentStore.write(val, key);
+    setVal(key: string, value: string): void {
+        $persistentStore.write(value, key);
     }
 
     fetch(request: FetchRequest): Promise<FetchResponse> {
@@ -213,8 +213,8 @@ export class SurgeContext extends Context {
 }
 
 export class LoonContext extends SurgeContext {
-    override initArgument(argument: object): void {
-        super.initArgument(argument);
+    override setupArgument(argument: object): void {
+        super.setupArgument(argument);
 
         if (typeof $argument === 'object') {
             Object.assign(this.argument, $argument);
@@ -283,7 +283,7 @@ export class QuantumultXContext extends Context {
         });
     }
 
-    initArgument(argument: object): void {
+    setupArgument(argument: object): void {
         Object.assign(this.argument, argument);
     }
 
@@ -291,8 +291,8 @@ export class QuantumultXContext extends Context {
         return $prefs.valueForKey(key);
     }
 
-    setVal(val: string, key: string): void {
-        $prefs.setValueForKey(val, key);
+    setVal(key: string, value: string): void {
+        $prefs.setValueForKey(value, key);
     }
 
     fetch(fetchRequest: FetchRequest): Promise<FetchResponse> {

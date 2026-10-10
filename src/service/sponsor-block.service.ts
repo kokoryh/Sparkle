@@ -13,7 +13,7 @@ export interface SegmentItem {
     description: string;
 }
 
-export function getSkipSegments(ctx: Context, videoId: string, cid = ''): Promise<FetchResponse> {
+export function fetchSkipSegments(ctx: Context, videoId: string, cid = ''): Promise<FetchResponse> {
     cid = cid !== '0' ? cid : '';
     return ctx.fetch({
         method: 'get',

@@ -3,6 +3,6 @@ import { router } from './router';
 
 const app = new Application();
 
-app.use(router.routes()).use(router.routeNotMatched());
+app.use(router.routes()).use(router.notFound());
 
 export { app };

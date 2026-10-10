@@ -31,7 +31,7 @@ import { SearchAllResponse } from '@proto/bilibili/polymer/app/search/v1/search'
 import { Context } from '@core/context';
 import { Logger } from '@core/logger';
 import { exit } from '@core/process';
-import { getSkipSegments, SegmentItem } from '@service/sponsor-block.service';
+import { fetchSkipSegments, SegmentItem } from '@service/sponsor-block.service';
 import { getDevice, toBvid, ungzip } from '@/utils';
 import { Middleware } from './middleware';
 
@@ -281,11 +281,11 @@ export const handleMainListReply: Middleware = (ctx, next) => {
         const excludeKeywordPattern = /淘宝|某宝|天猫|京东|狗东|拼多多|饿了么|美团|转转|妙界|神气小鹿/;
         message.topReplies = message.topReplies.filter(reply => {
             const urls = reply.content?.urls || {};
-            const message = reply.content?.message || '';
+            const replyMessage = reply.content?.message || '';
             return (
                 !Object.keys(urls).some(url => excludeLinkPattern.test(url)) &&
-                !excludeLinkPattern.test(message) &&
-                !excludeKeywordPattern.test(message)
+                !excludeLinkPattern.test(replyMessage) &&
+                !excludeKeywordPattern.test(replyMessage)
             );
         });
     }
@@ -311,7 +311,7 @@ export const handleSearchAllResponse: Middleware = (ctx, next) => {
     return next();
 };
 
-export const handleRequest: Middleware = async (ctx, next) => {
+export const fetchUpstream: Middleware = async (ctx, next) => {
     const { headers, bodyBytes, h2_trailers } = await fetchBilibili(ctx);
     ctx.response.headers = headers;
     ctx.response.bodyBytes = bodyBytes;
@@ -339,13 +339,13 @@ export const handleDmSegMobileReq: Middleware = async (ctx, next) => {
     }
 };
 
-async function fetchBilibili(ctx: Context, maxRetries = 2) {
+async function fetchBilibili(ctx: Context, maxAttempts = 2) {
     const { method, url: sourceUrl, headers, bodyBytes } = ctx.request;
     const url = new URL(sourceUrl);
     const hosts = ['grpc.biliapi.net', 'app.bilibili.com'];
 
     const startIndex = hosts.indexOf(url.hostname);
-    const endIndex = Math.min(startIndex + maxRetries, hosts.length);
+    const endIndex = Math.min(startIndex + maxAttempts, hosts.length);
 
     for (let i = startIndex; i < endIndex; i++) {
         url.hostname = hosts[i];
@@ -382,7 +382,7 @@ async function fetchBilibili(ctx: Context, maxRetries = 2) {
 
 async function fetchSponsorBlock(ctx: Context, videoId: string, cid: string): Promise<number[][]> {
     try {
-        const { status, body } = await getSkipSegments(ctx, videoId, cid);
+        const { status, body } = await fetchSkipSegments(ctx, videoId, cid);
 
         Logger.debug('[SponsorBlock]', { videoId, status, body });
 

@@ -1,6 +1,6 @@
-import { HTMLState, Middleware } from '../handler';
+import { HtmlState, Middleware } from '../handler';
 
-export const setHTMLState: Middleware = (ctx, next) => {
+export const prepareHtmlState: Middleware = (ctx, next) => {
     const state = ctx.state;
 
     state.injectScript = '{{ @template/script.js }}';
@@ -20,7 +20,7 @@ export const setHTMLState: Middleware = (ctx, next) => {
                 );
             },
         },
-    ] as HTMLState['nodeFilters'];
+    ] as HtmlState['nodeFilters'];
 
     return next();
 };
