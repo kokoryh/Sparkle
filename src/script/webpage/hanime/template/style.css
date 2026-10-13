@@ -10,6 +10,9 @@ a[href*='.labsda.com'] {
 a[href^='https://go.rmhfrtnd.com/'] {
     display: none !important;
 }
+a[href^='https://l.erodalabs.com'] {
+    display: none !important;
+}
 div[style*='width: 310px; height: 282px;'] {
     display: none !important;
 }
