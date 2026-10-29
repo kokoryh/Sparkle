@@ -1,4 +1,4 @@
-import { HtmlState, Middleware } from '../handler';
+import { HtmlState, Middleware } from '../middleware';
 
 export const prepareHtmlState: Middleware = (ctx, next) => {
     const state = ctx.state;

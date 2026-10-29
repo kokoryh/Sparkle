@@ -9,6 +9,12 @@ export interface HtmlState {
 
 export type Middleware = CoreMiddleware<HtmlState>;
 
+export const assertHtmlResponse: Middleware = (ctx, next) => {
+    const type = ctx.response.headers['content-type'] || ctx.response.headers['Content-Type'] || '';
+    if (!type.includes('text/html')) throw new Error('Content-Type must be text/html');
+    return next();
+};
+
 export const applyHtmlModifications: Middleware = (ctx, next) => {
     const { message, nodeFilters, injectScript, injectStyle } = ctx.state;
 
