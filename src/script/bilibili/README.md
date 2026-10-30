@@ -1,4 +1,4 @@
-# Bilibili 增强
+# 哔哩哔哩增强
 
 ## 参数说明
 
@@ -12,11 +12,21 @@
 | 空降助手策略     | 策略名称                    | DIRECT | 默认直连；建议配置为代理策略（视网络环境而定）                           |
 | 日志等级         | `1` / `2` / `3` / `4` / `5` | `4`    | `1`：DEBUG；`2`：INFO；`3`：WARN；`4`：ERROR；`5`：OFF                   |
 
+## 空降助手说明
+
+哔哩哔哩 App 自 9.17.0 起启用强制 RSA 验签。空降助手对 9.17.0 及以上版本客户端将改用备用方案，请确认接受以下缺陷后再开启空降助手：
+
+- 备用方案仅适用于 iOS
+
+- 触发空降的视频不保留播放历史记录，且历史记录会被替换为特定番剧
+
+- 触发空降的视频不支持杜比视界画质
+
 ## 常见问题
 
 - **不显示弹幕**
 
-  卸载重装最新商店版哔哩哔哩APP，MitM添加主机名 `-raw.githubusercontent.com` 后重试
+  MitM添加主机名 `-raw.githubusercontent.com` 后重试
 
 - **是否支持Script Hub？**
 
@@ -24,9 +34,9 @@
 
 ## 支持的APP
 
-| Surge                                                                                                                  | Loon                                                                                                                                                                                   | Egern                                                                                                                                                                               | QuantumultX | Shadowrocket |
-| ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | ------------ |
-| [模块地址](https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/release/surge/module/bilibili.sgmodule) | [一键安装](https://www.nsloon.com/openloon/import?plugin=https%3A%2F%2Fraw.githubusercontent.com%2Fkokoryh%2FSparkle%2Frefs%2Fheads%2Fmaster%2Frelease%2Floon%2Fplugin%2Fbilibili.lpx) | [一键安装](https://egernapp.com/modules/new?url=https%3A%2F%2Fraw.githubusercontent.com%2Fkokoryh%2FSparkle%2Frefs%2Fheads%2Fmaster%2Frelease%2Fsurge%2Fmodule%2Fbilibili.sgmodule) | 不支持      | 不支持       |
+| Surge                                                                                                                  | Loon                                                                                                                                                                                   | Egern                                                                                                                                                                               | QuantumultX |
+| ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| [模块地址](https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/release/surge/module/bilibili.sgmodule) | [一键安装](https://www.nsloon.com/openloon/import?plugin=https%3A%2F%2Fraw.githubusercontent.com%2Fkokoryh%2FSparkle%2Frefs%2Fheads%2Fmaster%2Frelease%2Floon%2Fplugin%2Fbilibili.lpx) | [一键安装](https://egernapp.com/modules/new?url=https%3A%2F%2Fraw.githubusercontent.com%2Fkokoryh%2FSparkle%2Frefs%2Fheads%2Fmaster%2Frelease%2Fsurge%2Fmodule%2Fbilibili.sgmodule) | 不支持      |
 
 ## 特别鸣谢
 
