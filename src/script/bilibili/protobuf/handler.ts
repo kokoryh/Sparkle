@@ -1,5 +1,6 @@
 import { DynAllReply, DynamicType } from '@proto/bilibili/app/dynamic/v2/dynamic';
-import { PlayViewUniteReply } from '@proto/bilibili/app/playerunite/v1/player';
+import { PlayViewUniteReq, PlayViewUniteReply } from '@proto/bilibili/app/playerunite/v1/player';
+import { PGCAnyModel } from '@proto/bilibili/app/playerunite/pgcanymodel/pgcanymodel';
 import { PlayViewReply } from '@proto/bilibili/app/playurl/v1/playurl';
 import { PopularReply } from '@proto/bilibili/app/show/popular/v1/popular';
 import {
@@ -26,14 +27,21 @@ import {
     DmViewReply,
 } from '@proto/bilibili/community/service/dm/v1/dm';
 import { MainListReply, Type } from '@proto/bilibili/main/community/reply/v1/reply';
-import { PlayViewReply as IpadPlayViewReply } from '@proto/bilibili/pgc/gateway/player/v2/playurl';
+import { ClipType, PlayViewReply as IpadPlayViewReply } from '@proto/bilibili/pgc/gateway/player/v2/playurl';
 import { SearchAllResponse } from '@proto/bilibili/polymer/app/search/v1/search';
+import { BizType, ConfType } from '@proto/bilibili/playershared/playershared';
+import { compose } from '@core/compose';
 import { Context } from '@core/context';
+import { transformGrpcResponse } from '@core/middleware';
 import { Logger } from '@core/logger';
 import { exit } from '@core/process';
 import { fetchSkipSegments, SegmentItem } from '@service/sponsor-block.service';
 import { getDevice, toBvid, ungzip } from '@/utils';
-import { Middleware } from './middleware';
+import { BiliVariant, Middleware } from './middleware';
+
+function isDanmakuAirborneSupported(version: number) {
+    return version < 9170000;
+}
 
 export const handleDynAllReply: Middleware = (ctx, next) => {
     const { displayUpList } = ctx.argument;
@@ -65,6 +73,50 @@ function handleUpList(message: DynAllReply, displayUpList: string): void {
     }
 }
 
+function sendNotification(ctx: Context) {
+    const CURRENT_UPDATE_TIMESTAMP = 1793439000;
+    const CACHE_KEY = 'kokoryh_bilibili_airborne_notification_timestamp';
+    const README_URL =
+        'https://github.com/kokoryh/Sparkle/tree/master/src/script/bilibili#%E7%A9%BA%E9%99%8D%E5%8A%A9%E6%89%8B%E8%AF%B4%E6%98%8E';
+
+    const lastNotifiedTimestamp = Number(ctx.getVal(CACHE_KEY)) || 0;
+    if (CURRENT_UPDATE_TIMESTAMP > lastNotifiedTimestamp) {
+        ctx.setVal(CACHE_KEY, String(CURRENT_UPDATE_TIMESTAMP));
+        ctx.notify('空降助手重要通知，请点击查看', '', '', {
+            openUrl: README_URL,
+        });
+    }
+}
+
+export const handlePlayViewUniteReq: Middleware = async (ctx, next) => {
+    // 仅限粉版APP使用
+    if (isDanmakuAirborneSupported(ctx.state.biliVersion) || ctx.state.biliVariant !== BiliVariant.UNIVERSAL) {
+        const { headers, bodyBytes, h2_trailers } = await fetchBilibili(ctx, 1);
+        ctx.response.headers = headers;
+        ctx.response.bodyBytes = bodyBytes;
+        ctx.response.h2_trailers = h2_trailers;
+        return next();
+    }
+    sendNotification(ctx);
+    const body = ctx.request.bodyBytes;
+    const data = body[0] ? ungzip(body.subarray(5)) : body.subarray(5);
+    const message = PlayViewUniteReq.fromBinary(data);
+    const { vod, bvid } = message;
+    const { aid, cid } = vod || {};
+    const videoId = bvid || toBvid(aid!);
+    const [{ headers, bodyBytes, h2_trailers }, segments] = await Promise.all([
+        fetchBilibili(ctx, 1),
+        fetchSponsorBlock(ctx, videoId, cid!),
+    ]);
+    ctx.response.headers = headers;
+    ctx.response.bodyBytes = bodyBytes;
+    ctx.response.h2_trailers = h2_trailers;
+    if (segments.length) {
+        ctx.state.segments = segments;
+    }
+    return next();
+};
+
 export const handlePlayViewUniteReply: Middleware = (ctx, next) => {
     const message = PlayViewUniteReply.fromBinary(ctx.response.bodyBytes);
     if (message.viewInfo) message.viewInfo.promptBar = undefined;
@@ -77,9 +129,81 @@ export const handlePlayViewUniteReply: Middleware = (ctx, next) => {
             }
         });
     }
+    if (ctx.state.segments && message.playArc && message.playArc.videoType === BizType.UGC) {
+        const arcConfs = message.playArcConf?.arcConfs || {};
+        [ConfType.SKIPOPED].forEach(i => {
+            arcConfs[i] = {
+                isSupport: true,
+                disabled: false,
+                unsupportScene: [],
+            };
+        });
+        [ConfType.FREYAENTER, ConfType.FREYAFULLENTER].forEach(i => {
+            arcConfs[i] = {
+                isSupport: false,
+                disabled: true,
+                unsupportScene: [],
+            };
+        });
+        if (message.vodInfo) {
+            message.vodInfo.streamList.forEach(item => {
+                delete item.streamInfo?.needVip;
+            });
+        }
+        if (message.playArc) {
+            message.playArc.videoType = BizType.PGC;
+        }
+        message.supplement = {
+            typeUrl: 'type.googleapis.com/bilibili.app.playerunite.pgcanymodel.PGCAnyModel',
+            value: PGCAnyModel.toBinary(buildPGCAnyModel(ctx.state.segments)),
+        };
+    }
     ctx.response.bodyBytes = PlayViewUniteReply.toBinary(message);
     return next();
 };
+
+export const handlePlayViewUnite: Middleware = compose([
+    handlePlayViewUniteReq,
+    transformGrpcResponse,
+    handlePlayViewUniteReply,
+]);
+
+function buildPGCAnyModel(segments: number[][]): PGCAnyModel {
+    return {
+        business: {
+            clipInfo: segments.map(([start, end]) => ({
+                start: Math.floor(start),
+                end: Math.ceil(end),
+                clipType: ClipType.CLIP_TYPE_OP,
+            })),
+            vipStatus: 1,
+            episodeInfo: {
+                epId: 1231523,
+                cid: '27730904912',
+                aid: '113740078909891',
+                epStatus: '2',
+                seasonInfo: {
+                    seasonId: 73081,
+                    seasonType: 1,
+                    seasonStatus: 13,
+                    mode: 2,
+                },
+            },
+            userStatus: {
+                watchProgress: {
+                    lastEpId: 1231523,
+                    lastEpIndex: 'OP',
+                    progress: '1',
+                    lastPlayAid: '113740078909891',
+                    lastPlayCid: '27730904912',
+                },
+            },
+        },
+        playExtConf: {
+            allowCloseSubtitle: true,
+        },
+    };
+}
 
 export const handlePlayViewReply: Middleware = (ctx, next) => {
     const message = PlayViewReply.fromBinary(ctx.response.bodyBytes);
@@ -128,7 +252,7 @@ export const handleIpadViewProgressReply: Middleware = (ctx, next) => {
     const message = IpadViewProgressReply.fromBinary(ctx.response.bodyBytes);
     message.videoGuide = undefined;
     if (isSponsorBlockEnabled(sponsorBlock) && message.chronos) {
-        handleChronos(message.chronos, ctx.request.headers);
+        handleChronos(message.chronos, ctx.state.biliVariant);
     }
     ctx.response.bodyBytes = IpadViewProgressReply.toBinary(message);
     return next();
@@ -145,8 +269,8 @@ export const handleViewProgressReply: Middleware = (ctx, next) => {
     const { sponsorBlock } = ctx.argument;
     const message = ViewProgressReply.fromBinary(ctx.response.bodyBytes);
     message.dm = undefined;
-    if (isSponsorBlockEnabled(sponsorBlock) && message.chronos) {
-        handleChronos(message.chronos, ctx.request.headers);
+    if (isDanmakuAirborneSupported(ctx.state.biliVersion) && isSponsorBlockEnabled(sponsorBlock) && message.chronos) {
+        handleChronos(message.chronos, ctx.state.biliVariant);
     }
     ctx.response.bodyBytes = ViewProgressReply.toBinary(message);
     return next();
@@ -156,11 +280,11 @@ function isSponsorBlockEnabled(value: string | boolean): boolean {
     return Boolean(value && value !== '#');
 }
 
-function handleChronos(chronos: Chronos, headers: Record<string, string>): void {
+function handleChronos(chronos: Chronos, variant: string): void {
     const chronosMd5Map = getChronosMd5Map();
     let processedMd5 = chronosMd5Map[chronos.md5];
     if (!processedMd5) {
-        processedMd5 = chronosMd5Map[getEdition(headers)];
+        processedMd5 = chronosMd5Map[variant] || chronosMd5Map.universal;
         Logger.warn(
             `MD5 mismatch detected. Received: ${chronos.md5}; File: ${chronos.file}.`,
             'Please update the app or script to the latest version.',
@@ -175,24 +299,13 @@ function handleChronos(chronos: Chronos, headers: Record<string, string>): void 
 function getChronosMd5Map(): Record<string, string> {
     return {
         universal: '106d21a147f49e9d4ef86e2e8523474f',
-        hd: 'e5a968f1a5055bbe5c12e67b100a6dcb',
+        hd2: 'e5a968f1a5055bbe5c12e67b100a6dcb',
         inter: '8c3feda2e92bf60e8a7aeade1a231586',
         '5bca6725b04c018358e69be749f0ee11': '106d21a147f49e9d4ef86e2e8523474f', // universal 3.11.0
         '45b564f5ba1fdd3746406937059addd8': 'e5a968f1a5055bbe5c12e67b100a6dcb', // hd 3.8.20
         '325e7073ffc6fb5263682fecdcd1058f': '932002070dc1b51241198a074d2279fc', // hd 2.7.4
         '3a14beddd23328eaddfe9f0eb048d713': '8c3feda2e92bf60e8a7aeade1a231586', // inter 2.7.3
     };
-}
-
-function getEdition(headers: Record<string, string>): string {
-    const ua = headers['user-agent'] || headers['User-Agent'] || '';
-    let edition = 'universal';
-    if (ua.includes('bili-hd')) {
-        edition = 'hd';
-    } else if (ua.includes('bili-inter')) {
-        edition = 'inter';
-    }
-    return edition;
 }
 
 export const handleRelatesFeedReply: Middleware = (ctx, next) => {
@@ -320,10 +433,15 @@ export const fetchUpstream: Middleware = async (ctx, next) => {
 };
 
 export const handleDmSegMobileReq: Middleware = async (ctx, next) => {
+    if (!isDanmakuAirborneSupported(ctx.state.biliVersion)) {
+        exit();
+    }
     const body = ctx.request.bodyBytes;
     const data = body[0] ? ungzip(body.subarray(5)) : body.subarray(5);
     const message = DmSegMobileReq.fromBinary(data);
-    if (message.type !== 1) exit();
+    if (message.type !== 1) {
+        exit();
+    }
     const { pid, oid } = message;
     const videoId = toBvid(pid);
     const [{ headers, bodyBytes, h2_trailers }, segments] = await Promise.all([

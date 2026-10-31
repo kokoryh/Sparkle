@@ -1,7 +1,9 @@
 import { matchUrlSuffix, Router } from '@core/router';
 import { transformGrpcResponse } from '@core/middleware';
+import { parseUserAgent } from '../middleware';
 import {
     fetchUpstream,
+    handlePlayViewUnite,
     handleDmSegMobileReq,
     handleDmSegMobileReply,
     handleViewReply,
@@ -18,7 +20,8 @@ const router = new Router({
     matchPath: matchUrlSuffix,
 });
 
-router.post('v1.DM/DmSegMobile', handleDmSegMobileReq, transformGrpcResponse, handleDmSegMobileReply);
+router.post('playerunite.v1.Player/PlayViewUnite', parseUserAgent, handlePlayViewUnite);
+router.post('v1.DM/DmSegMobile', parseUserAgent, handleDmSegMobileReq, transformGrpcResponse, handleDmSegMobileReply);
 router.post('viewunite.v1.View/View', fetchUpstream, transformGrpcResponse, handleViewReply);
 router.post('v1.Reply/MainList', fetchUpstream, transformGrpcResponse, handleMainListReply);
 
