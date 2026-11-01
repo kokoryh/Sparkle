@@ -13,6 +13,7 @@ import {
     RelateCardType,
     RelatesFeedReply,
     ViewReply,
+    ViewProgressReq,
     ViewProgressReply,
     AIRelateAsyncReply,
     Module,
@@ -32,7 +33,7 @@ import { Context } from '@core/context';
 import { Logger } from '@core/logger';
 import { exit } from '@core/process';
 import { fetchSkipSegments, SegmentItem } from '@service/sponsor-block.service';
-import { getDevice, toBvid, ungzip } from '@/utils';
+import { createMergedPoints, getDevice, toBvid, ungzip } from '@/utils';
 import { Middleware } from './middleware';
 
 export const handleDynAllReply: Middleware = (ctx, next) => {
@@ -127,8 +128,14 @@ export const handleIpadViewProgressReply: Middleware = (ctx, next) => {
     const { sponsorBlock } = ctx.argument;
     const message = IpadViewProgressReply.fromBinary(ctx.response.bodyBytes);
     message.videoGuide = undefined;
-    if (isSponsorBlockEnabled(sponsorBlock) && message.chronos) {
-        handleChronos(message.chronos, ctx.request.headers);
+    if (isSponsorBlockEnabled(sponsorBlock)) {
+        if (ctx.state.isDanmakuAirborneEffective && message.chronos) {
+            handleChronos(message.chronos, ctx.state.biliVariant);
+        }
+        if (ctx.state.segments) {
+            message.points = createMergedPoints(message.points, ctx.state.segments, ctx.state.videoDuration);
+            message.pointPermanent = true;
+        }
     }
     ctx.response.bodyBytes = IpadViewProgressReply.toBinary(message);
     return next();
@@ -141,12 +148,42 @@ export const handleIpadRelatesFeedReply: Middleware = (ctx, next) => {
     return next();
 };
 
+export const handleViewProgressReq: Middleware = async (ctx, next) => {
+    if (ctx.state.isDanmakuAirborneEffective) {
+        await fetchBilibili(ctx, 1);
+        return next();
+    }
+    const body = ctx.request.bodyBytes;
+    const data = body[0] ? ungzip(body.subarray(5)) : body.subarray(5);
+    const message = ViewProgressReq.fromBinary(data);
+    const { aid, cid } = message;
+    const videoId = toBvid(aid);
+    await Promise.all([fetchBilibili(ctx, 1), fetchSponsorBlock(ctx, videoId, cid)]);
+    return next();
+};
+
 export const handleViewProgressReply: Middleware = (ctx, next) => {
     const { sponsorBlock } = ctx.argument;
     const message = ViewProgressReply.fromBinary(ctx.response.bodyBytes);
     message.dm = undefined;
-    if (isSponsorBlockEnabled(sponsorBlock) && message.chronos) {
-        handleChronos(message.chronos, ctx.request.headers);
+    if (isSponsorBlockEnabled(sponsorBlock)) {
+        if (ctx.state.isDanmakuAirborneEffective && message.chronos) {
+            handleChronos(message.chronos, ctx.state.biliVariant);
+        }
+        if (ctx.state.segments?.length) {
+            if (!message.videoGuide) {
+                message.videoGuide = {};
+            }
+            if (!message.videoGuide.videoPoint) {
+                message.videoGuide.videoPoint = { points: [], pointPermanent: true };
+            }
+            message.videoGuide.videoPoint.points = createMergedPoints(
+                message.videoGuide.videoPoint.points,
+                ctx.state.segments,
+                ctx.state.videoDuration
+            );
+            message.videoGuide.videoPoint.pointPermanent = true;
+        }
     }
     ctx.response.bodyBytes = ViewProgressReply.toBinary(message);
     return next();
@@ -156,11 +193,11 @@ function isSponsorBlockEnabled(value: string | boolean): boolean {
     return Boolean(value && value !== '#');
 }
 
-function handleChronos(chronos: Chronos, headers: Record<string, string>): void {
+function handleChronos(chronos: Chronos, variant: string): void {
     const chronosMd5Map = getChronosMd5Map();
     let processedMd5 = chronosMd5Map[chronos.md5];
     if (!processedMd5) {
-        processedMd5 = chronosMd5Map[getEdition(headers)];
+        processedMd5 = chronosMd5Map[variant] || chronosMd5Map.universal;
         Logger.warn(
             `MD5 mismatch detected. Received: ${chronos.md5}; File: ${chronos.file}.`,
             'Please update the app or script to the latest version.',
@@ -175,24 +212,13 @@ function handleChronos(chronos: Chronos, headers: Record<string, string>): void 
 function getChronosMd5Map(): Record<string, string> {
     return {
         universal: '106d21a147f49e9d4ef86e2e8523474f',
-        hd: 'e5a968f1a5055bbe5c12e67b100a6dcb',
+        hd2: 'e5a968f1a5055bbe5c12e67b100a6dcb',
         inter: '8c3feda2e92bf60e8a7aeade1a231586',
         '5bca6725b04c018358e69be749f0ee11': '106d21a147f49e9d4ef86e2e8523474f', // universal 3.11.0
         '45b564f5ba1fdd3746406937059addd8': 'e5a968f1a5055bbe5c12e67b100a6dcb', // hd 3.8.20
         '325e7073ffc6fb5263682fecdcd1058f': '932002070dc1b51241198a074d2279fc', // hd 2.7.4
         '3a14beddd23328eaddfe9f0eb048d713': '8c3feda2e92bf60e8a7aeade1a231586', // inter 2.7.3
     };
-}
-
-function getEdition(headers: Record<string, string>): string {
-    const ua = headers['user-agent'] || headers['User-Agent'] || '';
-    let edition = 'universal';
-    if (ua.includes('bili-hd')) {
-        edition = 'hd';
-    } else if (ua.includes('bili-inter')) {
-        edition = 'inter';
-    }
-    return edition;
 }
 
 export const handleRelatesFeedReply: Middleware = (ctx, next) => {
@@ -312,29 +338,24 @@ export const handleSearchAllResponse: Middleware = (ctx, next) => {
 };
 
 export const fetchUpstream: Middleware = async (ctx, next) => {
-    const { headers, bodyBytes, h2_trailers } = await fetchBilibili(ctx);
-    ctx.response.headers = headers;
-    ctx.response.bodyBytes = bodyBytes;
-    ctx.response.h2_trailers = h2_trailers;
+    await fetchBilibili(ctx);
     return next();
 };
 
 export const handleDmSegMobileReq: Middleware = async (ctx, next) => {
+    if (!ctx.state.isDanmakuAirborneEffective) {
+        exit();
+    }
     const body = ctx.request.bodyBytes;
     const data = body[0] ? ungzip(body.subarray(5)) : body.subarray(5);
     const message = DmSegMobileReq.fromBinary(data);
-    if (message.type !== 1) exit();
+    if (message.type !== 1) {
+        exit();
+    }
     const { pid, oid } = message;
     const videoId = toBvid(pid);
-    const [{ headers, bodyBytes, h2_trailers }, segments] = await Promise.all([
-        fetchBilibili(ctx, 1),
-        fetchSponsorBlock(ctx, videoId, oid),
-    ]);
-    ctx.response.headers = headers;
-    ctx.response.bodyBytes = bodyBytes;
-    ctx.response.h2_trailers = h2_trailers;
-    if (segments.length) {
-        ctx.state.segments = segments;
+    await Promise.all([fetchBilibili(ctx, 1), fetchSponsorBlock(ctx, videoId, oid)]);
+    if (ctx.state.segments?.length) {
         return next();
     }
 };
@@ -354,7 +375,10 @@ async function fetchBilibili(ctx: Context, maxAttempts = 2) {
             const response = await ctx.fetch(request);
 
             if (response.status === 200 && response.bodyBytes) {
-                return response;
+                ctx.response.headers = response.headers;
+                ctx.response.bodyBytes = response.bodyBytes;
+                ctx.response.h2_trailers = response.h2_trailers;
+                return;
             }
 
             Logger.info('[Bilibili] Invalid response', {
@@ -380,36 +404,44 @@ async function fetchBilibili(ctx: Context, maxAttempts = 2) {
     exit(1);
 }
 
-async function fetchSponsorBlock(ctx: Context, videoId: string, cid: string): Promise<number[][]> {
+async function fetchSponsorBlock(ctx: Context, videoId: string, cid: string): Promise<void> {
     try {
         const { status, body } = await fetchSkipSegments(ctx, videoId, cid);
 
         Logger.debug('[SponsorBlock]', { videoId, status, body });
 
         if (status !== 200 || !body || body === '[]') {
-            return [];
+            return;
         }
 
-        return parseSegments(body);
+        const { segments, videoDuration } = parseSegments(body);
+        if (segments.length) {
+            ctx.state.segments = segments;
+            ctx.state.videoDuration = videoDuration;
+        }
     } catch (e) {
         Logger.info('[SponsorBlock]', e);
-
-        return [];
+        return;
     }
 }
 
-function parseSegments(body: string): number[][] {
-    return (JSON.parse(body) as SegmentItem[]).reduce((memo: number[][], { actionType, segment }) => {
+function parseSegments(body: string) {
+    const res: SegmentItem[] = JSON.parse(body);
+    const segments = res.reduce((memo: number[][], { actionType, segment }) => {
         if (actionType === 'skip' && segment[1] - segment[0] >= 8) {
             memo.push(segment);
         }
         return memo;
     }, []);
+    const videoDuration = res[0].videoDuration;
+    return { segments, videoDuration };
 }
 
 export const handleDmSegMobileReply: Middleware = (ctx, next) => {
     const message = DmSegMobileReply.fromBinary(ctx.response.bodyBytes);
-    message.elems.push(...createAirborneDanmaku(ctx.state.segments));
+    if (ctx.state.segments) {
+        message.elems.push(...createAirborneDanmaku(ctx.state.segments));
+    }
     ctx.response.bodyBytes = DmSegMobileReply.toBinary(message);
     return next();
 };

@@ -20,9 +20,24 @@ message Relate {
     bytes cm = 28;
 }
 
+message ViewProgressReq {
+    int64 aid = 1;
+    int64 cid = 2;
+}
+
 message ViewProgressReply {
     optional bytes video_guide = 1;
     Chronos chronos = 2;
+    repeated VideoPoint points = 4;
+    bool point_permanent = 6;
+}
+
+message VideoPoint {
+    int32 type = 1;
+    int64 from = 2;
+    int64 to = 3;
+    string content = 4;
+    string cover = 5;
 }
 
 message Chronos {

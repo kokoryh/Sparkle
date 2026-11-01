@@ -1,5 +1,5 @@
 import { matchUrlSuffix, Router } from '@core/router';
-import { setupArgument } from '../middleware';
+import { parseUserAgent, setupArgument } from '../middleware';
 import {
     handleDynAllReply,
     handlePlayViewUniteReply,
@@ -28,9 +28,9 @@ router.post('playerunite.v1.Player/PlayViewUnite', handlePlayViewUniteReply);
 router.post('playurl.v1.PlayURL/PlayView', handlePlayViewReply);
 router.post('v1.Popular/Index', handlePopularReply);
 router.post('view.v1.View/View', handleIpadViewReply);
-router.post('view.v1.View/ViewProgress', setupArgument, handleIpadViewProgressReply);
+router.post('view.v1.View/ViewProgress', setupArgument, parseUserAgent, handleIpadViewProgressReply);
 router.post('view.v1.View/RelatesFeed', handleIpadRelatesFeedReply);
-router.post('viewunite.v1.View/ViewProgress', setupArgument, handleViewProgressReply);
+router.post('viewunite.v1.View/ViewProgress', setupArgument, parseUserAgent, handleViewProgressReply);
 router.post('viewunite.v1.View/RelatesFeed', handleRelatesFeedReply);
 router.post('viewunite.v1.View/View', handleViewReply);
 router.post('viewunite.v1.View/AIRelateAsync', handleAIRelateAsyncReply);

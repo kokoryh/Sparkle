@@ -79,9 +79,32 @@ message CardBasicInfo {
     string unique_id = 6;
 }
 
+message ViewProgressReq {
+    int64 aid = 1;
+    int64 cid = 2;
+}
+
 message ViewProgressReply {
+    VideoGuide video_guide = 1;
     Chronos chronos = 2;
     optional bytes dm = 4;
+}
+
+message VideoGuide {
+    VideoViewPoint video_point = 2;
+}
+
+message VideoViewPoint {
+    repeated VideoPoint points = 1;
+    bool point_permanent = 3;
+}
+
+message VideoPoint {
+    int32 type = 1;
+    int64 from = 2;
+    int64 to = 3;
+    string content = 4;
+    string cover = 5;
 }
 
 message Chronos {
