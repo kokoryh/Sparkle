@@ -34,7 +34,7 @@ import { Logger } from '@core/logger';
 import { exit } from '@core/process';
 import { fetchSkipSegments, SegmentItem } from '@service/sponsor-block.service';
 import { createMergedPoints, getDevice, toBvid, ungzip } from '@/utils';
-import { Middleware } from './middleware';
+import { Middleware, State } from './middleware';
 
 export const handleDynAllReply: Middleware = (ctx, next) => {
     const { displayUpList } = ctx.argument;
@@ -132,7 +132,7 @@ export const handleIpadViewProgressReply: Middleware = (ctx, next) => {
         if (ctx.state.isDanmakuAirborneEffective && message.chronos) {
             handleChronos(message.chronos, ctx.state.biliVariant);
         }
-        if (ctx.state.segments) {
+        if (ctx.state.segments && ctx.state.videoDuration) {
             message.points = createMergedPoints(message.points, ctx.state.segments, ctx.state.videoDuration);
             message.pointPermanent = true;
         }
@@ -170,7 +170,7 @@ export const handleViewProgressReply: Middleware = (ctx, next) => {
         if (ctx.state.isDanmakuAirborneEffective && message.chronos) {
             handleChronos(message.chronos, ctx.state.biliVariant);
         }
-        if (ctx.state.segments?.length) {
+        if (ctx.state.segments && ctx.state.videoDuration) {
             if (!message.videoGuide) {
                 message.videoGuide = {};
             }
@@ -355,12 +355,12 @@ export const handleDmSegMobileReq: Middleware = async (ctx, next) => {
     const { pid, oid } = message;
     const videoId = toBvid(pid);
     await Promise.all([fetchBilibili(ctx, 1), fetchSponsorBlock(ctx, videoId, oid)]);
-    if (ctx.state.segments?.length) {
+    if (ctx.state.segments) {
         return next();
     }
 };
 
-async function fetchBilibili(ctx: Context, maxAttempts = 2) {
+async function fetchBilibili(ctx: Context<State>, maxAttempts = 2) {
     const { method, url: sourceUrl, headers, bodyBytes } = ctx.request;
     const url = new URL(sourceUrl);
     const hosts = ['grpc.biliapi.net', 'app.bilibili.com'];
@@ -404,7 +404,7 @@ async function fetchBilibili(ctx: Context, maxAttempts = 2) {
     exit(1);
 }
 
-async function fetchSponsorBlock(ctx: Context, videoId: string, cid: string): Promise<void> {
+async function fetchSponsorBlock(ctx: Context<State>, videoId: string, cid: string): Promise<void> {
     try {
         const { status, body } = await fetchSkipSegments(ctx, videoId, cid);
 
