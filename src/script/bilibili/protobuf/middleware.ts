@@ -12,7 +12,7 @@ export interface State {
     biliVariant: BiliVariant;
     biliVersion: number;
     isDanmakuAirborneEffective: boolean;
-    segments?: number[][];
+    segments?: [number, number][];
     videoDuration: number;
 }
 

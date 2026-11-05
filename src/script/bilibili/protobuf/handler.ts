@@ -32,9 +32,10 @@ import { SearchAllResponse } from '@proto/bilibili/polymer/app/search/v1/search'
 import { Context } from '@core/context';
 import { Logger } from '@core/logger';
 import { exit } from '@core/process';
-import { fetchSkipSegments, SegmentItem } from '@service/sponsor-block.service';
-import { createMergedPoints, getDevice, toBvid, ungzip } from '@/utils';
+import { fetchSkipSegments } from '@service/sponsor-block.service';
+import { getDevice, toBvid, ungzip } from '@/utils';
 import { Middleware, State } from './middleware';
+import { createMergedPoints, parseSegments } from './utils';
 
 export const handleDynAllReply: Middleware = (ctx, next) => {
     const { displayUpList } = ctx.argument;
@@ -414,7 +415,7 @@ async function fetchSponsorBlock(ctx: Context<State>, videoId: string, cid: stri
             return;
         }
 
-        const { segments, videoDuration } = parseSegments(body);
+        const { segments, videoDuration } = parseSegments(body, !ctx.state.isDanmakuAirborneEffective);
         if (segments.length) {
             ctx.state.segments = segments;
             ctx.state.videoDuration = videoDuration;
@@ -423,18 +424,6 @@ async function fetchSponsorBlock(ctx: Context<State>, videoId: string, cid: stri
         Logger.info('[SponsorBlock]', e);
         return;
     }
-}
-
-function parseSegments(body: string) {
-    const res: SegmentItem[] = JSON.parse(body);
-    const segments = res.reduce((memo: number[][], { actionType, segment }) => {
-        if (actionType === 'skip' && segment[1] - segment[0] >= 8) {
-            memo.push(segment);
-        }
-        return memo;
-    }, []);
-    const videoDuration = res[0].videoDuration;
-    return { segments, videoDuration };
 }
 
 export const handleDmSegMobileReply: Middleware = (ctx, next) => {
