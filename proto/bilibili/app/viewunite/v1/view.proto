@@ -79,6 +79,19 @@ message CardBasicInfo {
     string unique_id = 6;
 }
 
+message AIRelateAsyncReply {
+    optional bytes cm = 1;
+    AsyncModule module = 2;
+}
+
+message AsyncModule {
+    repeated Module modules = 1;
+}
+
+message RelatesFeedReply {
+    repeated RelateCard relates = 1;
+}
+
 message ViewProgressReq {
     int64 aid = 1;
     int64 cid = 2;
@@ -111,17 +124,4 @@ message Chronos {
     string md5 = 1;
     string file = 2;
     optional string sign = 3;
-}
-
-message RelatesFeedReply {
-    repeated RelateCard relates = 1;
-}
-
-message AsyncModule {
-    repeated Module modules = 1;
-}
-
-message AIRelateAsyncReply {
-    optional bytes cm = 1;
-    AsyncModule module = 2;
 }

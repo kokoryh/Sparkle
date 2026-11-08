@@ -3,13 +3,13 @@ import { transformGrpcResponse } from '@core/middleware';
 import { parseUserAgent } from '../middleware';
 import {
     fetchUpstream,
-    handleDmSegMobileReq,
-    handleDmSegMobileReply,
-    handleMainListReply,
-    handleViewReply,
     handleViewProgressReq,
     handleViewProgressReply,
     handleIpadViewProgressReply,
+    handleDmSegMobileReq,
+    handleDmSegMobileReply,
+    handleViewReply,
+    handleMainListReply,
 } from '../handler';
 // import {
 //     handleDefaultWordsReq,
@@ -23,18 +23,18 @@ const router = new Router({
 });
 
 router.post(
-    'view.v1.View/ViewProgress',
-    parseUserAgent,
-    handleViewProgressReq,
-    transformGrpcResponse,
-    handleIpadViewProgressReply
-);
-router.post(
     'viewunite.v1.View/ViewProgress',
     parseUserAgent,
     handleViewProgressReq,
     transformGrpcResponse,
     handleViewProgressReply
+);
+router.post(
+    'view.v1.View/ViewProgress',
+    parseUserAgent,
+    handleViewProgressReq,
+    transformGrpcResponse,
+    handleIpadViewProgressReply
 );
 router.post('v1.DM/DmSegMobile', parseUserAgent, handleDmSegMobileReq, transformGrpcResponse, handleDmSegMobileReply);
 router.post('viewunite.v1.View/View', fetchUpstream, transformGrpcResponse, handleViewReply);

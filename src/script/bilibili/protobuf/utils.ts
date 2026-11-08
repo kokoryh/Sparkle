@@ -1,6 +1,37 @@
 import { VideoPoint } from '@proto/bilibili/app/viewunite/v1/view';
 import { SegmentItem } from '@service/sponsor-block.service';
 
+export function toBvid(avid: string | number): string {
+    const XOR_CODE = 23442827791579n;
+    const MAX_AID = 1n << 51n;
+    const BASE = 58n;
+    const data = 'FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf';
+    const bytes = ['B', 'V', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0'];
+    let bvIndex = bytes.length - 1;
+    let tmp = (MAX_AID | BigInt(avid)) ^ XOR_CODE;
+    while (tmp > 0) {
+        bytes[bvIndex] = data[Number(tmp % BigInt(BASE))];
+        tmp = tmp / BASE;
+        bvIndex -= 1;
+    }
+    [bytes[3], bytes[9]] = [bytes[9], bytes[3]];
+    [bytes[4], bytes[7]] = [bytes[7], bytes[4]];
+    return bytes.join('');
+}
+
+export function toAvid(bvid: string): number {
+    const XOR_CODE = 23442827791579n;
+    const MASK_CODE = 2251799813685247n;
+    const BASE = 58n;
+    const data = 'FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf';
+    const bvidArr = Array.from(bvid);
+    [bvidArr[3], bvidArr[9]] = [bvidArr[9], bvidArr[3]];
+    [bvidArr[4], bvidArr[7]] = [bvidArr[7], bvidArr[4]];
+    bvidArr.splice(0, 3);
+    const tmp = bvidArr.reduce((pre, bvidChar) => pre * BASE + BigInt(data.indexOf(bvidChar)), 0n);
+    return Number((tmp & MASK_CODE) ^ XOR_CODE);
+}
+
 export function parseSegments(body: string, roundBounds: boolean) {
     const items: SegmentItem[] = JSON.parse(body);
 
@@ -34,21 +65,6 @@ export function parseSegments(body: string, roundBounds: boolean) {
         segments: merged.filter(seg => seg[1] - seg[0] >= 5),
         videoDuration,
     };
-}
-
-function isPointsContinuous(points: VideoPoint[]): boolean {
-    if (points.length === 0) {
-        return true;
-    }
-    if (points[0].from !== '0') {
-        return false;
-    }
-    for (let i = 1; i < points.length; i++) {
-        if (points[i - 1].to !== points[i].from) {
-            return false;
-        }
-    }
-    return true;
 }
 
 export function createMergedPoints(points: VideoPoint[], segments: number[][], videoDuration: number): VideoPoint[] {
@@ -135,4 +151,19 @@ export function createMergedPoints(points: VideoPoint[], segments: number[][], v
     }
 
     return result;
+}
+
+function isPointsContinuous(points: VideoPoint[]): boolean {
+    if (points.length === 0) {
+        return true;
+    }
+    if (points[0].from !== '0') {
+        return false;
+    }
+    for (let i = 1; i < points.length; i++) {
+        if (points[i - 1].to !== points[i].from) {
+            return false;
+        }
+    }
+    return true;
 }

@@ -1,7 +1,6 @@
 // import { gunzipSync } from 'fflate';
 
 export { assert } from './assert';
-export { toAvid, toBvid, createMergedPoints } from './bilibili';
 export { toArrayBuffer, toUint8Array, isUint8Array } from './binary';
 
 export function createCaseInsensitiveDictionary<T extends object>(

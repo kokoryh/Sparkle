@@ -1,4 +1,3 @@
-import { getLayoutData, getSectionData, getCreatorHubData, getVIPData } from './data';
 import {
     Layout,
     Splash,
@@ -8,23 +7,13 @@ import {
     FeedIndexStory,
     AccountMine,
     AccountInfo,
-    LiveRoomInfo,
-    LiveCardType,
     LiveFeedInfo,
+    LiveCardType,
+    LiveRoomInfo,
     LiveUserInfo,
 } from './types';
 import { Middleware } from './middleware';
-
-function patchValue<T extends object, P extends object>(target: T | T[], patch: P): void {
-    const keys = Object.keys(patch);
-    for (const obj of Array.isArray(target) ? target : [target]) {
-        for (const key of keys) {
-            if (Object.hasOwn(obj, key)) {
-                (obj as Record<string, unknown>)[key] = (patch as Record<string, unknown>)[key];
-            }
-        }
-    }
-}
+import { getLayoutData, getSectionData, getCreatorHubData, getVIPData } from './data';
 
 export const handleLayout: Middleware<Layout> = (ctx, next) => {
     const { data } = ctx.state.message;
@@ -190,6 +179,17 @@ export const handleLiveUserInfo: Middleware<LiveUserInfo> = (ctx, next) => {
 
     return next();
 };
+
+function patchValue<T extends object, P extends object>(target: T | T[], patch: P): void {
+    const keys = Object.keys(patch);
+    for (const obj of Array.isArray(target) ? target : [target]) {
+        for (const key of keys) {
+            if (Object.hasOwn(obj, key)) {
+                (obj as Record<string, unknown>)[key] = (patch as Record<string, unknown>)[key];
+            }
+        }
+    }
+}
 
 function setAllValuesToNull(functionCard: Record<string, unknown>) {
     Object.keys(functionCard).forEach(key => (functionCard[key] = null));

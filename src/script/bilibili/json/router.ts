@@ -1,16 +1,16 @@
 import { matchPathSuffix, Router } from '@core/router';
+import { setupI18n, setupArgument } from './middleware';
 import {
-    handleAccountMine,
-    handleAccountMyInfo,
+    handleLayout,
+    handleSplash,
     handleFeedIndex,
     handleFeedIndexStory,
-    handleLayout,
+    handleAccountMine,
+    handleAccountMyInfo,
     handleLiveFeedInfo,
     handleLiveRoomInfo,
     handleLiveUserInfo,
-    handleSplash,
 } from './handler';
-import { setupI18n, setupArgument } from './middleware';
 
 const router = new Router({
     matchPath: matchPathSuffix,

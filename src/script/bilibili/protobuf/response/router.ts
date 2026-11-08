@@ -1,20 +1,20 @@
 import { matchUrlSuffix, Router } from '@core/router';
 import { parseUserAgent, setupArgument } from '../middleware';
 import {
-    handleDynAllReply,
     handlePlayViewUniteReply,
     handlePlayViewReply,
-    handlePopularReply,
-    handleIpadViewReply,
-    handleIpadViewProgressReply,
-    handleIpadRelatesFeedReply,
-    handleViewProgressReply,
-    handleRelatesFeedReply,
+    handlePgcPlayViewReply,
     handleViewReply,
     handleAIRelateAsyncReply,
+    handleRelatesFeedReply,
+    handleViewProgressReply,
+    handleIpadViewReply,
+    handleIpadRelatesFeedReply,
+    handleIpadViewProgressReply,
     handleDmViewReply,
     handleMainListReply,
-    handleIpadPlayViewReply,
+    handleDynAllReply,
+    handlePopularReply,
     handleSearchAllResponse,
 } from '../handler';
 // import { handleDefaultWordsReply, handleModeStatusReply, handleTFInfoReply } from '../deprecated-handler';
@@ -23,20 +23,20 @@ const router = new Router({
     matchPath: matchUrlSuffix,
 });
 
-router.post('v2.Dynamic/DynAll', setupArgument, handleDynAllReply);
 router.post('playerunite.v1.Player/PlayViewUnite', handlePlayViewUniteReply);
 router.post('playurl.v1.PlayURL/PlayView', handlePlayViewReply);
-router.post('v1.Popular/Index', handlePopularReply);
-router.post('view.v1.View/View', handleIpadViewReply);
-router.post('view.v1.View/ViewProgress', setupArgument, parseUserAgent, handleIpadViewProgressReply);
-router.post('view.v1.View/RelatesFeed', handleIpadRelatesFeedReply);
-router.post('viewunite.v1.View/ViewProgress', setupArgument, parseUserAgent, handleViewProgressReply);
-router.post('viewunite.v1.View/RelatesFeed', handleRelatesFeedReply);
+router.post('player.v2.PlayURL/PlayView', handlePgcPlayViewReply);
 router.post('viewunite.v1.View/View', handleViewReply);
 router.post('viewunite.v1.View/AIRelateAsync', handleAIRelateAsyncReply);
+router.post('viewunite.v1.View/RelatesFeed', handleRelatesFeedReply);
+router.post('viewunite.v1.View/ViewProgress', setupArgument, parseUserAgent, handleViewProgressReply);
+router.post('view.v1.View/View', handleIpadViewReply);
+router.post('view.v1.View/RelatesFeed', handleIpadRelatesFeedReply);
+router.post('view.v1.View/ViewProgress', setupArgument, parseUserAgent, handleIpadViewProgressReply);
 router.post('v1.DM/DmView', handleDmViewReply);
 router.post('v1.Reply/MainList', setupArgument, handleMainListReply);
-router.post('v2.PlayURL/PlayView', handleIpadPlayViewReply);
+router.post('v2.Dynamic/DynAll', setupArgument, handleDynAllReply);
+router.post('v1.Popular/Index', handlePopularReply);
 router.post('v1.Search/SearchAll', handleSearchAllResponse);
 
 // router.post('v1.Search/DefaultWords', handleDefaultWordsReply);

@@ -21,6 +21,14 @@ export default tseslint.config(
                     allowObjectTypes: 'always',
                 },
             ],
+            'no-unused-expressions': 'off',
+            '@typescript-eslint/no-unused-expressions': [
+                'error',
+                {
+                    allowTernary: true,
+                    allowShortCircuit: true,
+                },
+            ],
         },
     }
 );

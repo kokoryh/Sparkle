@@ -20,6 +20,10 @@ message Relate {
     bytes cm = 28;
 }
 
+message RelatesFeedReply {
+    repeated Relate list = 1;
+}
+
 message ViewProgressReq {
     int64 aid = 1;
     int64 cid = 2;
@@ -32,6 +36,12 @@ message ViewProgressReply {
     bool point_permanent = 6;
 }
 
+message Chronos {
+    string md5 = 1;
+    string file = 2;
+    optional string sign = 3;
+}
+
 message VideoPoint {
     int32 type = 1;
     int64 from = 2;
@@ -40,18 +50,8 @@ message VideoPoint {
     string cover = 5;
 }
 
-message Chronos {
-    string md5 = 1;
-    string file = 2;
-    optional string sign = 3;
-}
-
 message TFInfoReply {
     int64 tips_id = 1;
     optional bytes tf_toast = 2;
     optional bytes tf_panel_customized = 3;
-}
-
-message RelatesFeedReply {
-    repeated Relate list = 1;
 }

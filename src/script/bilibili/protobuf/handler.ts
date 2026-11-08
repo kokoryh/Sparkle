@@ -1,71 +1,41 @@
-import { DynAllReply, DynamicType } from '@proto/bilibili/app/dynamic/v2/dynamic';
 import { PlayViewUniteReply } from '@proto/bilibili/app/playerunite/v1/player';
 import { PlayViewReply } from '@proto/bilibili/app/playurl/v1/playurl';
-import { PopularReply } from '@proto/bilibili/app/show/popular/v1/popular';
+import { PlayViewReply as PgcPlayViewReply } from '@proto/bilibili/pgc/gateway/player/v2/playurl';
 import {
-    Chronos,
-    ViewReply as IpadViewReply,
-    ViewProgressReply as IpadViewProgressReply,
-    RelatesFeedReply as IpadRelatesFeedReply,
-} from '@proto/bilibili/app/view/v1/view';
-import {
-    ModuleType,
-    RelateCardType,
-    RelatesFeedReply,
     ViewReply,
+    AIRelateAsyncReply,
+    RelatesFeedReply,
     ViewProgressReq,
     ViewProgressReply,
-    AIRelateAsyncReply,
     Module,
+    ModuleType,
     RelateCard,
+    RelateCardType,
+    Chronos,
 } from '@proto/bilibili/app/viewunite/v1/view';
 import {
+    ViewReply as IpadViewReply,
+    RelatesFeedReply as IpadRelatesFeedReply,
+    ViewProgressReply as IpadViewProgressReply,
+} from '@proto/bilibili/app/view/v1/view';
+import { DynAllReply, DynamicType } from '@proto/bilibili/app/dynamic/v2/dynamic';
+import { PopularReply } from '@proto/bilibili/app/show/popular/v1/popular';
+import {
+    DmViewReply,
+    DmSegMobileReq,
+    DmSegMobileReply,
     DanmakuElem,
     DmColorfulType,
-    DmSegMobileReply,
-    DmSegMobileReq,
-    DmViewReply,
 } from '@proto/bilibili/community/service/dm/v1/dm';
 import { MainListReply, Type } from '@proto/bilibili/main/community/reply/v1/reply';
-import { PlayViewReply as IpadPlayViewReply } from '@proto/bilibili/pgc/gateway/player/v2/playurl';
 import { SearchAllResponse } from '@proto/bilibili/polymer/app/search/v1/search';
 import { Context } from '@core/context';
 import { Logger } from '@core/logger';
 import { exit } from '@core/process';
 import { fetchSkipSegments } from '@service/sponsor-block.service';
-import { getDevice, toBvid, ungzip } from '@/utils';
+import { getDevice, ungzip } from '@/utils';
 import { Middleware, State } from './middleware';
-import { createMergedPoints, parseSegments } from './utils';
-
-export const handleDynAllReply: Middleware = (ctx, next) => {
-    const { displayUpList } = ctx.argument;
-    const message = DynAllReply.fromBinary(ctx.response.bodyBytes);
-    message.topicList = undefined;
-    if (message.dynamicList) {
-        const excludeTypes = [DynamicType.AD, DynamicType.LIVE_RCMD];
-        message.dynamicList.list = message.dynamicList.list.filter(item => !excludeTypes.includes(item.cardType));
-    }
-    handleUpList(message, displayUpList);
-    ctx.response.bodyBytes = DynAllReply.toBinary(message);
-    return next();
-};
-
-function handleUpList(message: DynAllReply, displayUpList: string): void {
-    if (displayUpList === 'show' || getDevice().startsWith('iPad')) {
-        return;
-    }
-    if (displayUpList === 'hide' || !message.upList?.showLiveNum) {
-        message.upList = undefined;
-        return;
-    }
-    const { list, listSecond } = message.upList;
-    const lastItem = listSecond.at(-1);
-    if (lastItem) {
-        lastItem.separator = true;
-        message.upList.list = [...listSecond, ...list];
-        listSecond.length = 0;
-    }
-}
+import { createMergedPoints, parseSegments, toBvid } from './utils';
 
 export const handlePlayViewUniteReply: Middleware = (ctx, next) => {
     const message = PlayViewUniteReply.fromBinary(ctx.response.bodyBytes);
@@ -98,56 +68,78 @@ export const handlePlayViewReply: Middleware = (ctx, next) => {
     return next();
 };
 
-export const handlePopularReply: Middleware = (ctx, next) => {
-    const message = PopularReply.fromBinary(ctx.response.bodyBytes);
-    const excludeTypes = ['rcmdOneItem', 'smallCoverV5Ad', 'topicList'];
-    message.items = message.items.filter(item => {
-        if (item.item.oneofKind === 'smallCoverV5') {
-            const card = item.item.smallCoverV5;
-            return card.base?.fromType === 'recommend' && !card.base.adInfo.length;
-        }
-        return !excludeTypes.includes(item.item.oneofKind as string);
-    });
-    ctx.response.bodyBytes = PopularReply.toBinary(message);
-    return next();
-};
-
-export const handleIpadViewReply: Middleware = (ctx, next) => {
-    const message = IpadViewReply.fromBinary(ctx.response.bodyBytes);
-    message.label = undefined;
-    message.cmIpad = undefined;
-    message.cmConfig = undefined;
-    if (message.reqUser) message.reqUser.elecPlusBtn = undefined;
-    message.cms.length = 0;
-    message.specialCellNew.length = 0;
-    message.relates = message.relates.filter(item => !item.cm.length);
-    ctx.response.bodyBytes = IpadViewReply.toBinary(message);
-    return next();
-};
-
-export const handleIpadViewProgressReply: Middleware = (ctx, next) => {
-    const { sponsorBlock } = ctx.argument;
-    const message = IpadViewProgressReply.fromBinary(ctx.response.bodyBytes);
-    message.videoGuide = undefined;
-    if (isSponsorBlockEnabled(sponsorBlock)) {
-        if (ctx.state.isDanmakuAirborneEffective && message.chronos) {
-            handleChronos(message.chronos, ctx.state.biliVariant);
-        }
-        if (ctx.state.segments && ctx.state.videoDuration) {
-            message.points = createMergedPoints(message.points, ctx.state.segments, ctx.state.videoDuration);
-            message.pointPermanent = true;
-        }
+export const handlePgcPlayViewReply: Middleware = (ctx, next) => {
+    const message = PgcPlayViewReply.fromBinary(ctx.response.bodyBytes);
+    if (message.viewInfo) message.viewInfo.tryWatchPromptBar = undefined;
+    if (message.playExtConf?.castTips) {
+        message.playExtConf.castTips = { code: 0, message: '' };
     }
-    ctx.response.bodyBytes = IpadViewProgressReply.toBinary(message);
+    ctx.response.bodyBytes = PgcPlayViewReply.toBinary(message);
     return next();
 };
 
-export const handleIpadRelatesFeedReply: Middleware = (ctx, next) => {
-    const message = IpadRelatesFeedReply.fromBinary(ctx.response.bodyBytes);
-    message.list = message.list.filter(item => !item.cm.length);
-    ctx.response.bodyBytes = IpadRelatesFeedReply.toBinary(message);
+export const handleViewReply: Middleware = (ctx, next) => {
+    const message = ViewReply.fromBinary(ctx.response.bodyBytes);
+    message.cm = undefined;
+    if (message.reqUser) message.reqUser.elecPlusBtn = undefined;
+    message.tab?.tabModule.forEach(tabModule => {
+        if (tabModule.tab.oneofKind !== 'introduction') return;
+        tabModule.tab.introduction.modules = handleViewModules(tabModule.tab.introduction.modules);
+    });
+    ctx.response.bodyBytes = ViewReply.toBinary(message);
     return next();
 };
+
+export const handleAIRelateAsyncReply: Middleware = (ctx, next) => {
+    const message = AIRelateAsyncReply.fromBinary(ctx.response.bodyBytes);
+    message.cm = undefined;
+    if (message.module) {
+        message.module.modules = handleViewModules(message.module.modules);
+    }
+    ctx.response.bodyBytes = AIRelateAsyncReply.toBinary(message);
+    return next();
+};
+
+export const handleRelatesFeedReply: Middleware = (ctx, next) => {
+    const message = RelatesFeedReply.fromBinary(ctx.response.bodyBytes);
+    message.relates = handleRelateCard(message.relates);
+    ctx.response.bodyBytes = RelatesFeedReply.toBinary(message);
+    return next();
+};
+
+function handleViewModules(modules: Module[]) {
+    const excludeTypes = [
+        ModuleType.ACTIVITY,
+        ModuleType.PAY_BAR,
+        ModuleType.SPECIALTAG,
+        ModuleType.MERCHANDISE,
+        ModuleType.VIDEO_MENTIONS,
+    ];
+    return modules.filter((module: Module) => {
+        if (excludeTypes.includes(module.type)) {
+            return false;
+        }
+        if (module.type === ModuleType.UGC_HEADLINE && module.data.oneofKind === 'headLine') {
+            module.data.headLine.label = undefined;
+        } else if (module.type === ModuleType.RELATED_RECOMMEND && module.data.oneofKind === 'relates') {
+            module.data.relates.cards = handleRelateCard(module.data.relates.cards);
+        }
+        return true;
+    });
+}
+
+function handleRelateCard(cards: RelateCard[]): RelateCard[] {
+    const excludeTypes = [
+        RelateCardType.GAME,
+        RelateCardType.CM_TYPE,
+        RelateCardType.LIVE,
+        RelateCardType.AI_RECOMMEND,
+        RelateCardType.COURSE,
+    ];
+    return cards.filter((card: RelateCard) => {
+        return !excludeTypes.includes(card.relateCardType) && !card.cmStock.length && !card.basicInfo?.uniqueId;
+    });
+}
 
 export const handleViewProgressReq: Middleware = async (ctx, next) => {
     if (ctx.state.isDanmakuAirborneEffective) {
@@ -190,100 +182,42 @@ export const handleViewProgressReply: Middleware = (ctx, next) => {
     return next();
 };
 
-function isSponsorBlockEnabled(value: string | boolean): boolean {
-    return Boolean(value && value !== '#');
-}
-
-function handleChronos(chronos: Chronos, variant: string): void {
-    const chronosMd5Map = getChronosMd5Map();
-    let processedMd5 = chronosMd5Map[chronos.md5];
-    if (!processedMd5) {
-        processedMd5 = chronosMd5Map[variant] || chronosMd5Map.universal;
-        Logger.warn(
-            `MD5 mismatch detected. Received: ${chronos.md5}; File: ${chronos.file}.`,
-            'Please update the app or script to the latest version.',
-            'If you are already using the latest version, please contact the author for adjustments.'
-        );
-    }
-    chronos.md5 = processedMd5;
-    chronos.file = `https://raw.githubusercontent.com/kokoryh/chronos/refs/heads/master/${processedMd5}.zip`;
-    chronos.sign = undefined;
-}
-
-function getChronosMd5Map(): Record<string, string> {
-    return {
-        universal: '106d21a147f49e9d4ef86e2e8523474f',
-        hd2: 'e5a968f1a5055bbe5c12e67b100a6dcb',
-        inter: '8c3feda2e92bf60e8a7aeade1a231586',
-        '5bca6725b04c018358e69be749f0ee11': '106d21a147f49e9d4ef86e2e8523474f', // universal 3.11.0
-        '45b564f5ba1fdd3746406937059addd8': 'e5a968f1a5055bbe5c12e67b100a6dcb', // hd 3.8.20
-        '325e7073ffc6fb5263682fecdcd1058f': '932002070dc1b51241198a074d2279fc', // hd 2.7.4
-        '3a14beddd23328eaddfe9f0eb048d713': '8c3feda2e92bf60e8a7aeade1a231586', // inter 2.7.3
-    };
-}
-
-export const handleRelatesFeedReply: Middleware = (ctx, next) => {
-    const message = RelatesFeedReply.fromBinary(ctx.response.bodyBytes);
-    message.relates = handleRelateCard(message.relates);
-    ctx.response.bodyBytes = RelatesFeedReply.toBinary(message);
-    return next();
-};
-
-export const handleViewReply: Middleware = (ctx, next) => {
-    const message = ViewReply.fromBinary(ctx.response.bodyBytes);
-    message.cm = undefined;
+export const handleIpadViewReply: Middleware = (ctx, next) => {
+    const message = IpadViewReply.fromBinary(ctx.response.bodyBytes);
+    message.label = undefined;
+    message.cmIpad = undefined;
+    message.cmConfig = undefined;
     if (message.reqUser) message.reqUser.elecPlusBtn = undefined;
-    message.tab?.tabModule.forEach(tabModule => {
-        if (tabModule.tab.oneofKind !== 'introduction') return;
-        tabModule.tab.introduction.modules = handleViewModules(tabModule.tab.introduction.modules);
-    });
-    ctx.response.bodyBytes = ViewReply.toBinary(message);
+    message.cms.length = 0;
+    message.specialCellNew.length = 0;
+    message.relates = message.relates.filter(item => !item.cm.length);
+    ctx.response.bodyBytes = IpadViewReply.toBinary(message);
     return next();
 };
 
-export const handleAIRelateAsyncReply: Middleware = (ctx, next) => {
-    const message = AIRelateAsyncReply.fromBinary(ctx.response.bodyBytes);
-    message.cm = undefined;
-    if (message.module) {
-        message.module.modules = handleViewModules(message.module.modules);
+export const handleIpadRelatesFeedReply: Middleware = (ctx, next) => {
+    const message = IpadRelatesFeedReply.fromBinary(ctx.response.bodyBytes);
+    message.list = message.list.filter(item => !item.cm.length);
+    ctx.response.bodyBytes = IpadRelatesFeedReply.toBinary(message);
+    return next();
+};
+
+export const handleIpadViewProgressReply: Middleware = (ctx, next) => {
+    const { sponsorBlock } = ctx.argument;
+    const message = IpadViewProgressReply.fromBinary(ctx.response.bodyBytes);
+    message.videoGuide = undefined;
+    if (isSponsorBlockEnabled(sponsorBlock)) {
+        if (ctx.state.isDanmakuAirborneEffective && message.chronos) {
+            handleChronos(message.chronos, ctx.state.biliVariant);
+        }
+        if (ctx.state.segments && ctx.state.videoDuration) {
+            message.points = createMergedPoints(message.points, ctx.state.segments, ctx.state.videoDuration);
+            message.pointPermanent = true;
+        }
     }
-    ctx.response.bodyBytes = AIRelateAsyncReply.toBinary(message);
+    ctx.response.bodyBytes = IpadViewProgressReply.toBinary(message);
     return next();
 };
-
-function handleViewModules(modules: Module[]) {
-    const excludeTypes = [
-        ModuleType.ACTIVITY,
-        ModuleType.PAY_BAR,
-        ModuleType.SPECIALTAG,
-        ModuleType.MERCHANDISE,
-        ModuleType.VIDEO_MENTIONS,
-    ];
-    return modules.filter((module: Module) => {
-        if (excludeTypes.includes(module.type)) {
-            return false;
-        }
-        if (module.type === ModuleType.UGC_HEADLINE && module.data.oneofKind === 'headLine') {
-            module.data.headLine.label = undefined;
-        } else if (module.type === ModuleType.RELATED_RECOMMEND && module.data.oneofKind === 'relates') {
-            module.data.relates.cards = handleRelateCard(module.data.relates.cards);
-        }
-        return true;
-    });
-}
-
-function handleRelateCard(cards: RelateCard[]): RelateCard[] {
-    const excludeTypes = [
-        RelateCardType.GAME,
-        RelateCardType.CM_TYPE,
-        RelateCardType.LIVE,
-        RelateCardType.AI_RECOMMEND,
-        RelateCardType.COURSE,
-    ];
-    return cards.filter((card: RelateCard) => {
-        return !excludeTypes.includes(card.relateCardType) && !card.cmStock.length && !card.basicInfo?.uniqueId;
-    });
-}
 
 export const handleDmViewReply: Middleware = (ctx, next) => {
     const message = DmViewReply.fromBinary(ctx.response.bodyBytes);
@@ -295,6 +229,63 @@ export const handleDmViewReply: Middleware = (ctx, next) => {
     ctx.response.bodyBytes = DmViewReply.toBinary(message);
     return next();
 };
+
+export const handleDmSegMobileReq: Middleware = async (ctx, next) => {
+    if (!ctx.state.isDanmakuAirborneEffective) {
+        exit();
+    }
+    const body = ctx.request.bodyBytes;
+    const data = body[0] ? ungzip(body.subarray(5)) : body.subarray(5);
+    const message = DmSegMobileReq.fromBinary(data);
+    if (message.type !== 1) {
+        exit();
+    }
+    const { pid, oid } = message;
+    const videoId = toBvid(pid);
+    await Promise.all([fetchBilibili(ctx, 1), fetchSponsorBlock(ctx, videoId, oid)]);
+    if (ctx.state.segments) {
+        return next();
+    }
+};
+
+export const handleDmSegMobileReply: Middleware = (ctx, next) => {
+    const message = DmSegMobileReply.fromBinary(ctx.response.bodyBytes);
+    if (ctx.state.segments) {
+        message.elems.push(...createAirborneDanmaku(ctx.state.segments));
+    }
+    ctx.response.bodyBytes = DmSegMobileReply.toBinary(message);
+    return next();
+};
+
+function createAirborneDanmaku(segments: number[][]): DanmakuElem[] {
+    const offset = 2000;
+    return segments.map((segment, index) => {
+        const id = String(index + 1);
+        const start = Math.floor(segment[0] * 1000) + offset;
+        const end = Math.floor(segment[1] * 1000);
+        return {
+            id,
+            progress: start,
+            mode: 5,
+            fontsize: 50,
+            color: 16777215,
+            midHash: '1948dd5d',
+            content: '空指部已就位',
+            ctime: '1735660800',
+            weight: 11,
+            action: `airborne:${end}`,
+            pool: 0,
+            idStr: id,
+            attr: 1310724,
+            animation: '',
+            extra: '',
+            colorful: DmColorfulType.NONE_TYPE,
+            type: 1,
+            oid: '212364987',
+            dmFrom: 1,
+        };
+    });
+}
 
 export const handleMainListReply: Middleware = (ctx, next) => {
     const { purifyComment } = ctx.argument;
@@ -320,13 +311,47 @@ export const handleMainListReply: Middleware = (ctx, next) => {
     return next();
 };
 
-export const handleIpadPlayViewReply: Middleware = (ctx, next) => {
-    const message = IpadPlayViewReply.fromBinary(ctx.response.bodyBytes);
-    if (message.viewInfo) message.viewInfo.tryWatchPromptBar = undefined;
-    if (message.playExtConf?.castTips) {
-        message.playExtConf.castTips = { code: 0, message: '' };
+export const handleDynAllReply: Middleware = (ctx, next) => {
+    const { displayUpList } = ctx.argument;
+    const message = DynAllReply.fromBinary(ctx.response.bodyBytes);
+    message.topicList = undefined;
+    if (message.dynamicList) {
+        const excludeTypes = [DynamicType.AD, DynamicType.LIVE_RCMD];
+        message.dynamicList.list = message.dynamicList.list.filter(item => !excludeTypes.includes(item.cardType));
     }
-    ctx.response.bodyBytes = IpadPlayViewReply.toBinary(message);
+    handleUpList(message, displayUpList);
+    ctx.response.bodyBytes = DynAllReply.toBinary(message);
+    return next();
+};
+
+function handleUpList(message: DynAllReply, displayUpList: string): void {
+    if (displayUpList === 'show' || getDevice().startsWith('iPad')) {
+        return;
+    }
+    if (displayUpList === 'hide' || !message.upList?.showLiveNum) {
+        message.upList = undefined;
+        return;
+    }
+    const { list, listSecond } = message.upList;
+    const lastItem = listSecond.at(-1);
+    if (lastItem) {
+        lastItem.separator = true;
+        message.upList.list = [...listSecond, ...list];
+        listSecond.length = 0;
+    }
+}
+
+export const handlePopularReply: Middleware = (ctx, next) => {
+    const message = PopularReply.fromBinary(ctx.response.bodyBytes);
+    const excludeTypes = ['rcmdOneItem', 'smallCoverV5Ad', 'topicList'];
+    message.items = message.items.filter(item => {
+        if (item.item.oneofKind === 'smallCoverV5') {
+            const card = item.item.smallCoverV5;
+            return card.base?.fromType === 'recommend' && !card.base.adInfo.length;
+        }
+        return !excludeTypes.includes(item.item.oneofKind as string);
+    });
+    ctx.response.bodyBytes = PopularReply.toBinary(message);
     return next();
 };
 
@@ -341,24 +366,6 @@ export const handleSearchAllResponse: Middleware = (ctx, next) => {
 export const fetchUpstream: Middleware = async (ctx, next) => {
     await fetchBilibili(ctx);
     return next();
-};
-
-export const handleDmSegMobileReq: Middleware = async (ctx, next) => {
-    if (!ctx.state.isDanmakuAirborneEffective) {
-        exit();
-    }
-    const body = ctx.request.bodyBytes;
-    const data = body[0] ? ungzip(body.subarray(5)) : body.subarray(5);
-    const message = DmSegMobileReq.fromBinary(data);
-    if (message.type !== 1) {
-        exit();
-    }
-    const { pid, oid } = message;
-    const videoId = toBvid(pid);
-    await Promise.all([fetchBilibili(ctx, 1), fetchSponsorBlock(ctx, videoId, oid)]);
-    if (ctx.state.segments) {
-        return next();
-    }
 };
 
 async function fetchBilibili(ctx: Context<State>, maxAttempts = 2) {
@@ -422,45 +429,33 @@ async function fetchSponsorBlock(ctx: Context<State>, videoId: string, cid: stri
         }
     } catch (e) {
         Logger.info('[SponsorBlock]', e);
-        return;
     }
 }
 
-export const handleDmSegMobileReply: Middleware = (ctx, next) => {
-    const message = DmSegMobileReply.fromBinary(ctx.response.bodyBytes);
-    if (ctx.state.segments) {
-        message.elems.push(...createAirborneDanmaku(ctx.state.segments));
-    }
-    ctx.response.bodyBytes = DmSegMobileReply.toBinary(message);
-    return next();
-};
+function isSponsorBlockEnabled(value: string | boolean): boolean {
+    return Boolean(value && value !== '#');
+}
 
-function createAirborneDanmaku(segments: number[][]): DanmakuElem[] {
-    const offset = 2000;
-    return segments.map((segment, index) => {
-        const id = String(index + 1);
-        const start = Math.floor(segment[0] * 1000) + offset;
-        const end = Math.floor(segment[1] * 1000);
-        return {
-            id,
-            progress: start,
-            mode: 5,
-            fontsize: 50,
-            color: 16777215,
-            midHash: '1948dd5d',
-            content: '空指部已就位',
-            ctime: '1735660800',
-            weight: 11,
-            action: `airborne:${end}`,
-            pool: 0,
-            idStr: id,
-            attr: 1310724,
-            animation: '',
-            extra: '',
-            colorful: DmColorfulType.NONE_TYPE,
-            type: 1,
-            oid: '212364987',
-            dmFrom: 1,
-        };
-    });
+function handleChronos(chronos: Chronos, variant: string): void {
+    const chronosMd5Map: Record<string, string> = {
+        universal: '106d21a147f49e9d4ef86e2e8523474f',
+        hd2: 'e5a968f1a5055bbe5c12e67b100a6dcb',
+        inter: '8c3feda2e92bf60e8a7aeade1a231586',
+        '5bca6725b04c018358e69be749f0ee11': '106d21a147f49e9d4ef86e2e8523474f', // universal 3.11.0
+        '45b564f5ba1fdd3746406937059addd8': 'e5a968f1a5055bbe5c12e67b100a6dcb', // hd 3.8.20
+        '325e7073ffc6fb5263682fecdcd1058f': '932002070dc1b51241198a074d2279fc', // hd 2.7.4
+        '3a14beddd23328eaddfe9f0eb048d713': '8c3feda2e92bf60e8a7aeade1a231586', // inter 2.7.3
+    };
+    let processedMd5 = chronosMd5Map[chronos.md5];
+    if (!processedMd5) {
+        processedMd5 = chronosMd5Map[variant] || chronosMd5Map.universal;
+        Logger.debug(
+            `MD5 mismatch detected. Received: ${chronos.md5}; File: ${chronos.file}.`,
+            'Please update the app or script to the latest version.',
+            'If you are already using the latest version, please contact the author for adjustments.'
+        );
+    }
+    chronos.md5 = processedMd5;
+    chronos.file = `https://raw.githubusercontent.com/kokoryh/chronos/refs/heads/master/${processedMd5}.zip`;
+    chronos.sign = undefined;
 }

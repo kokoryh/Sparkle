@@ -7,7 +7,8 @@ const router = new Router({
 });
 
 router.post('/getAdList', doneFakeResponse, ctx => {
-    const getResponseBody = (placementNo: string) => {
+    const message = JSON.parse(ctx.request.body);
+    ctx.response.body = ((placementNo: string) => {
         if (placementNo === '0007') {
             return '{"materialsList":[{"billMaterialsId":"1","filePath":"#","creativeType":1}],"advertParam":{"skipTime":1}}';
         }
@@ -15,21 +16,13 @@ router.post('/getAdList', doneFakeResponse, ctx => {
             return '{"code":"00","materialsList":[{}]}';
         }
         return '{"code":"00","message":"0"}';
-    };
-
-    const message = JSON.parse(ctx.request.body);
-    ctx.response.body = getResponseBody(message.placementNo);
+    })(message.placementNo);
 });
 
 router.post('/mgw.htm', ctx => {
     const excludeTypes = ['com.cars.otsmobile.newHomePageBussData'];
-    const headers = ctx.request.headers;
-    const operationType = headers['operation-type'] || headers['Operation-Type'];
-    if (excludeTypes.includes(operationType)) {
-        abort();
-    } else {
-        exit();
-    }
+    const operationType = ctx.request.headers['operation-type'] || '';
+    excludeTypes.includes(operationType) ? abort() : exit();
 });
 
 export { router };
