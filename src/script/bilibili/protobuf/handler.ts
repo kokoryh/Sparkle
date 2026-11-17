@@ -385,7 +385,7 @@ async function fetchBilibili(ctx: Context<State>, maxAttempts = 2) {
             if (response.status === 200 && response.bodyBytes) {
                 ctx.response.headers = response.headers;
                 ctx.response.bodyBytes = response.bodyBytes;
-                ctx.response.h2_trailers = response.h2_trailers;
+                ctx.response.trailers = response.trailers;
                 return;
             }
 

@@ -15,7 +15,7 @@ export interface HttpResponse<T = HttpBody> {
     status: number;
     headers: HttpHeaders;
     body?: T;
-    h2_trailers?: HttpTrailers;
+    trailers?: HttpTrailers;
 }
 
 export interface HttpRequestDone<T = HttpBody> {
@@ -28,7 +28,7 @@ export interface HttpResponseDone<T = HttpBody> {
     status?: number;
     headers?: HttpHeaders;
     body?: T;
-    h2_trailers?: HttpTrailers;
+    trailers?: HttpTrailers;
 }
 
 export interface FetchRequest<T = HttpBody> {
@@ -40,5 +40,5 @@ export interface FetchRequest<T = HttpBody> {
 export interface FetchResponse {
     status: number;
     headers: HttpHeaders;
-    h2_trailers: HttpTrailers;
+    trailers: HttpTrailers;
 }

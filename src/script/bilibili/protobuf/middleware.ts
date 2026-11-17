@@ -49,9 +49,12 @@ export const parseUserAgent: Middleware = (ctx, next) => {
     return next();
 };
 
+/**
+ * @deprecated
+ */
 export const fixResponseHeaders: Middleware = (ctx, next) => {
     return next().then(() => {
-        if (ctx.response.h2_trailers !== undefined) {
+        if (ctx.response.trailers !== undefined) {
             return;
         }
 

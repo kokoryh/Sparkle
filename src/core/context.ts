@@ -213,6 +213,27 @@ export class SurgeContext extends Context {
 }
 
 export class LoonContext extends SurgeContext {
+    override createResponse(response: typeof $response | null): HttpResponse {
+        return Object.create(response, {
+            bodyBytes: {
+                get() {
+                    return this.body;
+                },
+                set(value) {
+                    this.body = value;
+                },
+            },
+            trailers: {
+                get() {
+                    return this.h2_trailers;
+                },
+                set(value) {
+                    this.h2_trailers = value;
+                },
+            },
+        });
+    }
+
     override setupArgument(argument: object): void {
         super.setupArgument(argument);
 
