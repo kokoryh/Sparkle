@@ -16,7 +16,8 @@ export const prepareHtmlState: Middleware = (ctx, next) => {
                 return (
                     src.includes('tsyndicate.com') ||
                     innerText.includes('TSOutstreamVideo') ||
-                    innerText.includes('htmlAds')
+                    innerText.includes('htmlAds') ||
+                    innerText.includes('upload.mrst.ccwu.cc')
                 );
             },
         },

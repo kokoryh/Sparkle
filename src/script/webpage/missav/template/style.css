@@ -34,3 +34,9 @@ div > a[href*='myavlive.com'] {
 div.space-y-6.mb-6 {
     display: none !important;
 }
+.order-first > div.bg-primary.py-3 {
+    display: none !important;
+}
+#b-a-b {
+    display: none !important;
+}
